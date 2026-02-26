@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond } from "next/font/google";
+import { Inter } from "next/font/config"; // Veya projenin kullandığı font
 import "./globals.css";
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400"],
-  style: "italic",
-});
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Archive of Almost",
-  description: "A curated digital museum of unfinished love.",
+  title: "Museum of Left",
+  description: "An archive for things left behind.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className={`${cormorant.className} bg-[#0a0a0a] text-[#e5e5e5] antialiased`}>
+      <body className="bg-black antialiased">
+        {/* Navbar her sayfanın tepesinde sabit duracak */}
+        <Navbar />
+        
+        {/* Sayfaların içeriği buraya gelecek */}
         {children}
       </body>
     </html>

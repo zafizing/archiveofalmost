@@ -1,60 +1,120 @@
+'use client';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
-export default async function ArchivePage() {
-  const { data: exhibits } = await supabase
-    .from('exhibits')
-    .select('*')
-    .order('created_at', { ascending: false });
+export default function ArchivePage() {
+  const [exhibits, setExhibits] = useState<any[]>([]);
+  const [selectedExhibit, setSelectedExhibit] = useState<any | null>(null);
+
+  useEffect(() => {
+    const fetchExhibits = async () => {
+      // Katalog ID'ye göre azalan sıralama (En yeni # numara en üstte)
+      const { data, error } = await supabase
+        .from('exhibits')
+        .select('*')
+        .order('catalog_id', { ascending: false });
+      
+      if (!error && data) setExhibits(data);
+    };
+    fetchExhibits();
+  }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white p-8 pt-24">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-extralight mb-20 tracking-[0.4em] uppercase text-center text-white">
-          The Archive
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
-          {exhibits?.map((item) => (
-            <div key={item.id} className="group flex flex-col border border-neutral-800 overflow-hidden bg-[#0A0A0A] hover:border-neutral-400 transition-all duration-500">
-              {/* Görsel */}
-              <div className="w-full h-80 overflow-hidden">
-                <img 
-                  src={item.image_url} 
-                  alt={item.title}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                />
-              </div>
-              
-              {/* Metin İçeriği */}
-              <div className="p-10 space-y-6">
-                {/* Üst Bilgiler - Saf Beyaz ve Belirgin */}
-                <div className="flex justify-between items-center border-b border-neutral-700 pb-4 text-white text-[11px] tracking-[0.2em] font-bold">
-                  <span className="opacity-100">{item.catalog_id}</span>
-                  <span className="opacity-100">{item.year}</span>
-                </div>
-                
-                {/* Başlık - Saf Beyaz */}
-                <h3 className="text-2xl font-light italic text-white tracking-tight">
-                  "{item.title}"
-                </h3>
-                
-                {/* Ana Açıklama - Okunabilir Beyaz */}
-                <p className="text-[16px] text-white/90 leading-relaxed font-light italic">
-                  {item.description}
-                </p>
-                
-                {/* Küratör Bilgisi - Saf Beyaz ve Net */}
-                <div className="pt-6 flex items-center gap-3">
-                  <div className="w-8 h-[1px] bg-white"></div>
-                  <span className="text-[10px] tracking-[0.3em] text-white uppercase font-bold">
-                    Curated by {item.submitter_name}
-                  </span>
-                </div>
+    <main className="min-h-screen bg-black text-white pt-24 md:pt-32 pb-20 px-4 md:px-6 font-serif selection:bg-white selection:text-black">
+      {/* Saf CSS Animasyon Blokları */}
+      <style jsx global>{`
+        @keyframes spotlightFocus {
+          0% { transform: scale(1.3); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes textReveal {
+          0% { transform: translateY(15px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slowPulse {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+        .animate-spotlight { animation: spotlightFocus 1.2s ease-out forwards; }
+        .animate-text-1 { animation: textReveal 0.8s ease-out 0.3s forwards; opacity: 0; }
+        .animate-text-2 { animation: textReveal 0.8s ease-out 0.6s forwards; opacity: 0; }
+        .animate-glow { animation: slowPulse 5s ease-in-out infinite; }
+      `}</style>
+
+      {/* Header Section */}
+      <div className="max-w-7xl mx-auto mb-12 md:mb-20 text-center">
+        <h1 className="text-4xl md:text-8xl tracking-[0.2em] md:tracking-[0.3em] uppercase font-light italic opacity-80">The Archive</h1>
+        <div className="w-16 md:w-24 h-[1px] bg-neutral-900 mx-auto mt-6 md:mt-8"></div>
+      </div>
+
+      {/* Grid: Arşiv Kartları */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
+        {exhibits.map((item) => (
+          <div key={item.id} onClick={() => setSelectedExhibit(item)} className="group cursor-pointer space-y-6 md:space-y-8 p-4 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000">
+            <div className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000">
+              <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+            </div>
+            <div className="flex justify-between text-[9px] md:text-[10px] tracking-[0.3em] text-neutral-600 font-bold uppercase italic">
+              <span>{item.catalog_id}</span>
+              <span>{item.year}</span>
+            </div>
+            <h3 className="text-lg md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity">"{item.title}"</h3>
+          </div>
+        ))}
+      </div>
+
+      {/* RESPONSIVE DRAMATIC MODAL */}
+      {selectedExhibit && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-all duration-500" onClick={() => setSelectedExhibit(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-2xl transition-opacity duration-1000"></div>
+          
+          <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide" onClick={(e) => e.stopPropagation()}>
+            
+            {/* MOBİL VE DESKTOP UYUMLU X BUTONU */}
+            <button 
+              onClick={() => setSelectedExhibit(null)} 
+              className="fixed top-6 right-6 md:absolute md:-top-6 md:-right-12 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[110]"
+            >
+              <span className="hidden md:inline text-[10px] tracking-[0.4em] uppercase mr-4 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Close</span>
+              <span className="text-4xl md:text-5xl font-extralight leading-none">×</span>
+            </button>
+
+            {/* SOL: SPOTLIGHT (MOBİLDE ÜSTTE) */}
+            <div className="relative w-full md:w-1/2 aspect-square md:aspect-square shrink-0">
+              <div className="absolute -inset-8 md:-inset-16 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06)_0%,_transparent_65%)] blur-[40px] md:blur-[80px] -z-10 animate-glow"></div>
+              <div className="relative w-full h-full border border-white/10 shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 z-20 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.5)_55%,_rgba(0,0,0,0.95)_100%)] animate-spotlight"></div>
+                <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" />
               </div>
             </div>
-          ))}
+
+            {/* SAĞ: METİN ALANI (MOBİLDE ALTTA) */}
+            <div className="w-full md:w-1/2 space-y-6 md:space-y-10 text-left relative">
+              <div className="hidden md:block absolute -left-20 top-0 w-80 h-80 bg-white/[0.04] blur-[120px] rounded-full -z-10 animate-glow"></div>
+
+              <div className="space-y-3 md:space-y-4 animate-text-1">
+                <div className="flex items-center gap-4 md:gap-6 text-[9px] md:text-[10px] tracking-[0.4em] md:tracking-[0.5em] text-white/70 uppercase font-black">
+                  <span>{selectedExhibit.catalog_id}</span>
+                  <div className="w-8 md:w-12 h-[1px] bg-white/30"></div>
+                  <span>{selectedExhibit.year}</span>
+                </div>
+                <h2 className="text-4xl md:text-7xl font-light italic leading-tight md:leading-none text-white tracking-tighter drop-shadow-2xl">
+                  "{selectedExhibit.title}"
+                </h2>
+              </div>
+              
+              <div className="w-16 md:w-24 h-[1px] bg-white/20 animate-text-1" style={{ animationDelay: '0.5s' }}></div>
+              
+              <div className="max-h-[250px] md:max-h-[350px] overflow-y-auto pr-4 md:pr-8 custom-scrollbar animate-text-2">
+                <p className="text-lg md:text-2xl text-white font-light leading-relaxed italic opacity-95">
+                  {selectedExhibit.description}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }
