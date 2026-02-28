@@ -15,12 +15,12 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-[1000] p-4 md:p-10 bg-black/90 backdrop-blur-sm border-b border-white/5">
+    <nav className="fixed top-0 left-0 w-full z-[1000] p-4 md:p-6 bg-black/90 backdrop-blur-sm border-b border-white/5">
       <div className="flex justify-between items-center">
-        {/* Logo ve Buton Grubu */}
+        {/* Logo ve Buton Grubu - Orta Hizalama İçin Flex */}
         <div className="flex items-center gap-4">
-          {/* --- Logo Fontu Küçültüldü (text-[9px] md:text-[11px]) --- [cite: 2026-03-01] */}
-          <Link href="/" className="text-[9px] md:text-[11px] tracking-[0.4em] md:tracking-[0.5em] uppercase font-bold text-white transition-opacity hover:opacity-70">
+          {/* --- Font boyutu eşitleme (text-[9px] md:text-[10px]) --- [cite: 2026-03-01] */}
+          <Link href="/" className="text-[9px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase font-bold text-white transition-opacity hover:opacity-70">
             ARCHIVE OF ALMOST
           </Link>
           
@@ -31,10 +31,10 @@ export default function Navbar() {
         </div>
 
         {/* Masaüstü ve Mobil Görünür Menü */}
-        <div className="flex items-center gap-6 md:gap-12">
+        <div className="flex items-center gap-6 md:gap-8">
           {/* Masaüstü Linkleri (Geniş ekranda görünür) */}
           <div className="hidden md:flex items-center gap-6 md:gap-8">
-            {/* --- Metin "Archive Your Memory" olarak düzeltildi --- [cite: 2026-03-01] */}
+            {/* --- Metin "Archive Your Memory" olarak düzeltildi ve font eşitlendi --- [cite: 2026-03-01] */}
             <Link href="/submit" className={`text-[9px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase transition-all duration-300 hover:text-white whitespace-nowrap ${pathname === '/submit' ? 'text-white' : 'text-white/70'}`}>
               Archive Your Memory
             </Link>
