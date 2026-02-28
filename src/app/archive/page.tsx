@@ -2,6 +2,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+// --- PAYLAŞIM KÜTÜPHANESİ IMPORT ---
+import {
+  FacebookShareButton,
+  TwitterShareButton,
+  WhatsappShareButton,
+  FacebookIcon,
+  TwitterIcon,
+  WhatsappIcon,
+} from "react-share";
+// ------------------------------------
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
@@ -40,6 +50,10 @@ export default function ArchivePage() {
         .animate-text-1 { animation: textReveal 0.8s ease-out 0.3s forwards; opacity: 0; }
         .animate-text-2 { animation: textReveal 0.8s ease-out 0.6s forwards; opacity: 0; }
         .animate-glow { animation: slowPulse 5s ease-in-out infinite; }
+        
+        /* Modal scrollbar gizleme */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Header Section */}
@@ -111,6 +125,21 @@ export default function ArchivePage() {
                   {selectedExhibit.description}
                 </p>
               </div>
+
+              {/* --- PAYLAŞIM BUTONLARI --- */}
+              <div className="flex items-center gap-4 pt-4 animate-text-2" style={{ animationDelay: '0.8s' }}>
+                <span className="text-[10px] tracking-[0.3em] text-white/40 uppercase font-bold">Share</span>
+                <FacebookShareButton url={`https://archiveofalmost.vercel.app/archive/${selectedExhibit.id}`}>
+                  <FacebookIcon size={32} round className="hover:opacity-70 transition-opacity" />
+                </FacebookShareButton>
+                <TwitterShareButton url={`https://archiveofalmost.vercel.app/archive/${selectedExhibit.id}`} title={`Almost Archive: "${selectedExhibit.title}"`}>
+                  <TwitterIcon size={32} round className="hover:opacity-70 transition-opacity" />
+                </TwitterShareButton>
+                <WhatsappShareButton url={`https://archiveofalmost.vercel.app/archive/${selectedExhibit.id}`} title={`Almost Archive: "${selectedExhibit.title}"`}>
+                  <WhatsappIcon size={32} round className="hover:opacity-70 transition-opacity" />
+                </WhatsappShareButton>
+              </div>
+              {/* ------------------------- */}
             </div>
           </div>
         </div>
