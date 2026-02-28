@@ -19,28 +19,39 @@ export default function ArchivePage() {
     fetchExhibits();
   }, []);
 
-  // --- WEB SHARE API FONKSİYONU ---
+  // --- REVİZE EDİLMİŞ PAYLAŞIM FONKSİYONU ---
   const handleShare = async (item: any) => {
-    const shareData = {
-      title: item.title,
-      text: `Almost Archive: "${item.title}"`,
-      url: `https://archiveofalmost.vercel.app/archive/${item.id}`,
-    };
+    try {
+      // 1. Resmi blob olarak indir (share API'nin dosyayı paylaşabilmesi için)
+      const response = await fetch(item.image_url);
+      const blob = await response.blob();
+      
+      // 2. Dosya adını ve tipini belirle
+      const file = new File([blob], `${item.title}.jpg`, { type: 'image/jpeg' });
+      const filesArray = [file];
 
-    if (navigator.share) {
-      // Mobil tarayıcılarda sistemin paylaş menüsünü açar (Instagram, WhatsApp vs.)
-      try {
-        await navigator.share(shareData);
-      } catch (error) {
-        console.error('Error sharing:', error);
+      // 3. Web Share API ile dosyayı ve bilgileri paylaş
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: filesArray })) {
+        await navigator.share({
+          files: filesArray,
+          title: item.title,
+          text: `Almost Archive: "${item.title}"`,
+          url: `https://archiveofalmost.vercel.app/archive/${item.id}`,
+        });
+        console.log('Successfully shared');
+      } else {
+        // API desteklenmiyorsa linki kopyala (fallback)
+        navigator.clipboard.writeText(`https://archiveofalmost.vercel.app/archive/${item.id}`);
+        alert('Link copied to clipboard!');
       }
-    } else {
-      // API desteklenmiyorsa linki kopyala
-      navigator.clipboard.writeText(shareData.url);
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Hata durumunda linki kopyala
+      navigator.clipboard.writeText(`https://archiveofalmost.vercel.app/archive/${item.id}`);
       alert('Link copied to clipboard!');
     }
   };
-  // ---------------------------------
+  // ------------------------------------------
 
   return (
     <main className="min-h-screen bg-black text-white pt-24 md:pt-32 pb-20 px-4 md:px-6 font-serif selection:bg-white selection:text-black">
@@ -83,7 +94,6 @@ export default function ArchivePage() {
             </div>
             <h3 className="text-lg md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity">"{item.title}"</h3>
             
-            {/* Kart İçindeki Paylaş Butonu */}
             <button 
               onClick={() => handleShare(item)}
               className="w-full text-center text-[10px] tracking-[0.3em] text-white/50 uppercase font-bold p-2 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
@@ -131,7 +141,6 @@ export default function ArchivePage() {
                 </p>
               </div>
 
-              {/* Modal İçindeki Paylaş Butonu */}
               <button 
                 onClick={() => handleShare(selectedExhibit)}
                 className="flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full hover:bg-white/20 transition-colors text-sm animate-text-2"
