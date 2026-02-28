@@ -164,7 +164,7 @@ export default function SubmitPage() {
             disabled={loading} 
             className="w-full py-5 md:py-6 border border-neutral-700 bg-transparent text-white hover:bg-white hover:text-black transition-all duration-[1s] uppercase tracking-[0.4em] md:tracking-[0.6em] text-[9px] md:text-[10px] font-bold mt-4 md:mt-8"
           >
-            {loading ? 'ARCHIVING...' : 'CONFIRM ARCHIVE'}
+            {loading ? 'ARCHIVING...' : 'CONFIRM ARCHIVE ($24.99)'} {/* --- Fiyat Eklendi --- */}
           </button>
         </form>
       </div>
