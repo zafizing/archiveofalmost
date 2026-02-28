@@ -1,36 +1,61 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+
+const PAGE_SIZE = 6; // Her seferinde kaç foto yüklenecek
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
   const [selectedExhibit, setSelectedExhibit] = useState<any | null>(null);
+  const [page, setPage] = useState(0); // Kaçıncı sayfadayız
+  const [hasMore, setHasMore] = useState(true); // Yüklenecek başka foto var mı?
+  const observer = useRef<IntersectionObserver | null>(null);
 
-  useEffect(() => {
-    const fetchExhibits = async () => {
-      const { data, error } = await supabase
-        .from('exhibits')
-        .select('*')
-        .order('catalog_id', { ascending: false });
-      
-      if (!error && data) setExhibits(data);
-    };
-    fetchExhibits();
+  // --- REVİZE: Supabase'den Kısıtlı Veri Çekme (Pagination) ---
+  const fetchExhibits = useCallback(async (pageNum: number) => {
+    const from = pageNum * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
+      .from('exhibits')
+      .select('*')
+      .order('catalog_id', { ascending: false })
+      .range(from, to);
+    
+    if (!error && data) {
+      setExhibits((prev) => [...prev, ...data]);
+      if (data.length < PAGE_SIZE) setHasMore(false);
+    }
   }, []);
 
-  // Modal açıldığında scroll'u kitle
+  useEffect(() => {
+    fetchExhibits(page);
+  }, [page, fetchExhibits]);
+  // ---------------------------------------------------------
+
+  // --- REVİZE: Infinite Scroll (Görünür alanı takip et) ---
+  const lastExhibitElementRef = useCallback((node: any) => {
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [hasMore]);
+  // ---------------------------------------------------------
+
+  // Modal scroll kilitleme
   useEffect(() => {
     if (selectedExhibit) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [selectedExhibit]);
 
+  // Share Fonksiyonu aynı kalıyor
   const handleShare = async (item: any) => {
     try {
       const response = await fetch(item.image_url);
@@ -84,42 +109,66 @@ export default function ArchivePage() {
         <div className="w-16 md:w-24 h-[1px] bg-neutral-900 mx-auto mt-6 md:mt-8"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
-        {exhibits.map((item) => (
-          <div key={item.id} className="group space-y-6 md:space-y-8 p-4 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000">
-            <div onClick={() => setSelectedExhibit(item)} className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 cursor-pointer">
-              <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-1000" />
-            </div>
-            
-            <div className="flex justify-between text-[9px] md:text-[10px] tracking-[0.3em] text-neutral-600 font-bold uppercase italic">
-              <span>{item.catalog_id}</span>
-              <span>{item.year}</span>
-            </div>
-            <h3 className="text-lg md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity">"{item.title}"</h3>
-            
-            <button 
-              onClick={() => handleShare(item)}
-              className="w-full text-center text-[10px] tracking-[0.3em] text-white/50 uppercase font-bold p-2 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
-            >
-              Share Memory
-            </button>
-          </div>
-        ))}
+      {/* --- REVİZE: Mobilde 2'li Grid (grid-cols-2) --- */}
+      <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-16">
+        {exhibits.map((item, index) => {
+          if (exhibits.length === index + 1) {
+            return (
+              <div ref={lastExhibitElementRef} key={item.id} className="group space-y-4 md:space-y-8 p-2 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000">
+                <div onClick={() => setSelectedExhibit(item)} className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 cursor-pointer">
+                  <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                </div>
+                
+                <div className="flex justify-between text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] text-neutral-600 font-bold uppercase italic">
+                  <span>{item.catalog_id}</span>
+                  <span>{item.year}</span>
+                </div>
+                <h3 className="text-xs md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity truncate">"{item.title}"</h3>
+                
+                <button 
+                  onClick={() => handleShare(item)}
+                  className="w-full text-center text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] text-white/50 uppercase font-bold p-1 md:p-2 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
+                >
+                  Share
+                </button>
+              </div>
+            );
+          } else {
+            return (
+              <div key={item.id} className="group space-y-4 md:space-y-8 p-2 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000">
+                <div onClick={() => setSelectedExhibit(item)} className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 cursor-pointer">
+                  <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                </div>
+                
+                <div className="flex justify-between text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] text-neutral-600 font-bold uppercase italic">
+                  <span>{item.catalog_id}</span>
+                  <span>{item.year}</span>
+                </div>
+                <h3 className="text-xs md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity truncate">"{item.title}"</h3>
+                
+                <button 
+                  onClick={() => handleShare(item)}
+                  className="w-full text-center text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] text-white/50 uppercase font-bold p-1 md:p-2 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
+                >
+                  Share
+                </button>
+              </div>
+            );
+          }
+        })}
       </div>
+      {/* ------------------------------------------------- */}
 
+      {/* Modal Kısmı Aynı Kalıyor */}
       {selectedExhibit && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-all duration-500" onClick={() => setSelectedExhibit(null)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-2xl transition-opacity duration-1000"></div>
           
-          {/* --- REVİZE: İçerik Taşmasını Engelle (overflow-x-hidden) --- */}
           <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide overflow-x-hidden" onClick={(e) => e.stopPropagation()}>
-            
-            {/* --- REVİZE: X Butonu Konumu ve Z-Index --- */}
             <button onClick={() => setSelectedExhibit(null)} className="absolute top-4 right-4 md:top-0 md:right-0 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[2000]">
               <span className="hidden md:inline text-[10px] tracking-[0.4em] uppercase mr-4 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Close</span>
-              <span className="text-4xl md:text-5xl font-extralight leading-none">×</span>
+              <span className="text-5xl font-extralight leading-none">×</span>
             </button>
-            {/* ------------------------------------------------- */}
 
             <div className="relative w-full md:w-1/2 aspect-square md:aspect-square shrink-0">
               <div className="absolute -inset-8 md:-inset-16 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06)_0%,_transparent_65%)] blur-[40px] md:blur-[80px] -z-10 animate-glow"></div>
