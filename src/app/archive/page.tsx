@@ -19,7 +19,7 @@ export default function ArchivePage() {
     fetchExhibits();
   }, []);
 
-  // --- HATA DÜZELTME: MODAL AÇILDIĞINDA KAYDIRMAYI KİLİTLE ---
+  // Modal açıldığında scroll'u kitle
   useEffect(() => {
     if (selectedExhibit) {
       document.body.style.overflow = 'hidden';
@@ -30,7 +30,6 @@ export default function ArchivePage() {
       document.body.style.overflow = 'unset';
     };
   }, [selectedExhibit]);
-  // ---------------------------------------------------------
 
   const handleShare = async (item: any) => {
     try {
@@ -112,10 +111,11 @@ export default function ArchivePage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-all duration-500" onClick={() => setSelectedExhibit(null)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-2xl transition-opacity duration-1000"></div>
           
-          <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide" onClick={(e) => e.stopPropagation()}>
+          {/* --- REVİZE: İçerik Taşmasını Engelle (overflow-x-hidden) --- */}
+          <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide overflow-x-hidden" onClick={(e) => e.stopPropagation()}>
             
-            {/* --- HATA DÜZELTME: X BUTONU Z-INDEX VE POZİSYON --- */}
-            <button onClick={() => setSelectedExhibit(null)} className="fixed top-6 right-6 md:absolute md:-top-6 md:-right-12 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[2000]">
+            {/* --- REVİZE: X Butonu Konumu ve Z-Index --- */}
+            <button onClick={() => setSelectedExhibit(null)} className="absolute top-4 right-4 md:top-0 md:right-0 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[2000]">
               <span className="hidden md:inline text-[10px] tracking-[0.4em] uppercase mr-4 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Close</span>
               <span className="text-4xl md:text-5xl font-extralight leading-none">×</span>
             </button>
