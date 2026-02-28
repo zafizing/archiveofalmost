@@ -19,18 +19,26 @@ export default function ArchivePage() {
     fetchExhibits();
   }, []);
 
-  // --- REVİZE EDİLMİŞ PAYLAŞIM FONKSİYONU ---
+  // --- HATA DÜZELTME: MODAL AÇILDIĞINDA KAYDIRMAYI KİLİTLE ---
+  useEffect(() => {
+    if (selectedExhibit) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedExhibit]);
+  // ---------------------------------------------------------
+
   const handleShare = async (item: any) => {
     try {
-      // 1. Resmi blob olarak indir (share API'nin dosyayı paylaşabilmesi için)
       const response = await fetch(item.image_url);
       const blob = await response.blob();
-      
-      // 2. Dosya adını ve tipini belirle
       const file = new File([blob], `${item.title}.jpg`, { type: 'image/jpeg' });
       const filesArray = [file];
 
-      // 3. Web Share API ile dosyayı ve bilgileri paylaş
       if (navigator.share && navigator.canShare && navigator.canShare({ files: filesArray })) {
         await navigator.share({
           files: filesArray,
@@ -38,20 +46,16 @@ export default function ArchivePage() {
           text: `Almost Archive: "${item.title}"`,
           url: `https://archiveofalmost.vercel.app/archive/${item.id}`,
         });
-        console.log('Successfully shared');
       } else {
-        // API desteklenmiyorsa linki kopyala (fallback)
         navigator.clipboard.writeText(`https://archiveofalmost.vercel.app/archive/${item.id}`);
         alert('Link copied to clipboard!');
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      // Hata durumunda linki kopyala
       navigator.clipboard.writeText(`https://archiveofalmost.vercel.app/archive/${item.id}`);
       alert('Link copied to clipboard!');
     }
   };
-  // ------------------------------------------
 
   return (
     <main className="min-h-screen bg-black text-white pt-24 md:pt-32 pb-20 px-4 md:px-6 font-serif selection:bg-white selection:text-black">
@@ -110,10 +114,12 @@ export default function ArchivePage() {
           
           <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide" onClick={(e) => e.stopPropagation()}>
             
-            <button onClick={() => setSelectedExhibit(null)} className="fixed top-6 right-6 md:absolute md:-top-6 md:-right-12 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[110]">
+            {/* --- HATA DÜZELTME: X BUTONU Z-INDEX VE POZİSYON --- */}
+            <button onClick={() => setSelectedExhibit(null)} className="fixed top-6 right-6 md:absolute md:-top-6 md:-right-12 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[2000]">
               <span className="hidden md:inline text-[10px] tracking-[0.4em] uppercase mr-4 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Close</span>
               <span className="text-4xl md:text-5xl font-extralight leading-none">×</span>
             </button>
+            {/* ------------------------------------------------- */}
 
             <div className="relative w-full md:w-1/2 aspect-square md:aspect-square shrink-0">
               <div className="absolute -inset-8 md:-inset-16 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06)_0%,_transparent_65%)] blur-[40px] md:blur-[80px] -z-10 animate-glow"></div>
