@@ -2,16 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-// --- PAYLAŞIM KÜTÜPHANESİ IMPORT ---
-import {
-  FacebookShareButton,
-  TwitterShareButton,
-  WhatsappShareButton,
-  FacebookIcon,
-  TwitterIcon,
-  WhatsappIcon,
-} from "react-share";
-// ------------------------------------
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
@@ -19,7 +9,6 @@ export default function ArchivePage() {
 
   useEffect(() => {
     const fetchExhibits = async () => {
-      // Katalog ID'ye göre azalan sıralama (En yeni # numara en üstte)
       const { data, error } = await supabase
         .from('exhibits')
         .select('*')
@@ -30,9 +19,31 @@ export default function ArchivePage() {
     fetchExhibits();
   }, []);
 
+  // --- WEB SHARE API FONKSİYONU ---
+  const handleShare = async (item: any) => {
+    const shareData = {
+      title: item.title,
+      text: `Almost Archive: "${item.title}"`,
+      url: `https://archiveofalmost.vercel.app/archive/${item.id}`,
+    };
+
+    if (navigator.share) {
+      // Mobil tarayıcılarda sistemin paylaş menüsünü açar (Instagram, WhatsApp vs.)
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      // API desteklenmiyorsa linki kopyala
+      navigator.clipboard.writeText(shareData.url);
+      alert('Link copied to clipboard!');
+    }
+  };
+  // ---------------------------------
+
   return (
     <main className="min-h-screen bg-black text-white pt-24 md:pt-32 pb-20 px-4 md:px-6 font-serif selection:bg-white selection:text-black">
-      {/* Saf CSS Animasyon Blokları */}
       <style jsx global>{`
         @keyframes spotlightFocus {
           0% { transform: scale(1.3); opacity: 0; }
@@ -50,51 +61,50 @@ export default function ArchivePage() {
         .animate-text-1 { animation: textReveal 0.8s ease-out 0.3s forwards; opacity: 0; }
         .animate-text-2 { animation: textReveal 0.8s ease-out 0.6s forwards; opacity: 0; }
         .animate-glow { animation: slowPulse 5s ease-in-out infinite; }
-        
-        /* Modal scrollbar gizleme */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-12 md:mb-20 text-center">
         <h1 className="text-4xl md:text-8xl tracking-[0.2em] md:tracking-[0.3em] uppercase font-light italic opacity-80">The Archive</h1>
         <div className="w-16 md:w-24 h-[1px] bg-neutral-900 mx-auto mt-6 md:mt-8"></div>
       </div>
 
-      {/* Grid: Arşiv Kartları */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
         {exhibits.map((item) => (
-          <div key={item.id} onClick={() => setSelectedExhibit(item)} className="group cursor-pointer space-y-6 md:space-y-8 p-4 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000">
-            <div className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000">
+          <div key={item.id} className="group space-y-6 md:space-y-8 p-4 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000">
+            <div onClick={() => setSelectedExhibit(item)} className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 cursor-pointer">
               <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-1000" />
             </div>
+            
             <div className="flex justify-between text-[9px] md:text-[10px] tracking-[0.3em] text-neutral-600 font-bold uppercase italic">
               <span>{item.catalog_id}</span>
               <span>{item.year}</span>
             </div>
             <h3 className="text-lg md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity">"{item.title}"</h3>
+            
+            {/* Kart İçindeki Paylaş Butonu */}
+            <button 
+              onClick={() => handleShare(item)}
+              className="w-full text-center text-[10px] tracking-[0.3em] text-white/50 uppercase font-bold p-2 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
+            >
+              Share Memory
+            </button>
           </div>
         ))}
       </div>
 
-      {/* RESPONSIVE DRAMATIC MODAL */}
       {selectedExhibit && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-all duration-500" onClick={() => setSelectedExhibit(null)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-2xl transition-opacity duration-1000"></div>
           
           <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide" onClick={(e) => e.stopPropagation()}>
             
-            {/* MOBİL VE DESKTOP UYUMLU X BUTONU */}
-            <button 
-              onClick={() => setSelectedExhibit(null)} 
-              className="fixed top-6 right-6 md:absolute md:-top-6 md:-right-12 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[110]"
-            >
+            <button onClick={() => setSelectedExhibit(null)} className="fixed top-6 right-6 md:absolute md:-top-6 md:-right-12 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[110]">
               <span className="hidden md:inline text-[10px] tracking-[0.4em] uppercase mr-4 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Close</span>
               <span className="text-4xl md:text-5xl font-extralight leading-none">×</span>
             </button>
 
-            {/* SOL: SPOTLIGHT (MOBİLDE ÜSTTE) */}
             <div className="relative w-full md:w-1/2 aspect-square md:aspect-square shrink-0">
               <div className="absolute -inset-8 md:-inset-16 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06)_0%,_transparent_65%)] blur-[40px] md:blur-[80px] -z-10 animate-glow"></div>
               <div className="relative w-full h-full border border-white/10 shadow-2xl overflow-hidden">
@@ -103,10 +113,7 @@ export default function ArchivePage() {
               </div>
             </div>
 
-            {/* SAĞ: METİN ALANI (MOBİLDE ALTTA) */}
             <div className="w-full md:w-1/2 space-y-6 md:space-y-10 text-left relative">
-              <div className="hidden md:block absolute -left-20 top-0 w-80 h-80 bg-white/[0.04] blur-[120px] rounded-full -z-10 animate-glow"></div>
-
               <div className="space-y-3 md:space-y-4 animate-text-1">
                 <div className="flex items-center gap-4 md:gap-6 text-[9px] md:text-[10px] tracking-[0.4em] md:tracking-[0.5em] text-white/70 uppercase font-black">
                   <span>{selectedExhibit.catalog_id}</span>
@@ -118,28 +125,19 @@ export default function ArchivePage() {
                 </h2>
               </div>
               
-              <div className="w-16 md:w-24 h-[1px] bg-white/20 animate-text-1" style={{ animationDelay: '0.5s' }}></div>
-              
               <div className="max-h-[250px] md:max-h-[350px] overflow-y-auto pr-4 md:pr-8 custom-scrollbar animate-text-2">
                 <p className="text-lg md:text-2xl text-white font-light leading-relaxed italic opacity-95">
                   {selectedExhibit.description}
                 </p>
               </div>
 
-              {/* --- PAYLAŞIM BUTONLARI --- */}
-              <div className="flex items-center gap-4 pt-4 animate-text-2" style={{ animationDelay: '0.8s' }}>
-                <span className="text-[10px] tracking-[0.3em] text-white/40 uppercase font-bold">Share</span>
-                <FacebookShareButton url={`https://archiveofalmost.vercel.app/archive/${selectedExhibit.id}`}>
-                  <FacebookIcon size={32} round className="hover:opacity-70 transition-opacity" />
-                </FacebookShareButton>
-                <TwitterShareButton url={`https://archiveofalmost.vercel.app/archive/${selectedExhibit.id}`} title={`Almost Archive: "${selectedExhibit.title}"`}>
-                  <TwitterIcon size={32} round className="hover:opacity-70 transition-opacity" />
-                </TwitterShareButton>
-                <WhatsappShareButton url={`https://archiveofalmost.vercel.app/archive/${selectedExhibit.id}`} title={`Almost Archive: "${selectedExhibit.title}"`}>
-                  <WhatsappIcon size={32} round className="hover:opacity-70 transition-opacity" />
-                </WhatsappShareButton>
-              </div>
-              {/* ------------------------- */}
+              {/* Modal İçindeki Paylaş Butonu */}
+              <button 
+                onClick={() => handleShare(selectedExhibit)}
+                className="flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full hover:bg-white/20 transition-colors text-sm animate-text-2"
+              >
+                🔗 <span>Share Memory</span>
+              </button>
             </div>
           </div>
         </div>
