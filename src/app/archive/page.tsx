@@ -10,6 +10,8 @@ export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [selectedExhibit, setSelectedExhibit] = useState<any | null>(null);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -20,6 +22,23 @@ export default function ArchivePage() {
   }, []);
 
   useEffect(() => { fetchTotalCount(); }, [fetchTotalCount]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!selectedExhibit) return;
+    const handleKey = (e: KeyboardEvent) => {
+      const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id);
+      if (e.key === 'ArrowRight' && idx < exhibits.length - 1) {
+        setSelectedExhibit(exhibits[idx + 1]);
+      } else if (e.key === 'ArrowLeft' && idx > 0) {
+        setSelectedExhibit(exhibits[idx - 1]);
+      } else if (e.key === 'Escape') {
+        setSelectedExhibit(null);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selectedExhibit, exhibits]);
 
   const fetchExhibits = useCallback(async (pageNum: number) => {
     const from = pageNum * PAGE_SIZE;
@@ -212,14 +231,22 @@ export default function ArchivePage() {
             {/* Info panel */}
             <div className="w-full md:w-[45%] bg-black border-t md:border-t-0 md:border-l border-white/[0.06] p-6 md:p-10 flex flex-col justify-between min-h-[300px] md:min-h-0">
               <div className="space-y-6 md:space-y-8">
-                {/* Close */}
-                <div className="flex justify-end">
-                  <button
+                {/* Close + Navigation hints */}
+                <div className="flex justify-between items-center">
+                  <div className="text-[10px] tracking-[0.3em] text-neutral-700 uppercase font-bold">
+                    {(() => { const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id); return `${idx + 1} / ${exhibits.length}`; })()}
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="hidden md:flex items-center gap-2 text-[10px] tracking-[0.3em] text-neutral-700 uppercase">
+                      <span>← →</span>
+                    </div>
+                    <button
                     onClick={() => setSelectedExhibit(null)}
                     className="text-[11px] tracking-[0.5em] text-neutral-400 uppercase font-bold hover:text-white transition-colors cursor-pointer"
                   >
                     Close ×
                   </button>
+                  </div>
                 </div>
 
                 {/* Catalog info */}
