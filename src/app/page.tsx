@@ -56,7 +56,7 @@ export default function Home() {
             <span className="relative text-white text-[11px] md:text-[12px] tracking-[0.6em] md:tracking-[0.8em] uppercase transition-colors duration-500 group-hover:text-black z-10 font-bold">
               Enter the Archive
             </span>
-            <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+            <div className="absolute inset-0 bg-white/15 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
           </Link>
 
           <div className="block text-[11px] md:text-[11px] tracking-[0.3em] uppercase mt-4">
