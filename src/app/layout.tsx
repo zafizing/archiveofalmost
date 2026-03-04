@@ -11,10 +11,13 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "Archive of Almost — A Permanent Collection of Objects Left Behind",
-  description: "100 objects. 100 stories. A permanent digital archive for the things we kept when we couldn't keep each other.",
+  description: "150 objects. 150 stories. A permanent digital archive for the things we kept when we couldn't keep each other.",
+  icons: {
+    icon: '/favicon.svg',
+  },
   openGraph: {
     title: "Archive of Almost",
-    description: "A permanent collection of objects left behind. Limited to 100.",
+    description: "A permanent collection of objects left behind. Limited to 150.",
     url: "https://archiveofalmost.co",
     siteName: "Archive of Almost",
     images: [
@@ -31,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Archive of Almost",
-    description: "100 objects. 100 stories. A permanent archive for things left behind.",
+    description: "150 objects. 150 stories. A permanent archive for things left behind.",
     images: ["/og-image.jpg"],
   },
 };
