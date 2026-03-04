@@ -135,7 +135,7 @@ export default function ArchivePage() {
               </div>
 
               {/* Meta */}
-              <div className="flex justify-between items-center text-[8px] md:text-[9px] tracking-[0.3em] text-neutral-400 uppercase font-bold">
+              <div className="flex justify-between items-center text-[8px] md:text-[9px] tracking-[0.3em] text-neutral-300 uppercase font-bold">
                 <span>{item.catalog_id}</span>
                 <span>{item.year}</span>
               </div>
@@ -143,7 +143,7 @@ export default function ArchivePage() {
               {/* Title */}
               <h3
                 onClick={() => setSelectedExhibit(item)}
-                className="text-sm md:text-lg font-light italic text-white/80 group-hover:text-white transition-colors duration-500 cursor-pointer leading-snug"
+                className="text-sm md:text-lg font-light italic text-white group-hover:text-white transition-colors duration-500 cursor-pointer leading-snug"
               >
                 "{item.title}"
               </h3>
@@ -151,7 +151,7 @@ export default function ArchivePage() {
               {/* Share */}
               <button
                 onClick={() => handleShare(item)}
-                className="text-[8px] md:text-[9px] tracking-[0.35em] text-neutral-500 uppercase font-bold hover:text-white/70 transition-colors duration-300"
+                className="text-[8px] md:text-[9px] tracking-[0.35em] text-neutral-400 uppercase font-bold hover:text-white transition-colors duration-300"
               >
                 — Share
               </button>
