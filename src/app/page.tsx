@@ -3,46 +3,77 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <main className="h-screen bg-black flex flex-col items-center justify-center text-center px-4 font-serif selection:bg-white selection:text-black overflow-hidden">
-      <div className="space-y-16 md:space-y-24 max-w-6xl w-full">
+      
+      {/* Subtle grain texture overlay */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '128px'
+      }} />
+
+      {/* Radial spotlight */}
+      <div className="fixed inset-0 pointer-events-none z-0" style={{
+        background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)'
+      }} />
+
+      <div className="relative z-10 space-y-16 md:space-y-20 max-w-4xl w-full">
         
-        {/* Başlık: Mobilde text-4xl'e düşürüldü ki taşmasın */}
-        <div className="cursor-default">
-          <h1 className="text-4xl md:text-8xl tracking-tight text-white/95 italic font-light leading-tight">
-            Archive of <span className="font-bold not-italic">Almost</span>
-          </h1>
-          
-          {/* Keskin bir denge çizgisi */}
-          <div className="w-16 md:w-20 h-[1px] bg-neutral-800 mx-auto mt-8 md:mt-12"></div>
+        {/* Edition marker */}
+        <div className="flex items-center justify-center gap-6">
+          <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
+          <span className="text-[8px] md:text-[9px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
+            Est. 2026 — Limited to 100 Objects
+          </span>
+          <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
         </div>
 
-        {/* Manifesto: Mobilde daha dengeli font ve satır aralığı */}
-        <div className="space-y-10 md:space-y-16">
-          <p className="text-lg md:text-2xl text-white/90 italic font-light max-w-2xl mx-auto leading-relaxed px-4">
-            "For the things we kept, when we couldn't keep each other."
+        {/* Main title */}
+        <div className="space-y-6 cursor-default">
+          <h1 className="text-[2.8rem] md:text-[7rem] tracking-tight text-white italic font-light leading-[0.9]">
+            Archive<br />
+            <span className="font-bold not-italic">of Almost</span>
+          </h1>
+          <p className="text-[11px] md:text-sm tracking-[0.3em] text-neutral-500 uppercase font-light max-w-sm mx-auto">
+            A permanent collection of objects left behind
           </p>
+        </div>
 
-          {/* Buton: Mobilde padding ve tracking ayarlandı */}
-          <div className="pt-2 md:pt-4">
-            <Link 
-              href="/archive" 
-              className="group relative inline-flex items-center justify-center px-10 md:px-16 py-4 md:py-5 overflow-hidden border border-white/30 transition-all duration-700 hover:border-white"
-            >
-              <span className="relative text-white text-[9px] md:text-[10px] tracking-[0.5em] md:tracking-[0.7em] uppercase transition-colors duration-700 group-hover:text-black z-10">
-                Enter the Gallery
-              </span>
-              
-              {/* Beyaz dolgu efekti */}
-              <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-            </Link>
+        {/* Manifesto */}
+        <p className="text-base md:text-xl text-white/60 italic font-light max-w-xl mx-auto leading-relaxed px-4">
+          "For the things we kept,<br className="hidden md:block" /> when we couldn't keep each other."
+        </p>
+
+        {/* CTA */}
+        <div className="space-y-4">
+          <Link 
+            href="/archive" 
+            className="group relative inline-flex items-center justify-center px-12 md:px-20 py-4 md:py-5 overflow-hidden border border-white/20 transition-all duration-700 hover:border-white/60"
+          >
+            <span className="relative text-white text-[9px] md:text-[10px] tracking-[0.6em] md:tracking-[0.8em] uppercase transition-colors duration-500 group-hover:text-black z-10 font-bold">
+              Enter the Archive
+            </span>
+            <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+          </Link>
+
+          <div className="block text-[8px] md:text-[9px] tracking-[0.3em] text-neutral-700 uppercase mt-4">
+            <span className="text-white/30">47 of 100 objects archived</span>
+            <span className="text-neutral-800 mx-3">—</span>
+            <span className="text-white/20">53 slots remaining</span>
           </div>
         </div>
 
       </div>
 
-      {/* Alt Köşe Detayı: Mobilde biraz daha yukarı çekildi */}
-      <div className="fixed bottom-8 md:bottom-12 text-[8px] md:text-[9px] tracking-[0.4em] text-neutral-700 uppercase">
-        © 2026 Archive Edition
+      {/* Bottom details */}
+      <div className="fixed bottom-8 left-0 right-0 flex justify-between items-end px-8 md:px-12">
+        <span className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase">
+          archiveofalmost.co
+        </span>
+        <span className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase">
+          © 2026
+        </span>
       </div>
+
     </main>
   );
 }
