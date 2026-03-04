@@ -15,7 +15,7 @@ export default function ArchivePage() {
   const observer = useRef<IntersectionObserver | null>(null);
 
   const fetchTotalCount = useCallback(async () => {
-    const { count } = await supabase.from('exhibits').select('*', { count: 'exact', head: true });
+    const { count } = await supabase.from('exhibits').select('*', { count: 'exact', head: true }).eq('is_approved', true);
     if (count !== null) setTotalCount(count);
   }, []);
 
@@ -27,6 +27,7 @@ export default function ArchivePage() {
     const { data, error } = await supabase
       .from('exhibits')
       .select('*')
+      .eq('is_approved', true)
       .order('created_at', { ascending: false })
       .range(from, to);
     if (!error && data) {
