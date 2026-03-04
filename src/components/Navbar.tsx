@@ -21,7 +21,7 @@ export default function Navbar() {
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         
         {/* Logo */}
-        <Link href="/" className="text-[9px] md:text-[10px] tracking-[0.4em] uppercase font-bold text-white/80 hover:text-white transition-colors duration-300">
+        <Link href="/" className="text-[11px] md:text-[12px] tracking-[0.4em] uppercase font-bold text-white/80 hover:text-white transition-colors duration-300">
           Archive of Almost
         </Link>
 
@@ -31,7 +31,7 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-[9px] tracking-[0.35em] uppercase transition-all duration-300 font-bold ${
+              className={`text-[11px] tracking-[0.35em] uppercase transition-all duration-300 font-bold ${
                 pathname === link.href
                   ? 'text-white'
                   : 'text-white/30 hover:text-white/70'
@@ -46,7 +46,7 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-4">
           <Link
             href="/submit"
-            className={`text-[8px] tracking-[0.25em] uppercase border px-3 py-1.5 transition-all duration-300 font-bold ${
+            className={`text-[11px] tracking-[0.25em] uppercase border px-3 py-1.5 transition-all duration-300 font-bold ${
               pathname === '/submit'
                 ? 'bg-white text-black border-white'
                 : 'text-white/60 border-white/20 hover:text-white hover:border-white/50'
@@ -73,7 +73,7 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className={`text-[9px] tracking-[0.4em] uppercase font-bold transition-colors duration-300 ${
+              className={`text-[11px] tracking-[0.4em] uppercase font-bold transition-colors duration-300 ${
                 pathname === link.href ? 'text-white' : 'text-white/40 hover:text-white'
               }`}
             >
