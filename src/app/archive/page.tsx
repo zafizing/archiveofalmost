@@ -99,11 +99,11 @@ export default function ArchivePage() {
       {/* Sticky top bar */}
       <div className="sticky top-[57px] md:top-[61px] z-50 bg-black/95 backdrop-blur-sm border-b border-white/[0.05] px-6 md:px-10 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-[7px] md:text-[8px] tracking-[0.5em] text-neutral-400 uppercase font-bold">Permanent Collection</span>
+          <span className="text-[11px] md:text-[11px] tracking-[0.5em] text-neutral-400 uppercase font-bold">Permanent Collection</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-16 h-[1px] bg-neutral-800 hidden md:block"></div>
-          <span className="text-[7px] md:text-[8px] tracking-[0.4em] text-neutral-400 uppercase font-bold">
+          <span className="text-[11px] md:text-[11px] tracking-[0.4em] text-neutral-400 uppercase font-bold">
             {exhibits.length} <span className="text-neutral-500">/ {TOTAL_SLOTS}</span> archived
           </span>
         </div>
@@ -140,15 +140,15 @@ export default function ArchivePage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_50%,_rgba(0,0,0,0.4)_100%)] pointer-events-none"></div>
                 {/* View hint on hover */}
                 <div className="absolute inset-0 flex items-end justify-start p-4 md:p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <span className="text-[7px] tracking-[0.5em] text-white/60 uppercase font-bold">View Object</span>
+                  <span className="text-[11px] tracking-[0.5em] text-white/60 uppercase font-bold">View Object</span>
                 </div>
               </div>
 
               {/* Museum label */}
               <div className="p-4 md:p-7 space-y-3 md:space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[7px] md:text-[8px] tracking-[0.4em] text-neutral-400 uppercase font-bold">{item.catalog_id}</span>
-                  <span className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-400 uppercase font-bold">{item.year}</span>
+                  <span className="text-[11px] md:text-[11px] tracking-[0.4em] text-neutral-400 uppercase font-bold">{item.catalog_id}</span>
+                  <span className="text-[11px] md:text-[11px] tracking-[0.3em] text-neutral-400 uppercase font-bold">{item.year}</span>
                 </div>
                 <h3
                   onClick={() => setSelectedExhibit(item)}
@@ -158,7 +158,7 @@ export default function ArchivePage() {
                 </h3>
                 <button
                   onClick={() => handleShare(item)}
-                  className="text-[7px] md:text-[8px] tracking-[0.4em] text-neutral-400 uppercase font-bold hover:text-white transition-colors duration-300"
+                  className="text-[11px] md:text-[11px] tracking-[0.4em] text-neutral-400 uppercase font-bold hover:text-white transition-colors duration-300"
                 >
                   — Share
                 </button>
@@ -171,7 +171,7 @@ export default function ArchivePage() {
         {exhibits.length > 0 && Array.from({ length: (3 - (exhibits.length % 3)) % 3 }).map((_, i) => (
           <div key={`empty-${i}`} className="border-b border-r border-white/[0.03] hidden md:block">
             <div className="aspect-square flex items-center justify-center">
-              <span className="text-[7px] tracking-[0.4em] text-neutral-600 uppercase font-bold">Unclaimed</span>
+              <span className="text-[11px] tracking-[0.4em] text-neutral-600 uppercase font-bold">Unclaimed</span>
             </div>
           </div>
         ))}
@@ -224,7 +224,7 @@ export default function ArchivePage() {
                 <div className="flex justify-end">
                   <button
                     onClick={() => setSelectedExhibit(null)}
-                    className="text-[8px] tracking-[0.5em] text-neutral-600 uppercase font-bold hover:text-white transition-colors"
+                    className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold hover:text-white transition-colors"
                   >
                     Close ×
                   </button>
@@ -232,7 +232,7 @@ export default function ArchivePage() {
 
                 {/* Catalog info */}
                 <div className="animate-text-1 space-y-1">
-                  <div className="flex items-center gap-3 text-[8px] tracking-[0.5em] text-neutral-400 uppercase font-bold">
+                  <div className="flex items-center gap-3 text-[11px] tracking-[0.5em] text-neutral-400 uppercase font-bold">
                     <span>{selectedExhibit.catalog_id}</span>
                     <div className="w-6 h-[1px] bg-neutral-700"></div>
                     <span>{selectedExhibit.year}</span>
@@ -255,13 +255,13 @@ export default function ArchivePage() {
               {/* Bottom */}
               <div className="animate-text-3 space-y-4 pt-6 border-t border-white/[0.05] mt-6">
                 {selectedExhibit.submitter_name && (
-                  <p className="text-[8px] tracking-[0.4em] text-neutral-600 uppercase font-bold">
+                  <p className="text-[11px] tracking-[0.4em] text-neutral-600 uppercase font-bold">
                     — {selectedExhibit.submitter_name}
                   </p>
                 )}
                 <button
                   onClick={() => handleShare(selectedExhibit)}
-                  className="text-[8px] tracking-[0.45em] text-neutral-300 uppercase font-bold hover:text-white transition-colors border border-white/[0.08] hover:border-white/30 px-5 py-3 w-full"
+                  className="text-[11px] tracking-[0.45em] text-neutral-300 uppercase font-bold hover:text-white transition-colors border border-white/[0.08] hover:border-white/30 px-5 py-3 w-full"
                 >
                   Share this object
                 </button>
