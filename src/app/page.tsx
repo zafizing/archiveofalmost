@@ -25,7 +25,7 @@ export default function Home() {
         {/* Edition marker */}
         <div className="flex items-center justify-center gap-6">
           <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
-          <span className="text-[8px] md:text-[9px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
+          <span className="text-[11px] md:text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
             Est. 2026 — Limited to {total} Objects
           </span>
           <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
@@ -53,13 +53,13 @@ export default function Home() {
             href="/archive" 
             className="group relative inline-flex items-center justify-center px-12 md:px-20 py-4 md:py-5 overflow-hidden border border-white/20 transition-all duration-700 hover:border-white/60"
           >
-            <span className="relative text-white text-[9px] md:text-[10px] tracking-[0.6em] md:tracking-[0.8em] uppercase transition-colors duration-500 group-hover:text-black z-10 font-bold">
+            <span className="relative text-white text-[11px] md:text-[12px] tracking-[0.6em] md:tracking-[0.8em] uppercase transition-colors duration-500 group-hover:text-black z-10 font-bold">
               Enter the Archive
             </span>
             <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
           </Link>
 
-          <div className="block text-[8px] md:text-[9px] tracking-[0.3em] uppercase mt-4">
+          <div className="block text-[11px] md:text-[11px] tracking-[0.3em] uppercase mt-4">
             {archived !== null ? (
               <>
                 <span className="text-white/30">{archived} of {total} objects archived</span>
@@ -76,10 +76,10 @@ export default function Home() {
 
       {/* Bottom details */}
       <div className="fixed bottom-8 left-0 right-0 flex justify-between items-end px-8 md:px-12">
-        <span className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase">
+        <span className="text-[11px] md:text-[11px] tracking-[0.3em] text-neutral-800 uppercase">
           archiveofalmost.co
         </span>
-        <Link href="/about" className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase hover:text-neutral-600 transition-colors">
+        <Link href="/about" className="text-[11px] md:text-[11px] tracking-[0.3em] text-neutral-800 uppercase hover:text-neutral-600 transition-colors">
           About
         </Link>
       </div>
