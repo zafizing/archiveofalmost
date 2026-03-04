@@ -8,7 +8,7 @@ export default function AboutPage() {
       <div className="min-h-screen flex flex-col justify-center px-6 md:px-20 pt-32 pb-20 max-w-5xl mx-auto">
         
         <div className="space-y-6 mb-20">
-          <div className="text-[8px] tracking-[0.6em] text-neutral-600 uppercase font-bold">
+          <div className="text-[11px] tracking-[0.6em] text-neutral-600 uppercase font-bold">
             About the Archive
           </div>
           <h1 className="text-4xl md:text-7xl font-light italic text-white leading-[1.1]">
@@ -50,7 +50,7 @@ export default function AboutPage() {
       <div className="px-6 md:px-20 py-20 md:py-28 max-w-5xl mx-auto grid md:grid-cols-3 gap-12 md:gap-16">
         
         <div className="space-y-4">
-          <div className="text-[8px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Collection</div>
+          <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Collection</div>
           <p className="text-sm text-white/55 font-light leading-relaxed italic">
             150 objects, permanently archived. Each with a photograph, a story, a year, and a name — 
             or the absence of one. The collection never changes. Once archived, always archived.
@@ -58,7 +58,7 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="text-[8px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Process</div>
+          <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Process</div>
           <p className="text-sm text-white/55 font-light leading-relaxed italic">
             Submit your object and story. We review every application personally. 
             If accepted, you'll receive an invitation to complete your archival. 
@@ -67,7 +67,7 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="text-[8px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Permanence</div>
+          <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Permanence</div>
           <p className="text-sm text-white/55 font-light leading-relaxed italic">
             Your object's entry in the archive is permanent. It will not be deleted, 
             altered, or moved. It will exist here as long as the archive exists. 
@@ -85,20 +85,20 @@ export default function AboutPage() {
           <p className="text-2xl md:text-3xl font-light italic text-white/80 leading-snug">
             "For the things we kept,<br /> when we couldn't keep each other."
           </p>
-          <p className="text-[8px] tracking-[0.4em] text-neutral-700 uppercase font-bold">
+          <p className="text-[11px] tracking-[0.4em] text-neutral-700 uppercase font-bold">
             Archive of Almost — Est. 2026
           </p>
         </div>
         <div className="flex gap-6">
           <Link
             href="/archive"
-            className="text-[8px] tracking-[0.4em] text-neutral-500 uppercase font-bold hover:text-white transition-colors border border-white/10 hover:border-white/30 px-6 py-3"
+            className="text-[11px] tracking-[0.4em] text-neutral-500 uppercase font-bold hover:text-white transition-colors border border-white/10 hover:border-white/30 px-6 py-3"
           >
             View Collection
           </Link>
           <Link
             href="/submit"
-            className="text-[8px] tracking-[0.4em] text-white uppercase font-bold hover:bg-white hover:text-black transition-all duration-500 border border-white/30 hover:border-white px-6 py-3"
+            className="text-[11px] tracking-[0.4em] text-white uppercase font-bold hover:bg-white hover:text-black transition-all duration-500 border border-white/30 hover:border-white px-6 py-3"
           >
             Apply
           </Link>
