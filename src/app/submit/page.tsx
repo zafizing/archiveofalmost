@@ -1,9 +1,11 @@
 'use client';
 import { useState } from 'react';
+import { useSlotCount } from '@/lib/useSlotCount';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function SubmitPage() {
+  const { remaining, total } = useSlotCount();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
@@ -126,7 +128,7 @@ export default function SubmitPage() {
             If accepted, you will be contacted to complete your archival for <span className="text-white/60">$1,000</span>.
           </p>
           <p className="text-[11px] tracking-[0.3em] text-neutral-700 uppercase">
-            148 slots remaining — No payment required to apply
+            {remaining !== null ? `${remaining} of ${total} slots remaining` : "Loading..."} — No payment required to apply
           </p>
         </div>
 
