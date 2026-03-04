@@ -167,16 +167,7 @@ export default function ArchivePage() {
             </div>
           );
         })}
-
-        {/* Empty slot placeholders */}
-        {exhibits.length > 0 && Array.from({ length: (3 - (exhibits.length % 3)) % 3 }).map((_, i) => (
-          <div key={`empty-${i}`} className="border-b border-r border-white/[0.03] hidden md:block">
-            <div className="aspect-square flex items-center justify-center">
-              <span className="text-[11px] tracking-[0.4em] text-neutral-600 uppercase font-bold">Unclaimed</span>
-            </div>
-          </div>
-        ))}
-      </div>
+</div>
 
       {exhibits.length === 0 && (
         <div className="text-center py-40">
@@ -282,7 +273,7 @@ export default function ArchivePage() {
         </div>
         <a
           href="/submit"
-          className="group relative overflow-hidden border border-white/20 hover:border-white/60 px-6 md:px-10 py-2.5 transition-all duration-500"
+          className="group relative overflow-hidden border border-white/50 hover:border-white px-6 md:px-10 py-2.5 transition-all duration-500"
         >
           <span className="relative text-[11px] tracking-[0.4em] uppercase font-bold text-white group-hover:text-black transition-colors duration-500 z-10">
             Apply
