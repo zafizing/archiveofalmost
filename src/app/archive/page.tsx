@@ -271,6 +271,26 @@ export default function ArchivePage() {
           </div>
         </div>
       )}
+
+      {/* Bottom CTA bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.06] bg-black/95 backdrop-blur-sm px-6 md:px-10 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse"></div>
+          <span className="text-[11px] tracking-[0.4em] text-white/40 uppercase font-bold">
+            {totalCount} of {TOTAL_SLOTS} objects archived
+          </span>
+        </div>
+        <a
+          href="/submit"
+          className="group relative overflow-hidden border border-white/20 hover:border-white/60 px-6 md:px-10 py-2.5 transition-all duration-500"
+        >
+          <span className="relative text-[11px] tracking-[0.4em] uppercase font-bold text-white group-hover:text-black transition-colors duration-500 z-10">
+            Apply
+          </span>
+          <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+        </a>
+      </div>
+
     </main>
   );
 }
