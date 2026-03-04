@@ -116,14 +116,14 @@ export default function ArchivePage() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 px-4 md:px-8 pb-24">
         {exhibits.map((item, index) => {
           const isLastElement = exhibits.length === index + 1;
           return (
             <div
               ref={isLastElement ? lastExhibitElementRef : null}
               key={item.id}
-              className="group border-b border-r border-white/[0.05] hover:border-white/[0.12] transition-colors duration-700"
+              className="group border border-white/[0.06] hover:border-white/[0.15] transition-colors duration-700"
             >
               {/* Image — color fades to B&W on hover */}
               <div
@@ -146,20 +146,20 @@ export default function ArchivePage() {
               </div>
 
               {/* Museum label */}
-              <div className="p-4 md:p-7 space-y-3 md:space-y-4">
+              <div className="p-5 md:p-8 space-y-3 md:space-y-5">
                 <div className="flex justify-between items-center">
                   <span className="text-[11px] md:text-[11px] tracking-[0.4em] text-neutral-400 uppercase font-bold">{item.catalog_id}</span>
                   <span className="text-[11px] md:text-[11px] tracking-[0.3em] text-neutral-400 uppercase font-bold">{item.year}</span>
                 </div>
                 <h3
                   onClick={() => setSelectedExhibit(item)}
-                  className="text-sm md:text-base font-light italic text-white leading-snug cursor-pointer hover:text-white/70 transition-colors"
+                  className="text-base md:text-lg font-light italic text-white leading-snug cursor-pointer hover:text-white/70 transition-colors"
                 >
                   "{item.title}"
                 </h3>
                 <button
                   onClick={() => handleShare(item)}
-                  className="text-[11px] md:text-[11px] tracking-[0.4em] text-neutral-400 uppercase font-bold hover:text-white transition-colors duration-300"
+                  className="text-[10px] md:text-xs tracking-[0.3em] text-neutral-400 uppercase font-bold hover:text-white transition-colors duration-300"
                 >
                   — Share
                 </button>
