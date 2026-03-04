@@ -168,7 +168,7 @@ export default function SubmitPage() {
             <textarea
               name="description"
               rows={5}
-              placeholder="Why does this object still exist in your life..."
+              placeholder="What is the story behind this object? What does it hold for you..."
               required
               className="bg-transparent border-b border-neutral-800 py-3 focus:border-white/40 outline-none resize-none text-white placeholder:text-neutral-700 leading-relaxed text-sm font-light italic"
             />
@@ -219,7 +219,7 @@ export default function SubmitPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-5 border border-neutral-700 bg-transparent text-white hover:bg-white hover:text-black transition-all duration-700 uppercase tracking-[0.5em] text-[11px] font-bold disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full py-5 border border-white/30 bg-transparent text-white hover:border-white/80 hover:bg-white/10 transition-all duration-700 uppercase tracking-[0.5em] text-[11px] font-bold disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {loading ? 'Submitting...' : 'Submit for Consideration'}
             </button>
