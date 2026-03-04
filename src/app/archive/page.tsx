@@ -199,9 +199,44 @@ export default function ArchivePage() {
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-16"
           onClick={() => setSelectedExhibit(null)}
+          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            const diff = touchStartX.current - e.changedTouches[0].clientX;
+            const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit?.id);
+            if (diff > 50 && idx < exhibits.length - 1) setSelectedExhibit(exhibits[idx + 1]);
+            if (diff < -50 && idx > 0) setSelectedExhibit(exhibits[idx - 1]);
+          }}
         >
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl"></div>
+
+          {/* Left Arrow */}
+          {exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id) > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id);
+                setSelectedExhibit(exhibits[idx - 1]);
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white/60 text-white/40 hover:text-white transition-all duration-300 cursor-pointer bg-black/60 backdrop-blur-sm hidden md:flex"
+            >
+              ←
+            </button>
+          )}
+
+          {/* Right Arrow */}
+          {exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id) < exhibits.length - 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id);
+                setSelectedExhibit(exhibits[idx + 1]);
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white/60 text-white/40 hover:text-white transition-all duration-300 cursor-pointer bg-black/60 backdrop-blur-sm hidden md:flex"
+            >
+              →
+            </button>
+          )}
 
           <div
             className="animate-modal relative w-full max-w-5xl flex flex-col md:flex-row gap-0 z-10 max-h-[90vh] md:max-h-none overflow-y-auto scrollbar-hide"
