@@ -239,7 +239,7 @@ export default function ArchivePage() {
           )}
 
           <div
-            className="animate-modal relative w-full max-w-5xl flex flex-col md:flex-row gap-0 z-10 max-h-[90vh] md:max-h-none overflow-y-auto scrollbar-hide"
+            className="animate-modal relative w-full max-w-5xl flex flex-col md:flex-row gap-0 z-10 max-h-[90vh] md:max-h-none overflow-y-auto scrollbar-hide border border-white/20"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image panel with spotlight effect */}
