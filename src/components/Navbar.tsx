@@ -9,6 +9,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'The Collection', href: '/archive' },
+    { name: 'About', href: '/about' },
     { name: 'Apply', href: '/submit' },
     { name: 'Terms', href: '/terms' },
     { name: 'Privacy', href: '/privacy' },
