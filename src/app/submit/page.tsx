@@ -89,7 +89,7 @@ export default function SubmitPage() {
       <main className="min-h-screen bg-black text-white flex items-center justify-center px-4 font-serif">
         <div className="max-w-lg text-center space-y-10">
           <div className="space-y-2">
-            <div className="text-[9px] tracking-[0.5em] text-neutral-600 uppercase font-bold mb-8">Application Received</div>
+            <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold mb-8">Application Received</div>
             <h2 className="text-3xl md:text-5xl font-light italic text-white/90 leading-tight">
               Your memory has been<br />submitted for consideration.
             </h2>
@@ -100,7 +100,7 @@ export default function SubmitPage() {
             If accepted, you will receive an email within 48 hours<br />
             with instructions to complete your archival.
           </p>
-          <p className="text-[9px] tracking-[0.3em] text-neutral-700 uppercase">
+          <p className="text-[11px] tracking-[0.3em] text-neutral-700 uppercase">
             Not all memories are accepted.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function SubmitPage() {
 
         {/* Header */}
         <div className="mb-16 md:mb-20 space-y-6">
-          <div className="text-[8px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
+          <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
             Request for Archival
           </div>
           <h2 className="text-3xl md:text-5xl font-light italic text-white/90 leading-tight">
@@ -125,7 +125,7 @@ export default function SubmitPage() {
             We accept a limited number of objects. Each submission is reviewed personally. 
             If accepted, you will be contacted to complete your archival for <span className="text-white/60">$1,000</span>.
           </p>
-          <p className="text-[9px] tracking-[0.3em] text-neutral-700 uppercase">
+          <p className="text-[11px] tracking-[0.3em] text-neutral-700 uppercase">
             $(( 150 - archived )) slots remaining — No payment required to apply
           </p>
         </div>
@@ -134,7 +134,7 @@ export default function SubmitPage() {
         <form onSubmit={handleSubmit} className="space-y-12">
 
           <div className="flex flex-col gap-3">
-            <label className="text-[8px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
+            <label className="text-[11px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
               01 — The Photograph
             </label>
             <input
@@ -142,13 +142,13 @@ export default function SubmitPage() {
               type="file"
               accept="image/*"
               required
-              className="bg-transparent border border-neutral-800 p-4 text-[10px] text-white/60 file:bg-white file:text-black file:border-none file:px-5 file:py-2 file:mr-5 file:font-bold file:uppercase file:text-[9px] file:cursor-pointer hover:file:bg-neutral-200 transition-all w-full"
+              className="bg-transparent border border-neutral-800 p-4 text-[10px] text-white/60 file:bg-white file:text-black file:border-none file:px-5 file:py-2 file:mr-5 file:font-bold file:uppercase file:text-[11px] file:cursor-pointer hover:file:bg-neutral-200 transition-all w-full"
             />
-            <span className="text-[8px] text-neutral-700 italic">JPG, PNG or WEBP — max 10MB</span>
+            <span className="text-[11px] text-neutral-700 italic">JPG, PNG or WEBP — max 10MB</span>
           </div>
 
           <div className="flex flex-col gap-3">
-            <label className="text-[8px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
+            <label className="text-[11px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
               02 — Title of the Memory
             </label>
             <input
@@ -160,7 +160,7 @@ export default function SubmitPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <label className="text-[8px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
+            <label className="text-[11px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
               03 — The Story
             </label>
             <textarea
@@ -174,7 +174,7 @@ export default function SubmitPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="flex flex-col gap-3">
-              <label className="text-[8px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
+              <label className="text-[11px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
                 04 — Year
               </label>
               <input
@@ -188,7 +188,7 @@ export default function SubmitPage() {
               />
             </div>
             <div className="flex flex-col gap-3">
-              <label className="text-[8px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
+              <label className="text-[11px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
                 05 — Your Name
               </label>
               <input
@@ -200,7 +200,7 @@ export default function SubmitPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <label className="text-[8px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
+            <label className="text-[11px] uppercase tracking-[0.4em] text-neutral-600 font-bold">
               06 — Your Email
             </label>
             <input
@@ -210,18 +210,18 @@ export default function SubmitPage() {
               required
               className="bg-transparent border-b border-neutral-800 py-3 focus:border-white/40 outline-none text-white placeholder:text-neutral-700 text-lg font-light"
             />
-            <span className="text-[8px] text-neutral-700 italic">Only used to notify you if accepted. Never shared.</span>
+            <span className="text-[11px] text-neutral-700 italic">Only used to notify you if accepted. Never shared.</span>
           </div>
 
           <div className="pt-6 space-y-4">
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-5 border border-neutral-700 bg-transparent text-white hover:bg-white hover:text-black transition-all duration-700 uppercase tracking-[0.5em] text-[9px] font-bold disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full py-5 border border-neutral-700 bg-transparent text-white hover:bg-white hover:text-black transition-all duration-700 uppercase tracking-[0.5em] text-[11px] font-bold disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {loading ? 'Submitting...' : 'Submit for Consideration'}
             </button>
-            <p className="text-center text-[8px] tracking-[0.2em] text-neutral-700 uppercase">
+            <p className="text-center text-[11px] tracking-[0.2em] text-neutral-700 uppercase">
               No payment required at this stage
             </p>
           </div>
