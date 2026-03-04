@@ -216,7 +216,7 @@ export default function ArchivePage() {
                 <div className="flex justify-end">
                   <button
                     onClick={() => setSelectedExhibit(null)}
-                    className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold hover:text-white transition-colors"
+                    className="text-[11px] tracking-[0.5em] text-neutral-400 uppercase font-bold hover:text-white transition-colors cursor-pointer"
                   >
                     Close ×
                   </button>
