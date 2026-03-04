@@ -237,9 +237,7 @@ export default function ArchivePage() {
                     {(() => { const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id); return `${idx + 1} / ${exhibits.length}`; })()}
                   </div>
                   <div className="flex items-center gap-6">
-                    <div className="hidden md:flex items-center gap-2 text-[10px] tracking-[0.3em] text-neutral-700 uppercase">
-                      <span>← →</span>
-                    </div>
+
                     <button
                     onClick={() => setSelectedExhibit(null)}
                     className="text-[11px] tracking-[0.5em] text-neutral-400 uppercase font-bold hover:text-white transition-colors cursor-pointer"
