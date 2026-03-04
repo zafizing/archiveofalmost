@@ -4,13 +4,22 @@ import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 const PAGE_SIZE = 9;
+const TOTAL_SLOTS = 150;
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [selectedExhibit, setSelectedExhibit] = useState<any | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
+
+  const fetchTotalCount = useCallback(async () => {
+    const { count } = await supabase.from('exhibits').select('*', { count: 'exact', head: true });
+    if (count !== null) setTotalCount(count);
+  }, []);
+
+  useEffect(() => { fetchTotalCount(); }, [fetchTotalCount]);
 
   const fetchExhibits = useCallback(async (pageNum: number) => {
     const from = pageNum * PAGE_SIZE;
