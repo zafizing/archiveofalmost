@@ -45,7 +45,7 @@ export default function SubmitPage() {
       const match = lastItem.catalog_id.match(/\d+/);
       if (match) nextNumber = parseInt(match[0]) + 1;
     }
-    const newCatalogId = `#${nextNumber.toString().padStart(3, '0')}`;
+    const newCatalogId = `ARC-${nextNumber.toString().padStart(3, '0')}`;
 
     // Görsel yükleme
     const fileName = `${Date.now()}-${file.name}`;
