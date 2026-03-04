@@ -126,7 +126,7 @@ export default function SubmitPage() {
             If accepted, you will be contacted to complete your archival for <span className="text-white/60">$1,000</span>.
           </p>
           <p className="text-[9px] tracking-[0.3em] text-neutral-700 uppercase">
-            53 slots remaining — No payment required to apply
+            $(( 150 - archived )) slots remaining — No payment required to apply
           </p>
         </div>
 
