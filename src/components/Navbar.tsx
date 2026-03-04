@@ -8,62 +8,78 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Archive', href: '/archive' },
+    { name: 'The Collection', href: '/archive' },
+    { name: 'Apply', href: '/submit' },
     { name: 'Terms', href: '/terms' },
     { name: 'Privacy', href: '/privacy' },
     { name: 'Refund', href: '/refund' },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-[1000] p-4 md:p-6 bg-black/90 backdrop-blur-sm border-b border-white/5">
-      <div className="flex justify-between items-center">
-        {/* Logo ve Buton Grubu - Orta Hizalama İçin Flex */}
-        <div className="flex items-center gap-4">
-          {/* --- Font boyutu eşitleme (text-[9px] md:text-[10px]) --- [cite: 2026-03-01] */}
-          <Link href="/" className="text-[9px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase font-bold text-white transition-opacity hover:opacity-70">
-            ARCHIVE OF ALMOST
-          </Link>
-          
-          {/* Mobil Buton logonun yanına taşındı */}
-          <Link href="/submit" className={`md:hidden text-[8px] tracking-[0.2em] uppercase transition-all duration-300 border border-white/20 px-2 py-1 hover:bg-white hover:text-black ${pathname === '/submit' ? 'bg-white text-black' : 'text-white'}`}>
-            Submit
-          </Link>
+    <nav className="fixed top-0 left-0 w-full z-[1000] px-6 md:px-10 py-5 bg-black/80 backdrop-blur-md border-b border-white/[0.04]">
+      <div className="flex justify-between items-center max-w-7xl mx-auto">
+        
+        {/* Logo */}
+        <Link href="/" className="text-[9px] md:text-[10px] tracking-[0.4em] uppercase font-bold text-white/80 hover:text-white transition-colors duration-300">
+          Archive of Almost
+        </Link>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-[9px] tracking-[0.35em] uppercase transition-all duration-300 font-bold ${
+                pathname === link.href
+                  ? 'text-white'
+                  : 'text-white/30 hover:text-white/70'
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
         </div>
 
-        {/* Masaüstü ve Mobil Görünür Menü */}
-        <div className="flex items-center gap-6 md:gap-8">
-          {/* Masaüstü Linkleri (Geniş ekranda görünür) */}
-          <div className="hidden md:flex items-center gap-6 md:gap-8">
-            {/* --- Metin "Archive Your Memory" olarak düzeltildi ve font eşitlendi --- [cite: 2026-03-01] */}
-            <Link href="/submit" className={`text-[9px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase transition-all duration-300 hover:text-white whitespace-nowrap ${pathname === '/submit' ? 'text-white' : 'text-white/70'}`}>
-              Archive Your Memory
-            </Link>
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`text-[9px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase transition-all duration-300 hover:text-white whitespace-nowrap ${pathname === link.href ? 'text-white' : 'text-white/70'}`}>
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Mobil Menü Butonu (Hamburger) */}
-          <button 
-            className="md:hidden text-white focus:outline-none" 
+        {/* Mobile: Apply button + hamburger */}
+        <div className="flex md:hidden items-center gap-4">
+          <Link
+            href="/submit"
+            className={`text-[8px] tracking-[0.25em] uppercase border px-3 py-1.5 transition-all duration-300 font-bold ${
+              pathname === '/submit'
+                ? 'bg-white text-black border-white'
+                : 'text-white/60 border-white/20 hover:text-white hover:border-white/50'
+            }`}
+          >
+            Apply
+          </Link>
+          <button
+            className="flex flex-col gap-1.5 focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
           >
-            <div className={`w-6 h-0.5 bg-white transition-all ${isOpen ? 'rotate-45 translate-y-1.5' : '-translate-y-1'}`}></div>
-            <div className={`w-6 h-0.5 bg-white transition-all ${isOpen ? 'opacity-0' : 'opacity-100'}`}></div>
-            <div className={`w-6 h-0.5 bg-white transition-all ${isOpen ? '-rotate-45 -translate-y-1.5' : 'translate-y-1'}`}></div>
+            <div className={`w-5 h-[1px] bg-white transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-[5px]' : ''}`}></div>
+            <div className={`w-5 h-[1px] bg-white transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`}></div>
+            <div className={`w-5 h-[1px] bg-white transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-[5px]' : ''}`}></div>
           </button>
         </div>
       </div>
 
-      {/* Mobil Menü İçeriği */}
-      <div className={`md:hidden flex flex-col items-center gap-6 pt-10 transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        {navLinks.map((link) => (
-          <Link key={link.href} href={link.href} className={`text-[10px] tracking-[0.4em] uppercase transition-all duration-300 hover:text-white ${pathname === link.href ? 'text-white' : 'text-white/70'}`} onClick={() => setIsOpen(false)}>
-            {link.name}
-          </Link>
-        ))}
+      {/* Mobile menu */}
+      <div className={`md:hidden transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-64 opacity-100 pt-8' : 'max-h-0 opacity-0'}`}>
+        <div className="flex flex-col items-center gap-6 pb-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className={`text-[9px] tracking-[0.4em] uppercase font-bold transition-colors duration-300 ${
+                pathname === link.href ? 'text-white' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
       </div>
     </nav>
   );
