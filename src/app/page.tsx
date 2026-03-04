@@ -1,10 +1,14 @@
+'use client';
 import Link from 'next/link';
+import { useSlotCount } from '@/lib/useSlotCount';
 
 export default function Home() {
+  const { archived, remaining, total } = useSlotCount();
+
   return (
     <main className="h-screen bg-black flex flex-col items-center justify-center text-center px-4 font-serif selection:bg-white selection:text-black overflow-hidden">
       
-      {/* Subtle grain texture overlay */}
+      {/* Grain texture */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
         backgroundRepeat: 'repeat',
@@ -22,7 +26,7 @@ export default function Home() {
         <div className="flex items-center justify-center gap-6">
           <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
           <span className="text-[8px] md:text-[9px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
-            Est. 2026 — Limited to 100 Objects
+            Est. 2026 — Limited to {total} Objects
           </span>
           <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
         </div>
@@ -55,10 +59,16 @@ export default function Home() {
             <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
           </Link>
 
-          <div className="block text-[8px] md:text-[9px] tracking-[0.3em] text-neutral-700 uppercase mt-4">
-            <span className="text-white/30">47 of 100 objects archived</span>
-            <span className="text-neutral-800 mx-3">—</span>
-            <span className="text-white/20">53 slots remaining</span>
+          <div className="block text-[8px] md:text-[9px] tracking-[0.3em] uppercase mt-4">
+            {archived !== null ? (
+              <>
+                <span className="text-white/30">{archived} of {total} objects archived</span>
+                <span className="text-neutral-800 mx-3">—</span>
+                <span className="text-white/20">{remaining} slots remaining</span>
+              </>
+            ) : (
+              <span className="text-neutral-800">Loading...</span>
+            )}
           </div>
         </div>
 
@@ -69,9 +79,9 @@ export default function Home() {
         <span className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase">
           archiveofalmost.co
         </span>
-        <span className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase">
-          © 2026
-        </span>
+        <Link href="/about" className="text-[7px] md:text-[8px] tracking-[0.3em] text-neutral-800 uppercase hover:text-neutral-600 transition-colors">
+          About
+        </Link>
       </div>
 
     </main>
