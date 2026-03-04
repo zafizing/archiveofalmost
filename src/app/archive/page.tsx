@@ -3,26 +3,23 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
-const PAGE_SIZE = 6; // Her seferinde kaç foto yüklenecek
+const PAGE_SIZE = 6;
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
   const [selectedExhibit, setSelectedExhibit] = useState<any | null>(null);
-  const [page, setPage] = useState(0); // Kaçıncı sayfadayız
-  const [hasMore, setHasMore] = useState(true); // Yüklenecek başka foto var mı?
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
 
-  // --- REVİZE: Supabase'den Range Fetch ile Veri Çekme ---
   const fetchExhibits = useCallback(async (pageNum: number) => {
     const from = pageNum * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-
     const { data, error } = await supabase
       .from('exhibits')
       .select('*')
-      .order('catalog_id', { ascending: false }) // Yeniye göre sırala
-      .range(from, to); // --- VERİMLİ VERİ ÇEKME ---
-    
+      .order('catalog_id', { ascending: false })
+      .range(from, to);
     if (!error && data) {
       setExhibits((prev) => [...prev, ...data]);
       if (data.length < PAGE_SIZE) setHasMore(false);
@@ -32,9 +29,7 @@ export default function ArchivePage() {
   useEffect(() => {
     fetchExhibits(page);
   }, [page, fetchExhibits]);
-  // ------------------------------------------------------
 
-  // --- Infinite Scroll (Görünür alanı takip et) ---
   const lastExhibitElementRef = useCallback((node: any) => {
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver((entries) => {
@@ -44,137 +39,199 @@ export default function ArchivePage() {
     });
     if (node) observer.current.observe(node);
   }, [hasMore]);
-  // -------------------------------------------------
 
-  // Share Fonksiyonu
   const handleShare = async (item: any) => {
     try {
-      const response = await fetch(item.image_url);
-      const blob = await response.blob();
-      const file = new File([blob], `${item.title}.jpg`, { type: 'image/jpeg' });
-      const filesArray = [file];
-
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: filesArray })) {
+      const shareUrl = `https://archiveofalmost.co/archive`;
+      if (navigator.share) {
         await navigator.share({
-          files: filesArray,
-          title: item.title,
-          text: `Almost Archive: "${item.title}"`,
-          url: `https://archiveofalmost.vercel.app/archive/${item.id}`,
+          title: `Archive of Almost — "${item.title}"`,
+          text: `"${item.title}" — ${item.year}. An object preserved in the Archive of Almost.`,
+          url: shareUrl,
         });
       } else {
-        navigator.clipboard.writeText(`https://archiveofalmost.vercel.app/archive/${item.id}`);
-        alert('Link copied to clipboard!');
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard.');
       }
     } catch (error) {
-      console.error('Error sharing:', error);
-      navigator.clipboard.writeText(`https://archiveofalmost.vercel.app/archive/${item.id}`);
-      alert('Link copied to clipboard!');
+      console.error('Share error:', error);
     }
   };
 
   return (
-    <main className="min-h-screen bg-black text-white pt-24 md:pt-32 pb-20 px-4 md:px-6 font-serif selection:bg-white selection:text-black">
+    <main className="min-h-screen bg-black text-white pt-28 md:pt-36 pb-24 px-4 md:px-8 font-serif selection:bg-white selection:text-black">
       <style jsx global>{`
         @keyframes spotlightFocus {
-          0% { transform: scale(1.3); opacity: 0; }
+          0% { transform: scale(1.05); opacity: 0; }
           100% { transform: scale(1); opacity: 1; }
         }
         @keyframes textReveal {
-          0% { transform: translateY(15px); opacity: 0; }
+          0% { transform: translateY(12px); opacity: 0; }
           100% { transform: translateY(0); opacity: 1; }
         }
         @keyframes slowPulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 0.5; }
         }
         .animate-spotlight { animation: spotlightFocus 1.2s ease-out forwards; }
-        .animate-text-1 { animation: textReveal 0.8s ease-out 0.3s forwards; opacity: 0; }
-        .animate-text-2 { animation: textReveal 0.8s ease-out 0.6s forwards; opacity: 0; }
-        .animate-glow { animation: slowPulse 5s ease-in-out infinite; }
+        .animate-text-1 { animation: textReveal 0.7s ease-out 0.2s forwards; opacity: 0; }
+        .animate-text-2 { animation: textReveal 0.7s ease-out 0.4s forwards; opacity: 0; }
+        .animate-text-3 { animation: textReveal 0.7s ease-out 0.6s forwards; opacity: 0; }
+        .animate-glow { animation: slowPulse 6s ease-in-out infinite; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="max-w-7xl mx-auto mb-12 md:mb-20 text-center">
-        <h1 className="text-4xl md:text-8xl tracking-[0.2em] md:tracking-[0.3em] uppercase font-light italic opacity-80">The Archive</h1>
-        <div className="w-16 md:w-24 h-[1px] bg-neutral-900 mx-auto mt-6 md:mt-8"></div>
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-16 md:mb-24">
+        <div className="flex items-end justify-between border-b border-white/[0.06] pb-8">
+          <div className="space-y-3">
+            <div className="text-[8px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
+              Permanent Collection
+            </div>
+            <h1 className="text-4xl md:text-6xl font-light italic text-white/90 leading-none">
+              The Archive
+            </h1>
+          </div>
+          <div className="text-right space-y-1 hidden md:block">
+            <div className="text-[8px] tracking-[0.4em] text-neutral-700 uppercase font-bold">
+              Objects Archived
+            </div>
+            <div className="text-2xl font-light text-white/30 tabular-nums">
+              {exhibits.length} <span className="text-neutral-800">/ 100</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* --- REVİZE: Mobilde 2'li Grid, Masaüstünde 3'lü Grid --- */}
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-16">
+      {/* Grid */}
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-px bg-white/[0.04]">
         {exhibits.map((item, index) => {
           const isLastElement = exhibits.length === index + 1;
-          
           return (
-            <div 
-              ref={isLastElement ? lastExhibitElementRef : null} 
-              key={item.id} 
-              className="group space-y-4 md:space-y-8 p-2 md:p-6 bg-neutral-950/20 border border-white/5 hover:border-white/20 transition-all duration-1000"
+            <div
+              ref={isLastElement ? lastExhibitElementRef : null}
+              key={item.id}
+              className="group bg-black p-4 md:p-8 space-y-4 md:space-y-6 hover:bg-neutral-950 transition-colors duration-700"
             >
-              <div onClick={() => setSelectedExhibit(item)} className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 cursor-pointer">
-                <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+              {/* Image */}
+              <div
+                onClick={() => setSelectedExhibit(item)}
+                className="aspect-square relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000 cursor-pointer"
+              >
+                <Image
+                  src={item.image_url}
+                  alt={item.title}
+                  fill
+                  unoptimized
+                  className="object-cover group-hover:scale-103 transition-transform duration-1000"
+                />
+                {/* Overlay hint */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-700 flex items-center justify-center">
+                  <span className="text-[8px] tracking-[0.4em] text-white uppercase font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    View
+                  </span>
+                </div>
               </div>
-              
-              <div className="flex justify-between text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] text-neutral-600 font-bold uppercase italic">
+
+              {/* Meta */}
+              <div className="flex justify-between items-center text-[8px] md:text-[9px] tracking-[0.3em] text-neutral-600 uppercase font-bold">
                 <span>{item.catalog_id}</span>
                 <span>{item.year}</span>
               </div>
-              <h3 className="text-xs md:text-xl font-light italic opacity-70 group-hover:opacity-100 transition-opacity truncate">"{item.title}"</h3>
-              
-              <button 
-                onClick={() => handleShare(item)}
-                className="w-full text-center text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] text-white/50 uppercase font-bold p-1 md:p-2 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
+
+              {/* Title */}
+              <h3
+                onClick={() => setSelectedExhibit(item)}
+                className="text-sm md:text-lg font-light italic text-white/60 group-hover:text-white/90 transition-colors duration-500 cursor-pointer leading-snug"
               >
-                Share
+                "{item.title}"
+              </h3>
+
+              {/* Share */}
+              <button
+                onClick={() => handleShare(item)}
+                className="text-[8px] md:text-[9px] tracking-[0.35em] text-neutral-700 uppercase font-bold hover:text-white/60 transition-colors duration-300"
+              >
+                — Share
               </button>
             </div>
           );
         })}
       </div>
-      {/* ------------------------------------------------------- */}
 
-      {/* Modal Kısmı */}
+      {exhibits.length === 0 && (
+        <div className="max-w-7xl mx-auto text-center py-32">
+          <p className="text-neutral-700 italic text-lg">The archive is being curated.</p>
+        </div>
+      )}
+
+      {/* Modal */}
       {selectedExhibit && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-all duration-500" onClick={() => setSelectedExhibit(null)}>
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-2xl transition-opacity duration-1000"></div>
-          
-          <div className="relative w-full max-w-7xl flex flex-col md:flex-row gap-8 md:gap-16 items-center z-10 overflow-y-auto md:overflow-visible max-h-[90vh] md:max-h-none scrollbar-hide overflow-x-hidden" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setSelectedExhibit(null)} className="absolute top-4 right-4 md:top-0 md:right-0 text-white hover:scale-110 transition-all duration-500 flex items-center group z-[2000]">
-              <span className="hidden md:inline text-[10px] tracking-[0.4em] uppercase mr-4 opacity-0 group-hover:opacity-100 transition-opacity font-bold">Close</span>
-              <span className="text-5xl font-extralight leading-none">×</span>
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-16"
+          onClick={() => setSelectedExhibit(null)}
+        >
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl"></div>
+
+          <div
+            className="relative w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-20 items-start md:items-center z-10 overflow-y-auto scrollbar-hide max-h-[90vh] md:max-h-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setSelectedExhibit(null)}
+              className="absolute top-0 right-0 text-[9px] tracking-[0.4em] text-white/40 uppercase font-bold hover:text-white transition-colors z-50"
+            >
+              Close ×
             </button>
 
-            <div className="relative w-full md:w-1/2 aspect-square md:aspect-square shrink-0">
-              <div className="absolute -inset-8 md:-inset-16 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06)_0%,_transparent_65%)] blur-[40px] md:blur-[80px] -z-10 animate-glow"></div>
-              <div className="relative w-full h-full border border-white/10 shadow-2xl overflow-hidden">
-                <div className="absolute inset-0 z-20 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.5)_55%,_rgba(0,0,0,0.95)_100%)] animate-spotlight"></div>
-                <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" />
+            {/* Image */}
+            <div className="relative w-full md:w-1/2 aspect-square shrink-0">
+              <div className="absolute -inset-12 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] blur-[60px] -z-10 animate-glow"></div>
+              <div className="relative w-full h-full border border-white/[0.08] overflow-hidden animate-spotlight">
+                <Image
+                  src={selectedExhibit.image_url}
+                  alt={selectedExhibit.title}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
               </div>
             </div>
 
-            <div className="w-full md:w-1/2 space-y-6 md:space-y-10 text-left relative">
-              <div className="space-y-3 md:space-y-4 animate-text-1">
-                <div className="flex items-center gap-4 md:gap-6 text-[9px] md:text-[10px] tracking-[0.4em] md:tracking-[0.5em] text-white/70 uppercase font-black">
+            {/* Info */}
+            <div className="w-full md:w-1/2 space-y-8 text-left pb-8 md:pb-0">
+              <div className="space-y-2 animate-text-1">
+                <div className="flex items-center gap-4 text-[8px] md:text-[9px] tracking-[0.5em] text-white/40 uppercase font-bold">
                   <span>{selectedExhibit.catalog_id}</span>
-                  <div className="w-8 md:w-12 h-[1px] bg-white/30"></div>
+                  <div className="w-8 h-[1px] bg-white/20"></div>
                   <span>{selectedExhibit.year}</span>
                 </div>
-                <h2 className="text-4xl md:text-7xl font-light italic leading-tight md:leading-none text-white tracking-tighter drop-shadow-2xl">
+                <h2 className="text-3xl md:text-5xl font-light italic text-white leading-tight">
                   "{selectedExhibit.title}"
                 </h2>
               </div>
-              
-              <div className="max-h-[250px] md:max-h-[350px] overflow-y-auto pr-4 md:pr-8 custom-scrollbar animate-text-2">
-                <p className="text-lg md:text-2xl text-white font-light leading-relaxed italic opacity-95">
+
+              <div className="w-8 h-[1px] bg-neutral-800 animate-text-2"></div>
+
+              <div className="max-h-[200px] md:max-h-[300px] overflow-y-auto scrollbar-hide animate-text-2">
+                <p className="text-base md:text-xl text-white/70 font-light leading-relaxed italic">
                   {selectedExhibit.description}
                 </p>
               </div>
 
-              <button 
+              {selectedExhibit.submitter_name && (
+                <p className="text-[9px] tracking-[0.4em] text-neutral-600 uppercase font-bold animate-text-3">
+                  — {selectedExhibit.submitter_name}
+                </p>
+              )}
+
+              <button
                 onClick={() => handleShare(selectedExhibit)}
-                className="flex items-center gap-2 bg-white/10 px-6 py-3 rounded-full hover:bg-white/20 transition-colors text-sm animate-text-2"
+                className="animate-text-3 text-[9px] tracking-[0.4em] text-white/30 uppercase font-bold hover:text-white/70 transition-colors border border-white/10 hover:border-white/30 px-6 py-3"
               >
-                🔗 <span>Share Memory</span>
+                Share this object
               </button>
             </div>
           </div>
