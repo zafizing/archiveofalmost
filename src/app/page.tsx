@@ -43,8 +43,8 @@ export default function Home() {
         </div>
 
         {/* Manifesto */}
-        <p className="text-sm md:text-xl text-white/60 italic font-light max-w-xl mx-auto leading-relaxed px-4">
-          "Some things outlive<br className="hidden md:block" /> the people who owned them."
+        <p className="text-lg md:text-2xl text-white/70 italic font-light max-w-2xl mx-auto leading-relaxed px-4 tracking-wide">
+          "Some things outlive the people who owned them."
         </p>
 
         {/* CTA */}
