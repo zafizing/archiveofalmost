@@ -103,8 +103,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* Social icons */}
-          <div className="flex items-center justify-center gap-6 pt-2">
+          {/* Social icons — only mobile */}
+          <div className="flex md:hidden items-center justify-center gap-6 pt-2">
             {socialLinks.map((social) => (
               <a
                 key={social.name}
