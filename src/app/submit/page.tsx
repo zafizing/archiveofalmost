@@ -90,21 +90,38 @@ export default function SubmitPage() {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center px-4 font-serif">
         <div className="max-w-lg text-center space-y-10">
-          <div className="space-y-2">
-            <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold mb-8">Application Received</div>
-            <h2 className="text-3xl md:text-5xl font-light italic text-white/90 leading-tight">
-              Your memory has been<br />submitted for consideration.
+
+          <div className="space-y-6">
+            <div className="text-[11px] tracking-[0.5em] text-neutral-500 uppercase font-bold">Application Received</div>
+            <h2 className="text-4xl md:text-6xl font-light italic text-white/90 leading-tight">
+              Your object is<br />under review.
             </h2>
           </div>
+
           <div className="w-12 h-[1px] bg-neutral-800 mx-auto"></div>
-          <p className="text-sm text-neutral-500 font-light leading-relaxed italic">
-            We review each submission personally.<br />
-            If accepted, you will receive an email within 48 hours<br />
-            with instructions to complete your archival.
+
+          <p className="text-base text-white/50 font-light leading-relaxed italic max-w-sm mx-auto">
+            Each submission is reviewed personally. 
+            We are selective — not every memory finds its place here.
+            If yours does, you will hear from us.
           </p>
-          <p className="text-[11px] tracking-[0.3em] text-neutral-700 uppercase">
-            Not all memories are accepted.
-          </p>
+
+          <div className="space-y-3">
+            <p className="text-[11px] tracking-[0.4em] text-neutral-600 uppercase">
+              We will contact you at the email you provided.
+            </p>
+            <p className="text-[11px] tracking-[0.4em] text-neutral-700 uppercase">
+              Archival fee: $1,000 — collected only upon acceptance.
+            </p>
+          </div>
+
+          <a
+            href="/archive"
+            className="inline-block text-[11px] tracking-[0.4em] text-neutral-500 uppercase hover:text-white transition-colors duration-300 border-b border-neutral-800 hover:border-white/40 pb-1"
+          >
+            View the Collection
+          </a>
+
         </div>
       </main>
     );
