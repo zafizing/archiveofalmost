@@ -37,14 +37,14 @@ export default function Home() {
             Archive<br />
             <span className="font-bold not-italic">of Almost</span>
           </h1>
-          <p className="text-[11px] md:text-sm tracking-[0.3em] text-neutral-500 uppercase font-light max-w-sm mx-auto">
+          <p className="hidden md:block text-[11px] md:text-sm tracking-[0.3em] text-neutral-500 uppercase font-light max-w-sm mx-auto">
             A permanent collection of objects left behind
           </p>
         </div>
 
         {/* Manifesto */}
         <p className="text-sm md:text-xl text-white/60 italic font-light max-w-xl mx-auto leading-relaxed px-4">
-          "For the things we kept,<br className="hidden md:block" /> when we couldn't keep each other."
+          "Some things outlive<br className="hidden md:block" /> the people who owned them."
         </p>
 
         {/* CTA */}
