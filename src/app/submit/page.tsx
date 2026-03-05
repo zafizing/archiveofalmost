@@ -34,20 +34,20 @@ export default function SubmitPage() {
       return;
     }
 
-    // Katalog ID hesaplama
-    const { data: lastItem } = await supabase
+    // Katalog ID hesaplama — tüm kayıtları çek, ARC-XXX formatındakilerin en büyüğünü bul
+    const { data: allItems } = await supabase
       .from('exhibits')
-      .select('catalog_id')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+      .select('catalog_id');
 
-    let nextNumber = 1;
-    if (lastItem?.catalog_id) {
-      const match = lastItem.catalog_id.match(/\d+/);
-      if (match) nextNumber = parseInt(match[0]) + 1;
-    }
-    const newCatalogId = `ARC-${nextNumber.toString().padStart(3, '0')}`;
+    let maxNumber = 0;
+    allItems?.forEach(item => {
+      const match = item.catalog_id?.match(/^ARC-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1]);
+        if (num > maxNumber) maxNumber = num;
+      }
+    });
+    const newCatalogId = `ARC-${(maxNumber + 1).toString().padStart(3, '0')}`;
 
     // Görsel yükleme
     const fileName = `${Date.now()}-${file.name}`;
