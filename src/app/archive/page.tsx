@@ -290,6 +290,12 @@ export default function ArchivePage() {
                 <div className="animate-text-2 relative">
                   <div
                     className="max-h-[180px] md:max-h-[240px] overflow-y-auto scrollbar-hide"
+                    ref={(el) => {
+                      if (el) {
+                        const fade = el.nextElementSibling as HTMLElement;
+                        if (fade) fade.style.opacity = el.scrollHeight <= el.clientHeight ? '0' : '1';
+                      }
+                    }}
                     onScroll={(e) => {
                       const el = e.currentTarget;
                       const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 5;
