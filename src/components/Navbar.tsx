@@ -107,7 +107,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-80 opacity-100 pt-8' : 'max-h-0 opacity-0'}`}>
+      <div className={`md:hidden transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100 pt-8' : 'max-h-0 opacity-0'}`}>
         <div className="flex flex-col items-center gap-6 pb-4">
           {navLinks.map((link) => (
             <Link
