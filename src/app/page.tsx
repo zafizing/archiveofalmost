@@ -5,6 +5,38 @@ import { useSlotCount } from '@/lib/useSlotCount';
 export default function Home() {
   const { archived, remaining, total } = useSlotCount();
 
+  const socialLinks = [
+    {
+      name: 'Instagram',
+      href: 'https://instagram.com/the.archiveofalmost',
+      icon: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+        </svg>
+      ),
+    },
+    {
+      name: 'TikTok',
+      href: 'https://tiktok.com/@thearchiveofalmost',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.28 8.28 0 004.84 1.55V6.79a4.85 4.85 0 01-1.07-.1z"/>
+        </svg>
+      ),
+    },
+    {
+      name: 'X',
+      href: 'https://x.com/archiveofalmost',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <main className="h-screen bg-black flex flex-col items-center justify-center text-center px-4 font-serif selection:bg-white selection:text-black overflow-hidden">
       
@@ -69,6 +101,22 @@ export default function Home() {
             ) : (
               <span className="text-neutral-800">Loading...</span>
             )}
+          </div>
+
+          {/* Social icons */}
+          <div className="flex items-center justify-center gap-6 pt-2">
+            {socialLinks.map((social) => (
+              <a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/20 hover:text-white/60 transition-colors duration-300"
+                aria-label={social.name}
+              >
+                {social.icon}
+              </a>
+            ))}
           </div>
         </div>
 
