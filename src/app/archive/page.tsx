@@ -142,7 +142,7 @@ export default function ArchivePage() {
             <div
               ref={isLastElement ? lastExhibitElementRef : null}
               key={item.id}
-              className="group border border-white/[0.06] hover:border-white/[0.15] transition-colors duration-700"
+              className="group border border-white/[0.15] hover:border-white/[0.35] transition-colors duration-700"
             >
               {/* Image — color fades to B&W on hover */}
               <div
