@@ -288,13 +288,20 @@ export default function ArchivePage() {
 
                 {/* Story — fade out at bottom to indicate scroll */}
                 <div className="animate-text-2 relative">
-                  <div className="max-h-[180px] md:max-h-[240px] overflow-y-auto scrollbar-hide">
+                  <div
+                    className="max-h-[180px] md:max-h-[240px] overflow-y-auto scrollbar-hide"
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 5;
+                      const fade = el.nextElementSibling as HTMLElement;
+                      if (fade) fade.style.opacity = isAtBottom ? '0' : '1';
+                    }}
+                  >
                     <p className="text-sm md:text-base text-white/80 font-light leading-relaxed italic">
                       {selectedExhibit.description}
                     </p>
                   </div>
-                  {/* Fade out efekti */}
-                  <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black to-transparent pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black to-transparent pointer-events-none transition-opacity duration-300"></div>
                 </div>
               </div>
 
