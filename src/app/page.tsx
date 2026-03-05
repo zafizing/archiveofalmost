@@ -20,10 +20,10 @@ export default function Home() {
         background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)'
       }} />
 
-      <div className="relative z-10 space-y-16 md:space-y-20 max-w-4xl w-full">
+      <div className="relative z-10 space-y-10 md:space-y-20 max-w-4xl w-full">
         
         {/* Edition marker */}
-        <div className="flex items-center justify-center gap-6">
+        <div className="hidden md:flex items-center justify-center gap-6">
           <div className="w-12 md:w-20 h-[1px] bg-neutral-800"></div>
           <span className="text-[11px] md:text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">
             Est. 2026 — Limited to {total} Objects
@@ -43,7 +43,7 @@ export default function Home() {
         </div>
 
         {/* Manifesto */}
-        <p className="text-base md:text-xl text-white/60 italic font-light max-w-xl mx-auto leading-relaxed px-4">
+        <p className="text-sm md:text-xl text-white/60 italic font-light max-w-xl mx-auto leading-relaxed px-4">
           "For the things we kept,<br className="hidden md:block" /> when we couldn't keep each other."
         </p>
 
@@ -59,7 +59,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-white/15 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
           </Link>
 
-          <div className="block text-[11px] md:text-[11px] tracking-[0.3em] uppercase mt-4">
+          <div className="block text-[9px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] uppercase mt-4">
             {archived !== null ? (
               <>
                 <span className="text-white/30">{archived} of {total} objects archived</span>
