@@ -42,18 +42,8 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile: Apply button + hamburger */}
+        {/* Mobile: hamburger only */}
         <div className="flex md:hidden items-center gap-4">
-          <Link
-            href="/submit"
-            className={`text-[11px] tracking-[0.25em] uppercase border px-3 py-1.5 transition-all duration-300 font-bold ${
-              pathname === '/submit'
-                ? 'bg-white text-black border-white'
-                : 'text-white/60 border-white/20 hover:text-white hover:border-white/50'
-            }`}
-          >
-            Apply
-          </Link>
           <button
             className="flex flex-col gap-1.5 focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
