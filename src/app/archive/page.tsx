@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 const TOTAL_SLOTS = 150;
-const AUTO_INTERVAL = 10000;
+const AUTO_INTERVAL = 7000;
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
@@ -272,9 +272,9 @@ export default function ArchivePage() {
         </>)}
 
         {/* NAV ARROWS */}
-        <button className="navbtn absolute z-20 flex items-center justify-center" onClick={prev}
+        <button className="navbtn hidden md:flex absolute z-20 items-center justify-center" onClick={prev}
           style={{ left:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.45)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>←</button>
-        <button className="navbtn absolute z-20 flex items-center justify-center" onClick={next}
+        <button className="navbtn hidden md:flex absolute z-20 items-center justify-center" onClick={next}
           style={{ right:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.45)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>→</button>
 
         {/* DOT NAV */}
