@@ -14,8 +14,10 @@ export default function ArchivePage() {
   const [isPaused, setIsPaused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const touchStartX = useRef<number>(0);
   const storyRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
 
   const fetchTotalCount = useCallback(async () => {
@@ -71,11 +73,126 @@ export default function ArchivePage() {
     }
   }, [selectedExhibit]);
 
+  const getShareUrl = (item: any) => `https://archiveofalmost.co/archive`;
+  const getShareText = (item: any) => `"${item.title}" — ${item.catalog_id}, ${item.year}. Archived at Archive of Almost.`;
+
+  const shareTwitter = (item: any) => {
+    const text = encodeURIComponent(`"${item.title}" — ${item.catalog_id}, ${item.year}\n\nArchived at Archive of Almost.\n`);
+    const url = encodeURIComponent(getShareUrl(item));
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&via=archiveofalmost`, '_blank');
+  };
+
+  const shareFacebook = (item: any) => {
+    const url = encodeURIComponent(getShareUrl(item));
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  };
+
+  const shareWhatsApp = (item: any) => {
+    const text = encodeURIComponent(`"${item.title}" — ${item.catalog_id}, ${item.year}.\n\nArchived at Archive of Almost:\n${getShareUrl(item)}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
+  const downloadCard = async (item: any) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1920;
+    const ctx = canvas.getContext('2d')!;
+
+    // Background
+    ctx.fillStyle = '#0c0a09';
+    ctx.fillRect(0, 0, 1080, 1920);
+
+    // Subtle vignette
+    const vignette = ctx.createRadialGradient(540, 960, 200, 540, 960, 900);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.7)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, 1080, 1920);
+
+    // Load image
+    const img = document.createElement('img') as HTMLImageElement;
+    img.crossOrigin = 'anonymous';
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      img.src = item.image_url;
+    });
+
+    // Frame
+    const frameX = 120, frameY = 320, frameW = 840, frameH = 840;
+    // Outer frame
+    ctx.fillStyle = '#4a3220';
+    ctx.fillRect(frameX - 18, frameY - 18, frameW + 36, frameH + 36);
+    // Gold border
+    ctx.strokeStyle = 'rgba(200,162,88,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(frameX - 18, frameY - 18, frameW + 36, frameH + 36);
+    // Passepartout
+    ctx.fillStyle = '#ede7db';
+    ctx.fillRect(frameX, frameY, frameW, frameH + 60);
+    // Photo
+    if (img.width > 0) {
+      ctx.save();
+      ctx.rect(frameX + 14, frameY + 14, frameW - 28, frameH - 28);
+      ctx.clip();
+      const scale = Math.max((frameW - 28) / img.width, (frameH - 28) / img.height);
+      const dw = img.width * scale, dh = img.height * scale;
+      ctx.drawImage(img, frameX + 14 + ((frameW - 28) - dw) / 2, frameY + 14 + ((frameH - 28) - dh) / 2, dw, dh);
+      ctx.restore();
+    }
+
+    // Glow behind frame
+    const glow = ctx.createRadialGradient(540, frameY + frameH/2, 0, 540, frameY + frameH/2, 560);
+    glow.addColorStop(0, 'rgba(255,248,220,0.12)');
+    glow.addColorStop(1, 'rgba(255,248,220,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, frameY - 100, 1080, frameH + 200);
+
+    // Catalog info
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '700 22px Georgia';
+    ctx.letterSpacing = '8px';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 540, frameY + frameH + 110);
+
+    // Title
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.font = 'italic 300 52px Georgia';
+    ctx.letterSpacing = '1px';
+    const title = `"${item.title}"`;
+    // Word wrap
+    const words = title.split(' ');
+    let line = '', lines: string[] = [];
+    for (const w of words) {
+      const test = line + w + ' ';
+      if (ctx.measureText(test).width > 820 && line) { lines.push(line.trim()); line = w + ' '; }
+      else line = test;
+    }
+    if (line) lines.push(line.trim());
+    lines.forEach((l, i) => ctx.fillText(l, 540, frameY + frameH + 185 + i * 68));
+
+    // Divider
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(420, 1750); ctx.lineTo(660, 1750);
+    ctx.stroke();
+
+    // Site name
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '700 20px Georgia';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1800);
+
+    // Download
+    const link = document.createElement('a');
+    link.download = `archive-of-almost-${item.catalog_id?.toLowerCase() || 'object'}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.click();
+  };
+
   const handleShare = async (item: any) => {
-    try {
-      if (navigator.share) await navigator.share({ title: `Archive of Almost — "${item.title}"`, url: 'https://archiveofalmost.co/archive' });
-      else await navigator.clipboard.writeText('https://archiveofalmost.co/archive');
-    } catch {}
+    setShowShareMenu(s => !s);
   };
 
   return (
@@ -304,7 +421,7 @@ export default function ArchivePage() {
       {selectedExhibit && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-12"
-          onClick={() => setSelectedExhibit(null)}
+          onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
           onTouchEnd={(e) => {
             const d = touchStartX.current - e.changedTouches[0].clientX;
@@ -399,11 +516,30 @@ export default function ArchivePage() {
                     </p>
                   </div>
                 )}
-                <button onClick={() => handleShare(selectedExhibit)}
-                  style={{ width:'100%', padding:'13px', fontSize:'10px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.82)', border:'1px solid rgba(255,255,255,0.22)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.6)'; e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color='rgba(255,255,255,0.65)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.22)'; e.currentTarget.style.background='none'; }}
-                >Share this object</button>
+                <div style={{ position:'relative' }}>
+                  <button onClick={() => handleShare(selectedExhibit)}
+                    style={{ width:'100%', padding:'13px', fontSize:'10px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.82)', border:'1px solid rgba(255,255,255,0.22)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.5)'; e.currentTarget.style.background='rgba(255,255,255,0.04)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color='rgba(255,255,255,0.82)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.22)'; e.currentTarget.style.background='none'; }}
+                  >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
+
+                  {showShareMenu && (
+                    <div style={{ marginTop:'8px', display:'flex', flexDirection:'column', gap:'6px' }}>
+                      {[
+                        { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(selectedExhibit) },
+                        { label: 'f  Share on Facebook',   fn: () => shareFacebook(selectedExhibit) },
+                        { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(selectedExhibit) },
+                        { label: '↓  Download Story Card', fn: () => downloadCard(selectedExhibit) },
+                      ].map((opt) => (
+                        <button key={opt.label} onClick={opt.fn}
+                          style={{ width:'100%', padding:'11px 16px', fontSize:'10px', letterSpacing:'0.35em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.65)', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.02)', cursor:'pointer', transition:'all 0.25s', fontFamily:'Georgia', textAlign:'left' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.35)'; e.currentTarget.style.background='rgba(255,255,255,0.06)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color='rgba(255,255,255,0.65)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.1)'; e.currentTarget.style.background='rgba(255,255,255,0.02)'; }}
+                        >{opt.label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
