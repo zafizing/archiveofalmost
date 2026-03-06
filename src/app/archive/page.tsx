@@ -231,15 +231,15 @@ export default function ArchivePage() {
 
               {/* IMAGE behind frame — padded to sit inside frame opening */}
               <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', backgroundColor:'#0c0a09' }}>
-                <div style={{ position:'absolute', inset:'13.5%', overflow:'hidden' }}>
+                <div style={{ position:'absolute', inset:'14%', overflow:'hidden' }}>
                   <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
                   <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 30px rgba(0,0,0,0.4)' }} />
                 </div>
-                {/* Frame PNG overlay — sits on top of photo */}
+                {/* Frame PNG — screen blend mode makes black invisible */}
                 <img
                   src="https://kfsllwsvqzshggvyuqvm.supabase.co/storage/v1/object/public/assets/frame.png"
                   alt=""
-                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', zIndex:2 }}
+                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', zIndex:2, mixBlendMode:'screen' }}
                 />
               </div>
             </div>
