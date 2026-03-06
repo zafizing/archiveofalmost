@@ -187,7 +187,7 @@ export default function ArchivePage() {
 
           {/* ── LEFT SIDE PHOTO ── centered in gap left of center photo */}
           <div className="hidden md:flex items-center justify-center" onClick={prev}
-            style={{ position:'absolute', left:'50px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
+            style={{ position:'absolute', left:'20px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
             <div
               style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
@@ -212,7 +212,7 @@ export default function ArchivePage() {
               {/* White backlight */}
               <div style={{
                 position:'absolute', inset:'-50px',
-                background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, transparent 62%)',
+                background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.28) 35%, transparent 62%)',
                 pointerEvents:'none', zIndex:-1,
                 filter:'blur(15px)',
               }} />
@@ -257,7 +257,7 @@ export default function ArchivePage() {
 
           {/* ── RIGHT SIDE PHOTO ── centered in gap right of center photo */}
           <div className="hidden md:flex items-center justify-center" onClick={next}
-            style={{ position:'absolute', right:'50px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
+            style={{ position:'absolute', right:'20px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
             <div
               style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
