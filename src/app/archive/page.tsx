@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 const TOTAL_SLOTS = 150;
-const AUTO_INTERVAL = 10000;
+const AUTO_INTERVAL = 15000;
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
@@ -103,14 +103,14 @@ export default function ArchivePage() {
       {/* TOP BAR */}
       <div className="fixed top-[57px] md:top-[61px] left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-3"
         style={{ backgroundColor:'rgba(12,10,9,0.96)', backdropFilter:'blur(16px)', borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
-        <span className="cg tracking-[0.5em] uppercase italic" style={{ fontSize:'11px', color:'rgba(255,255,255,0.55)' }}>Permanent Collection</span>
+        <span className="cg tracking-[0.5em] uppercase italic" style={{ fontSize:'11px', color:'rgba(255,255,255,0.75)' }}>Permanent Collection</span>
         <div className="flex items-center gap-5">
           {exhibits.length > 0 && (
-            <span style={{ fontSize:'10px', letterSpacing:'0.5em', color:'rgba(255,255,255,0.5)', textTransform:'uppercase', fontWeight:700 }}>
+            <span style={{ fontSize:'10px', letterSpacing:'0.5em', color:'rgba(255,255,255,0.72)', textTransform:'uppercase', fontWeight:700 }}>
               {String(activeIndex+1).padStart(2,'0')} <span style={{ color:'rgba(255,255,255,0.2)' }}>/ {String(exhibits.length).padStart(2,'0')}</span>
             </span>
           )}
-          <span className="hidden md:block" style={{ fontSize:'9px', letterSpacing:'0.35em', color:'rgba(255,255,255,0.3)', textTransform:'uppercase' }}>← → Navigate</span>
+          <span className="hidden md:block" style={{ fontSize:'9px', letterSpacing:'0.35em', color:'rgba(255,255,255,0.55)', textTransform:'uppercase' }}>← → Navigate</span>
         </div>
       </div>
 
@@ -127,10 +127,10 @@ export default function ArchivePage() {
         <div style={{ position:'absolute', top:'95px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent)', pointerEvents:'none', zIndex:1 }} />
         {/* SPOTLIGHT — cone from top center */}
         <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'520px', height:'100%', pointerEvents:'none', zIndex:1,
-          background:'radial-gradient(ellipse 38% 75% at 50% -5%, rgba(255,248,220,0.18) 0%, rgba(255,244,200,0.06) 40%, transparent 70%)' }} />
+          background:'radial-gradient(ellipse 42% 80% at 50% -5%, rgba(255,248,220,0.38) 0%, rgba(255,244,200,0.14) 38%, transparent 65%)' }} />
         {/* Extra tight beam */}
         <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'240px', height:'60%', pointerEvents:'none', zIndex:1,
-          background:'radial-gradient(ellipse 30% 80% at 50% 0%, rgba(255,252,230,0.1) 0%, transparent 60%)' }} />
+          background:'radial-gradient(ellipse 26% 85% at 50% 0%, rgba(255,252,235,0.28) 0%, transparent 52%)' }} />
         {/* Side vignettes */}
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)', pointerEvents:'none', zIndex:1 }} />
         {/* Floor line */}
@@ -140,7 +140,7 @@ export default function ArchivePage() {
 
           {/* LEFT SIDE CARD — vertically centered in left column */}
           <div className="side-frame hidden md:flex items-center justify-end pr-8 relative z-10" style={{ height:'100%' }} onClick={prev}>
-            <div style={{ width:'180px', opacity:0.35, filter:'brightness(0.4) saturate(0.4)', transform:'scale(0.82)', transformOrigin:'center center' }}>
+            <div style={{ width:'220px', opacity:0.55, filter:'brightness(0.6) saturate(0.65)', transform:'scale(0.9)', transformOrigin:'center center' }}>
               <div style={{ display:'flex', justifyContent:'center', height:'14px' }}>
                 <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.08)' }} />
               </div>
@@ -196,11 +196,11 @@ export default function ArchivePage() {
             {/* Label */}
             <div style={{ marginTop:'18px', width:'clamp(280px, 34vw, 460px)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
-                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'rgba(255,255,255,0.6)', textTransform:'uppercase', fontWeight:700 }}>
+                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'rgba(255,255,255,0.78)', textTransform:'uppercase', fontWeight:700 }}>
                   {exhibits[activeIndex].catalog_id}
                 </span>
                 <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
-                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.6)', textTransform:'uppercase', fontWeight:700 }}>
+                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.78)', textTransform:'uppercase', fontWeight:700 }}>
                   {exhibits[activeIndex].year}
                 </span>
               </div>
@@ -213,7 +213,7 @@ export default function ArchivePage() {
               </p>
               <span
                 onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.45)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
+                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.65)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.85)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.45)')}
               >View object →</span>
@@ -233,7 +233,7 @@ export default function ArchivePage() {
 
           {/* RIGHT SIDE CARD — vertically centered in right column */}
           <div className="side-frame hidden md:flex items-center justify-start pl-8 relative z-10" style={{ height:'100%' }} onClick={next}>
-            <div style={{ width:'180px', opacity:0.35, filter:'brightness(0.4) saturate(0.4)', transform:'scale(0.82)', transformOrigin:'center center' }}>
+            <div style={{ width:'220px', opacity:0.55, filter:'brightness(0.6) saturate(0.65)', transform:'scale(0.9)', transformOrigin:'center center' }}>
               <div style={{ display:'flex', justifyContent:'center', height:'14px' }}>
                 <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.08)' }} />
               </div>
@@ -274,8 +274,8 @@ export default function ArchivePage() {
           display:'flex', alignItems:'center', gap:'8px', zIndex:10,
           opacity: showSwipeHint ? 1 : 0, transition:'opacity 1.2s ease', pointerEvents:'none',
         }}>
-          <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.45)', textTransform:'uppercase' }}>Swipe</span>
-          <div style={{ animation:'swipeAnim 1.4s ease-in-out infinite', color:'rgba(255,255,255,0.45)', fontSize:'13px' }}>→</div>
+          <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.65)', textTransform:'uppercase' }}>Swipe</span>
+          <div style={{ animation:'swipeAnim 1.4s ease-in-out infinite', color:'rgba(255,255,255,0.65)', fontSize:'13px' }}>→</div>
         </div>
       </div>
 
@@ -327,11 +327,11 @@ export default function ArchivePage() {
               style={{ backgroundColor:'#090706', borderLeft:'1px solid rgba(255,255,255,0.08)', minHeight:'300px' }}>
               <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.45)', fontWeight:700 }}>
+                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.65)', fontWeight:700 }}>
                     {String(activeIndex+1).padStart(2,'0')} / {String(exhibits.length).padStart(2,'0')}
                   </span>
                   <button onClick={() => setSelectedExhibit(null)}
-                    style={{ fontSize:'11px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', fontWeight:700, cursor:'pointer', background:'none', border:'none', transition:'color 0.2s', fontFamily:'Georgia' }}
+                    style={{ fontSize:'11px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.78)', fontWeight:700, cursor:'pointer', background:'none', border:'none', transition:'color 0.2s', fontFamily:'Georgia' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color='white')}
                     onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.6)')}
                   >Close ×</button>
@@ -339,9 +339,9 @@ export default function ArchivePage() {
 
                 <div className="fu1">
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
-                    <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
+                    <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.75)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
                     <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
-                    <span style={{ fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontWeight:700 }}>{selectedExhibit.year}</span>
+                    <span style={{ fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', color:'rgba(255,255,255,0.75)', fontWeight:700 }}>{selectedExhibit.year}</span>
                   </div>
                   <h2 className="cg" style={{ fontSize:'clamp(20px, 3vw, 34px)', fontWeight:300, fontStyle:'italic', color:'rgba(255,255,255,0.95)', lineHeight:1.2 }}>
                     "{selectedExhibit.title}"
@@ -366,7 +366,7 @@ export default function ArchivePage() {
 
               <div className="fu3" style={{ paddingTop:'20px', marginTop:'20px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:'12px' }}>
                 {selectedExhibit.submitter_name && (
-                  <p className="cg" style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(255,255,255,0.45)', fontStyle:'italic' }}>
+                  <p className="cg" style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(255,255,255,0.65)', fontStyle:'italic' }}>
                     — {selectedExhibit.submitter_name}
                   </p>
                 )}
@@ -386,7 +386,7 @@ export default function ArchivePage() {
         style={{ backgroundColor:'rgba(12,10,9,0.97)', backdropFilter:'blur(12px)', borderTop:'1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
           <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'rgba(255,255,255,0.4)', animation:'blink 2.5s infinite' }} />
-          <span style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.4)' }}>
+          <span style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.65)' }}>
             {totalCount} of {TOTAL_SLOTS} objects archived
           </span>
         </div>
