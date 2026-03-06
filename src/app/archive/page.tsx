@@ -11,30 +11,28 @@ export default function ArchivePage() {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [selectedExhibit, setSelectedExhibit] = useState<any | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [sceneReady, setSceneReady] = useState(false);
   const touchStartX = useRef<number>(0);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const observer = useRef<IntersectionObserver | null>(null);
   const storyRef = useRef<HTMLDivElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<any>(null);
+  const rendererRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
+  const frameRef = useRef<number>(0);
+  const scrollYRef = useRef<number>(0);
+  const targetScrollRef = useRef<number>(0);
+  const artworkMeshesRef = useRef<any[]>([]);
+  const raycasterRef = useRef<any>(null);
+  const mouseRef = useRef<any>(null);
 
   const fetchTotalCount = useCallback(async () => {
     const { count } = await supabase.from('exhibits').select('*', { count: 'exact', head: true }).eq('is_approved', true);
     if (count !== null) setTotalCount(count);
   }, []);
   useEffect(() => { fetchTotalCount(); }, [fetchTotalCount]);
-
-  useEffect(() => {
-    if (!selectedExhibit) return;
-    const handleKey = (e: KeyboardEvent) => {
-      const idx = exhibits.findIndex((ex: any) => ex.id === selectedExhibit.id);
-      if (e.key === 'ArrowRight' && idx < exhibits.length - 1) { setSelectedExhibit(exhibits[idx + 1]); setSelectedIndex(idx + 1); }
-      else if (e.key === 'ArrowLeft' && idx > 0) { setSelectedExhibit(exhibits[idx - 1]); setSelectedIndex(idx - 1); }
-      else if (e.key === 'Escape') setSelectedExhibit(null);
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [selectedExhibit, exhibits]);
 
   const fetchExhibits = useCallback(async (pageNum: number) => {
     const from = pageNum * PAGE_SIZE;
@@ -49,13 +47,279 @@ export default function ArchivePage() {
   }, []);
   useEffect(() => { fetchExhibits(page); }, [page, fetchExhibits]);
 
-  const lastExhibitElementRef = useCallback((node: any) => {
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) setPage((prev) => prev + 1);
-    });
-    if (node) observer.current.observe(node);
-  }, [hasMore]);
+  // Build Three.js scene once exhibits are loaded
+  useEffect(() => {
+    if (exhibits.length === 0 || !mountRef.current) return;
+    if (sceneRef.current) return; // already built
+
+    let THREE: any;
+
+    const init = async () => {
+      THREE = await import('three');
+
+      const W = mountRef.current!.clientWidth;
+      const H = mountRef.current!.clientHeight;
+
+      // Renderer
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(W, H);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ReinhardToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      mountRef.current!.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
+
+      // Scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x120f0e);
+      scene.fog = new THREE.Fog(0x120f0e, 18, 35);
+      sceneRef.current = scene;
+
+      // Camera
+      const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 100);
+      camera.position.set(0, 0, 6);
+      camera.lookAt(0, 0, 0);
+      cameraRef.current = camera;
+
+      // Raycaster for click detection
+      raycasterRef.current = new THREE.Raycaster();
+      mouseRef.current = new THREE.Vector2();
+
+      // ── MATERIALS ──
+      const wallMat = new THREE.MeshLambertMaterial({ color: 0x1a1614 });
+      const floorMat = new THREE.MeshLambertMaterial({ color: 0x0f0d0c });
+      const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111010 });
+
+      // Room dimensions
+      const ROOM_W = 28;
+      const ROOM_H = 6;
+      const ROOM_D = 60; // long corridor
+
+      // Back wall
+      const backWall = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W, ROOM_H), wallMat);
+      backWall.position.set(0, 0, -ROOM_D / 2);
+      scene.add(backWall);
+
+      // Left wall
+      const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, ROOM_H), wallMat);
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.set(-ROOM_W / 2, 0, 0);
+      scene.add(leftWall);
+
+      // Right wall
+      const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, ROOM_H), wallMat);
+      rightWall.rotation.y = -Math.PI / 2;
+      rightWall.position.set(ROOM_W / 2, 0, 0);
+      scene.add(rightWall);
+
+      // Floor
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W, ROOM_D), floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.set(0, -ROOM_H / 2, 0);
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Ceiling
+      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W, ROOM_D), ceilMat);
+      ceil.rotation.x = Math.PI / 2;
+      ceil.position.set(0, ROOM_H / 2, 0);
+      scene.add(ceil);
+
+      // Wainscoting line on back wall
+      const wainGeo = new THREE.PlaneGeometry(ROOM_W, 0.03);
+      const wainMat = new THREE.MeshBasicMaterial({ color: 0x2a2420 });
+      const wain = new THREE.Mesh(wainGeo, wainMat);
+      wain.position.set(0, -1.5, -ROOM_D / 2 + 0.01);
+      scene.add(wain);
+
+      // Ambient light — very dim
+      const ambient = new THREE.AmbientLight(0xfff4d2, 0.08);
+      scene.add(ambient);
+
+      // ── ARTWORKS ──
+      const COLS = 3;
+      const xPositions = [-7, 0, 7];
+      const artMeshes: any[] = [];
+
+      for (let i = 0; i < exhibits.length; i++) {
+        const col = i % COLS;
+        const row = Math.floor(i / COLS);
+        const x = xPositions[col];
+        const z = -2 - row * 8; // each row 8 units deep
+        const y = 0.5;
+
+        const exhibit = exhibits[i];
+
+        // Spotlight for this artwork
+        const spot = new THREE.SpotLight(0xfff4d2, 3.5, 14, Math.PI / 7, 0.4, 1.5);
+        spot.position.set(x, ROOM_H / 2 - 0.1, z + 1.5);
+        spot.target.position.set(x, y, z - 0.5);
+        spot.castShadow = true;
+        spot.shadow.mapSize.set(512, 512);
+        scene.add(spot);
+        scene.add(spot.target);
+
+        // Spot light bulb visual
+        const bulbGeo = new THREE.SphereGeometry(0.06, 8, 8);
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff4d2 });
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.copy(spot.position);
+        scene.add(bulb);
+
+        // Frame group
+        const group = new THREE.Group();
+        group.position.set(x, y, z);
+        group.userData = { exhibit, index: i };
+
+        // Outer frame (dark wood)
+        const frameSize = 3.0;
+        const frameBorder = 0.12;
+        const frameGeo = new THREE.BoxGeometry(frameSize + frameBorder * 2, frameSize + frameBorder * 2, 0.08);
+        const frameMat = new THREE.MeshLambertMaterial({ color: 0x2a1e14 });
+        const frameMesh = new THREE.Mesh(frameGeo, frameMat);
+        frameMesh.castShadow = true;
+        frameMesh.receiveShadow = true;
+        group.add(frameMesh);
+
+        // Mat (white passepartout)
+        const matSize = frameSize + 0.06;
+        const matGeo = new THREE.BoxGeometry(matSize, matSize, 0.05);
+        const matMaterial = new THREE.MeshLambertMaterial({ color: 0xede8e0 });
+        const matMesh = new THREE.Mesh(matGeo, matMaterial);
+        matMesh.position.z = 0.02;
+        group.add(matMesh);
+
+        // Image plane — load texture
+        const loader = new THREE.TextureLoader();
+        loader.load(
+          exhibit.image_url,
+          (texture: any) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            const imgGeo = new THREE.PlaneGeometry(frameSize - 0.12, frameSize - 0.12);
+            const imgMat = new THREE.MeshLambertMaterial({ map: texture });
+            const imgMesh = new THREE.Mesh(imgGeo, imgMat);
+            imgMesh.position.z = 0.055;
+            group.add(imgMesh);
+          },
+          undefined,
+          () => {
+            // fallback plain dark rectangle
+            const imgGeo = new THREE.PlaneGeometry(frameSize - 0.12, frameSize - 0.12);
+            const imgMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+            const imgMesh = new THREE.Mesh(imgGeo, imgMat);
+            imgMesh.position.z = 0.055;
+            group.add(imgMesh);
+          }
+        );
+
+        // Position group against back wall
+        group.position.z = -ROOM_D / 2 + 0.1 + row * 0.001; // all on back wall plane
+        // Actually spread along Z for corridor feel
+        group.position.z = z - 0.1;
+
+        scene.add(group);
+        artMeshes.push(group);
+      }
+
+      artworkMeshesRef.current = artMeshes;
+      setSceneReady(true);
+
+      // ── ANIMATION LOOP ──
+      const animate = () => {
+        frameRef.current = requestAnimationFrame(animate);
+
+        // Smooth scroll camera
+        scrollYRef.current += (targetScrollRef.current - scrollYRef.current) * 0.06;
+        camera.position.z = 6 - scrollYRef.current;
+        camera.position.y = 0;
+
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      // ── RESIZE ──
+      const onResize = () => {
+        if (!mountRef.current) return;
+        const w = mountRef.current.clientWidth;
+        const h = mountRef.current.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onResize);
+
+      // ── SCROLL ──
+      const onWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        targetScrollRef.current = Math.max(0, Math.min(
+          targetScrollRef.current + e.deltaY * 0.01,
+          exhibits.length > 3 ? Math.ceil(exhibits.length / 3) * 8 - 10 : 0
+        ));
+      };
+      mountRef.current!.addEventListener('wheel', onWheel, { passive: false });
+
+      // ── CLICK ──
+      const onClick = (e: MouseEvent) => {
+        const rect = mountRef.current!.getBoundingClientRect();
+        mouseRef.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouseRef.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycasterRef.current.setFromCamera(mouseRef.current, camera);
+        const intersects = raycasterRef.current.intersectObjects(
+          artworkMeshesRef.current.flatMap((g: any) => g.children),
+          false
+        );
+        if (intersects.length > 0) {
+          const hit = intersects[0].object;
+          const group = hit.parent;
+          if (group && group.userData.exhibit) {
+            setSelectedExhibit(group.userData.exhibit);
+            setSelectedIndex(group.userData.index);
+          }
+        }
+      };
+      mountRef.current!.addEventListener('click', onClick);
+
+      // Touch scroll
+      let touchY = 0;
+      const onTouchStart = (e: TouchEvent) => { touchY = e.touches[0].clientY; };
+      const onTouchMove = (e: TouchEvent) => {
+        const dy = touchY - e.touches[0].clientY;
+        touchY = e.touches[0].clientY;
+        targetScrollRef.current = Math.max(0, Math.min(
+          targetScrollRef.current + dy * 0.02,
+          exhibits.length > 3 ? Math.ceil(exhibits.length / 3) * 8 - 10 : 0
+        ));
+      };
+      mountRef.current!.addEventListener('touchstart', onTouchStart);
+      mountRef.current!.addEventListener('touchmove', onTouchMove);
+    };
+
+    init();
+
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        rendererRef.current.domElement.remove();
+      }
+      sceneRef.current = null;
+      rendererRef.current = null;
+    };
+  }, [exhibits]);
+
+  // Keyboard nav
+  useEffect(() => {
+    if (!selectedExhibit) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' && selectedIndex < exhibits.length - 1) { setSelectedExhibit(exhibits[selectedIndex + 1]); setSelectedIndex(selectedIndex + 1); }
+      else if (e.key === 'ArrowLeft' && selectedIndex > 0) { setSelectedExhibit(exhibits[selectedIndex - 1]); setSelectedIndex(selectedIndex - 1); }
+      else if (e.key === 'Escape') setSelectedExhibit(null);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selectedExhibit, selectedIndex, exhibits]);
 
   useEffect(() => {
     if (selectedExhibit && storyRef.current && fadeRef.current) {
@@ -72,424 +336,92 @@ export default function ArchivePage() {
   };
 
   return (
-    <main className="min-h-screen text-white selection:bg-white selection:text-black" style={{ fontFamily: "'Georgia', serif", backgroundColor: '#0d0b0a' }}>
+    <main className="text-white selection:bg-white selection:text-black" style={{ fontFamily: 'Georgia, serif', backgroundColor: '#0d0b0a' }}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
         .cg { font-family: 'Cormorant Garamond', Georgia, serif; }
-
-        /* ===================== MUSEUM ROOM ===================== */
-
-        /* The wall itself — dark warm stone, not flat black */
-        .gallery-wall {
-          background-color: #181614;
-          background-image:
-            /* Strong overhead lighting band */
-            radial-gradient(ellipse 90% 20% at 50% 0%, rgba(255, 244, 210, 0.09) 0%, transparent 100%),
-            /* Left corner dark */
-            linear-gradient(100deg, rgba(0,0,0,0.55) 0%, transparent 22%),
-            /* Right corner dark */
-            linear-gradient(260deg, rgba(0,0,0,0.55) 0%, transparent 22%),
-            /* Very subtle warm wall tint */
-            radial-gradient(ellipse 140% 60% at 50% 40%, rgba(60,45,30,0.12) 0%, transparent 70%);
-          position: relative;
-        }
-
-        /* Horizontal wainscoting line — divides wall into upper/lower */
-        .gallery-wall::after {
-          content: '';
-          position: absolute;
-          left: 0; right: 0;
-          bottom: 18%;
-          height: 1px;
-          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 15%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.06) 85%, transparent 100%);
-          pointer-events: none;
-        }
-
-        /* Ceiling rail line */
-        .ceiling-rail {
-          height: 3px;
-          background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(255,244,210,0.06) 5%,
-            rgba(255,244,210,0.18) 20%,
-            rgba(255,244,210,0.22) 50%,
-            rgba(255,244,210,0.18) 80%,
-            rgba(255,244,210,0.06) 95%,
-            transparent 100%
-          );
-          position: relative;
-        }
-
-        /* Individual spot light dots */
-        .spot-dot {
-          position: absolute;
-          top: -1px;
-          width: 4px;
-          height: 4px;
-          border-radius: 50%;
-          background: rgba(255,244,200,0.9);
-          box-shadow: 0 0 6px 2px rgba(255,244,200,0.6), 0 0 16px 4px rgba(255,244,200,0.2);
-          transform: translateX(-50%);
-        }
-
-        /* ===================== ARTWORK ===================== */
-
-        @keyframes revealArtwork {
-          0%   { opacity: 0; transform: translateY(24px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .artwork-cell {
-          opacity: 0;
-          animation: revealArtwork 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          position: relative;
-        }
-        .artwork-cell:nth-child(1) { animation-delay: 0.05s; }
-        .artwork-cell:nth-child(2) { animation-delay: 0.15s; }
-        .artwork-cell:nth-child(3) { animation-delay: 0.25s; }
-        .artwork-cell:nth-child(4) { animation-delay: 0.35s; }
-        .artwork-cell:nth-child(5) { animation-delay: 0.45s; }
-        .artwork-cell:nth-child(6) { animation-delay: 0.55s; }
-        .artwork-cell:nth-child(7) { animation-delay: 0.65s; }
-        .artwork-cell:nth-child(8) { animation-delay: 0.75s; }
-        .artwork-cell:nth-child(9) { animation-delay: 0.85s; }
-
-        /* The spotlight cone — from ceiling down onto frame */
-        .artwork-cell::before {
-          content: '';
-          position: absolute;
-          top: -60px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 70%;
-          height: 80px;
-          clip-path: polygon(30% 0%, 70% 0%, 85% 100%, 15% 100%);
-          background: linear-gradient(to bottom,
-            rgba(255,244,200,0.10) 0%,
-            rgba(255,244,200,0.03) 70%,
-            transparent 100%
-          );
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity 0.4s ease;
-        }
-        .artwork-cell:hover::before { opacity: 1; }
-
-        /* Wall glow behind frame on hover */
-        .artwork-cell::after {
-          content: '';
-          position: absolute;
-          inset: -30px;
-          background: radial-gradient(ellipse 80% 70% at 50% 40%,
-            rgba(255,244,200,0.05) 0%,
-            transparent 70%
-          );
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity 0.5s ease;
-          z-index: 0;
-        }
-        .artwork-cell:hover::after { opacity: 1; }
-
-        .artwork-inner {
-          position: relative;
-          z-index: 1;
-          cursor: pointer;
-          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .artwork-cell:hover .artwork-inner { transform: translateY(-5px) scale(1.015); }
-
-        /* ===== THE FRAME ===== */
-
-        /* Outer shadow — frame casting shadow on wall */
-        .frame-shadow {
-          box-shadow:
-            0 8px 30px rgba(0,0,0,0.7),
-            0 20px 60px rgba(0,0,0,0.5),
-            0 2px 4px rgba(0,0,0,0.8);
-          transition: box-shadow 0.5s ease;
-        }
-        .artwork-cell:hover .frame-shadow {
-          box-shadow:
-            0 12px 40px rgba(0,0,0,0.8),
-            0 28px 80px rgba(0,0,0,0.6),
-            0 2px 4px rgba(0,0,0,0.9),
-            0 0 60px rgba(255,244,200,0.04);
-        }
-
-        /* Wooden frame border — dark walnut look */
-        .frame-wood {
-          padding: 7px;
-          background:
-            linear-gradient(135deg, #3a2e22 0%, #2a2018 40%, #3a2e22 60%, #221a10 100%);
-          position: relative;
-        }
-        /* Frame highlight edge */
-        .frame-wood::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%),
-            linear-gradient(315deg, rgba(0,0,0,0.3) 0%, transparent 40%);
-          pointer-events: none;
-        }
-
-        /* White mat / passepartout */
-        .frame-mat {
-          background: #ede8e0;
-          padding: 10px 10px 26px 10px;
-          position: relative;
-        }
-        /* Mat inner shadow */
-        .frame-mat::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          box-shadow: inset 0 0 12px rgba(0,0,0,0.15);
-          pointer-events: none;
-        }
-
-        /* Glass reflection */
-        .frame-glass {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            130deg,
-            rgba(255,255,255,0.07) 0%,
-            rgba(255,255,255,0.02) 25%,
-            transparent 45%
-          );
-          pointer-events: none;
-          z-index: 3;
-          opacity: 0;
-          transition: opacity 0.4s ease;
-        }
-        .artwork-cell:hover .frame-glass { opacity: 1; }
-
-        /* ===== MUSEUM LABEL ===== */
-        .label-card {
-          margin-top: 16px;
-          padding-left: 0;
-        }
-        .label-title {
-          font-family: 'Cormorant Garamond', Georgia, serif;
-          font-style: italic;
-          font-weight: 300;
-          font-size: 15px;
-          line-height: 1.3;
-          color: rgba(255,255,255,0.72);
-          margin-bottom: 6px;
-        }
-        .label-meta {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .label-id {
-          font-size: 9px;
-          letter-spacing: 0.4em;
-          text-transform: uppercase;
-          font-weight: 700;
-          color: #3d3630;
-          font-family: Georgia, serif;
-        }
-        .label-year {
-          font-size: 9px;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          font-weight: 700;
-          color: #3d3630;
-          font-family: Georgia, serif;
-        }
-        .label-submitter {
-          font-size: 9px;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          font-weight: 700;
-          color: #2e2822;
-          font-family: Georgia, serif;
-          margin-top: 3px;
-        }
-        /* Thin underline like real museum card */
-        .label-line {
-          width: 32px;
-          height: 1px;
-          background: rgba(255,255,255,0.08);
-          margin-top: 10px;
-        }
-
-        /* ===== FLOOR ===== */
-        .gallery-floor {
-          height: 60px;
-          background: linear-gradient(to top,
-            rgba(0,0,0,0.7) 0%,
-            rgba(0,0,0,0.3) 40%,
-            transparent 100%
-          );
-        }
-
-        /* ===== MODAL ===== */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes modalIn {
-          0%   { opacity: 0; transform: scale(0.96) translateY(12px); }
+          0% { opacity: 0; transform: scale(0.96) translateY(12px); }
           100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         @keyframes fadeUp {
-          0%   { opacity: 0; transform: translateY(10px); }
+          0% { opacity: 0; transform: translateY(10px); }
           100% { opacity: 1; transform: translateY(0); }
         }
         .modal-anim { animation: modalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .fu1 { animation: fadeUp 0.6s ease-out 0.08s forwards; opacity: 0; }
-        .fu2 { animation: fadeUp 0.6s ease-out 0.2s forwards; opacity: 0; }
-        .fu3 { animation: fadeUp 0.6s ease-out 0.34s forwards; opacity: 0; }
-
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-          .gallery-grid { grid-template-columns: 1fr !important; gap: 56px 0 !important; padding: 48px 20px 80px !important; }
-        }
-        @media (min-width: 641px) and (max-width: 1024px) {
-          .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 64px 40px !important; padding: 64px 40px 80px !important; }
-        }
+        .fu2 { animation: fadeUp 0.6s ease-out 0.22s forwards; opacity: 0; }
+        .fu3 { animation: fadeUp 0.6s ease-out 0.36s forwards; opacity: 0; }
       `}</style>
 
-      {/* ── TOP BAR ── */}
+      {/* TOP BAR */}
+      <div className="fixed top-[57px] md:top-[61px] left-0 right-0 z-50 px-6 md:px-10 py-3 flex items-center justify-between"
+        style={{ backgroundColor: 'rgba(13,11,10,0.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <span className="cg text-[10px] tracking-[0.6em] uppercase italic" style={{ color: '#555' }}>Permanent Collection</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontFamily: 'Georgia', fontSize: '10px', letterSpacing: '0.4em', color: '#333', textTransform: 'uppercase', fontWeight: 700 }}>
+            {exhibits.length} <span style={{ color: '#222' }}>/ {TOTAL_SLOTS}</span>
+          </span>
+          <span style={{ fontFamily: 'Georgia', fontSize: '9px', letterSpacing: '0.35em', color: '#333', textTransform: 'uppercase' }}>
+            Scroll to explore ↓
+          </span>
+        </div>
+      </div>
+
+      {/* THREE.JS CANVAS */}
       <div
-        className="sticky top-[57px] md:top-[61px] z-50 px-6 md:px-10 py-3 flex items-center justify-between"
-        style={{ backgroundColor: 'rgba(13,11,10,0.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+        ref={mountRef}
+        style={{
+          width: '100vw',
+          height: '100vh',
+          cursor: 'crosshair',
+          position: 'relative',
+          backgroundColor: '#120f0e',
+        }}
       >
-        <span className="cg text-[10px] tracking-[0.6em] uppercase" style={{ color: '#444', fontStyle: 'italic' }}>Permanent Collection</span>
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: '10px', letterSpacing: '0.4em', color: '#333', textTransform: 'uppercase', fontWeight: 700 }}>
-          {exhibits.length} <span style={{ color: '#252525' }}>/ {TOTAL_SLOTS}</span>
-        </span>
+        {/* Loading state */}
+        {!sceneReady && (
+          <div style={{
+            position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: '16px',
+            backgroundColor: '#120f0e',
+          }}>
+            <p className="cg" style={{ fontSize: '18px', fontStyle: 'italic', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em' }}>
+              Preparing the gallery…
+            </p>
+          </div>
+        )}
+
+        {/* Scroll hint */}
+        {sceneReady && exhibits.length > 3 && (
+          <div style={{
+            position: 'absolute', bottom: '100px', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+            pointerEvents: 'none',
+          }}>
+            <span style={{ fontFamily: 'Georgia', fontSize: '9px', letterSpacing: '0.5em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>Scroll</span>
+            <div style={{ width: '1px', height: '32px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)' }}></div>
+          </div>
+        )}
+
+        {/* Click hint */}
+        {sceneReady && (
+          <div style={{
+            position: 'absolute', bottom: '100px', right: '32px',
+            pointerEvents: 'none',
+          }}>
+            <span style={{ fontFamily: 'Georgia', fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.15)' }}>
+              Click to view
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* ── PAGE HEADER ── */}
-      <div style={{ backgroundColor: '#0d0b0a', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '56px 64px 52px' }}>
-        <p style={{ fontFamily: 'Georgia, serif', fontSize: '9px', letterSpacing: '0.7em', textTransform: 'uppercase', color: '#2e2822', marginBottom: '12px', fontWeight: 700 }}>
-          Gallery I — Objects of Remembrance
-        </p>
-        <h1 className="cg" style={{ fontSize: 'clamp(42px, 6vw, 72px)', fontWeight: 300, fontStyle: 'italic', color: 'rgba(255,255,255,0.88)', lineHeight: 1 }}>
-          The Archive
-        </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
-          <div style={{ width: '32px', height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
-          <p style={{ fontFamily: 'Georgia, serif', fontSize: '9px', letterSpacing: '0.5em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontWeight: 700 }}>
-            Objects from relationships that have ended
-          </p>
-        </div>
-      </div>
-
-      {/* ══════════════ THE GALLERY ROOM ══════════════ */}
-      <div className="gallery-wall" style={{ minHeight: '100vh', paddingBottom: '0' }}>
-
-        {/* Ceiling rail with spot lights */}
-        <div className="ceiling-rail" style={{ position: 'relative' }}>
-          {[12, 28, 50, 72, 88].map((p) => (
-            <div key={p} className="spot-dot" style={{ left: `${p}%` }}></div>
-          ))}
-        </div>
-
-        {/* Side wall panels (vertical lines for architectural depth) */}
-        <div style={{ position: 'absolute', top: 0, bottom: 0, left: '6%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.04) 80%, transparent)', pointerEvents: 'none' }}></div>
-        <div style={{ position: 'absolute', top: 0, bottom: 0, right: '6%', width: '1px', background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.04) 80%, transparent)', pointerEvents: 'none' }}></div>
-
-        {/* ── GRID ── */}
-        <div
-          className="gallery-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '90px 70px',
-            padding: '80px 72px 100px',
-            maxWidth: '1380px',
-            margin: '0 auto',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          {exhibits.map((item, index) => {
-            const isLast = exhibits.length === index + 1;
-            return (
-              <div
-                key={item.id}
-                ref={isLast ? lastExhibitElementRef : null}
-                className="artwork-cell"
-              >
-                <div
-                  className="artwork-inner"
-                  onClick={() => { setSelectedExhibit(item); setSelectedIndex(index); }}
-                >
-                  {/* Frame with shadow */}
-                  <div className="frame-shadow">
-                    {/* Wood frame */}
-                    <div className="frame-wood">
-                      {/* White mat */}
-                      <div className="frame-mat">
-                        {/* Image */}
-                        <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden' }}>
-                          <Image
-                            src={item.image_url}
-                            alt={item.title}
-                            fill
-                            unoptimized
-                            className="object-cover"
-                            style={{ filter: 'saturate(0.80) contrast(1.06) brightness(0.93)' }}
-                          />
-                          {/* Top spotlight on image */}
-                          <div style={{
-                            position: 'absolute', inset: 0, pointerEvents: 'none',
-                            background: 'radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255,244,200,0.10) 0%, transparent 60%)'
-                          }}></div>
-                          {/* Vignette */}
-                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 28px rgba(0,0,0,0.35)' }}></div>
-                          {/* Glass glare */}
-                          <div className="frame-glass"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Museum label */}
-                  <div className="label-card">
-                    <p className="label-title">"{item.title}"</p>
-                    <div className="label-meta">
-                      <span className="label-id">{item.catalog_id}</span>
-                      <span style={{ color: '#2e2822', fontSize: '8px' }}>—</span>
-                      <span className="label-year">{item.year}</span>
-                    </div>
-                    {item.submitter_name && <p className="label-submitter">{item.submitter_name}</p>}
-                    <div className="label-line"></div>
-                  </div>
-                </div>
-
-                {/* Frame floor shadow */}
-                <div style={{
-                  position: 'absolute', bottom: '-16px', left: '8%', right: '8%', height: '16px',
-                  background: 'radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.45) 0%, transparent 70%)',
-                  pointerEvents: 'none', zIndex: 0,
-                }}></div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Floor */}
-        <div className="gallery-floor"></div>
-      </div>
-
-      {exhibits.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '160px 0', backgroundColor: '#181614' }}>
-          <p className="cg" style={{ color: '#333', fontStyle: 'italic', fontSize: '18px' }}>The collection is being assembled.</p>
-        </div>
-      )}
-
-      {/* ══════════════ MODAL ══════════════ */}
+      {/* MODAL */}
       {selectedExhibit && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-12"
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-12"
           onClick={() => setSelectedExhibit(null)}
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
           onTouchEnd={(e) => {
@@ -498,20 +430,13 @@ export default function ArchivePage() {
             if (diff < -50 && selectedIndex > 0) { setSelectedExhibit(exhibits[selectedIndex - 1]); setSelectedIndex(selectedIndex - 1); }
           }}
         >
-          {/* Backdrop */}
           <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,5,4,0.96)', backdropFilter: 'blur(24px)' }}></div>
-          {/* Ceiling spot in modal */}
-          <div style={{
-            position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-            width: '700px', height: '500px', pointerEvents: 'none',
-            background: 'radial-gradient(ellipse 50% 70% at 50% 0%, rgba(255,244,200,0.07) 0%, transparent 70%)'
-          }}></div>
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '700px', height: '500px', pointerEvents: 'none', background: 'radial-gradient(ellipse 50% 70% at 50% 0%, rgba(255,244,200,0.07) 0%, transparent 70%)' }}></div>
 
-          {/* Nav arrows */}
           {selectedIndex > 0 && (
             <button onClick={(e) => { e.stopPropagation(); setSelectedExhibit(exhibits[selectedIndex - 1]); setSelectedIndex(selectedIndex - 1); }}
               className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center transition-all duration-300"
-              style={{ border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.3)' }}
+              style={{ border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}
               onMouseEnter={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
             >←</button>
@@ -519,29 +444,23 @@ export default function ArchivePage() {
           {selectedIndex < exhibits.length - 1 && (
             <button onClick={(e) => { e.stopPropagation(); setSelectedExhibit(exhibits[selectedIndex + 1]); setSelectedIndex(selectedIndex + 1); }}
               className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center transition-all duration-300"
-              style={{ border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.3)' }}
+              style={{ border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}
               onMouseEnter={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
             >→</button>
           )}
 
-          {/* Modal card */}
-          <div
-            className="modal-anim relative w-full max-w-5xl flex flex-col md:flex-row z-10 max-h-[90vh] overflow-y-auto scrollbar-hide"
+          <div className="modal-anim relative w-full max-w-5xl flex flex-col md:flex-row z-10 max-h-[90vh] overflow-y-auto scrollbar-hide"
             style={{ border: '1px solid rgba(255,255,255,0.08)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Left — framed image */}
+            {/* Framed image */}
             <div className="w-full md:w-[55%] shrink-0" style={{ backgroundColor: '#0f0d0c', padding: '20px' }}>
-              <div style={{
-                background: 'linear-gradient(135deg, #3a2e22 0%, #2a2018 40%, #3a2e22 60%, #221a10 100%)',
-                padding: '6px',
-                boxShadow: '0 16px 50px rgba(0,0,0,0.8)',
-              }}>
+              <div style={{ background: 'linear-gradient(135deg, #3a2e22 0%, #2a2018 40%, #3a2e22 60%, #221a10 100%)', padding: '6px', boxShadow: '0 16px 50px rgba(0,0,0,0.8)' }}>
                 <div style={{ background: '#ede8e0', padding: '8px 8px 20px 8px' }}>
                   <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden' }}>
                     <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
-                      style={{ filter: 'saturate(0.80) contrast(1.06) brightness(0.93)' }} />
+                      style={{ filter: 'saturate(0.82) contrast(1.05)' }} />
                     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,244,200,0.10) 0%, transparent 60%)' }}></div>
                     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 40px rgba(0,0,0,0.4)' }}></div>
                   </div>
@@ -549,15 +468,12 @@ export default function ArchivePage() {
               </div>
             </div>
 
-            {/* Right — info */}
+            {/* Info */}
             <div className="w-full md:w-[45%] flex flex-col justify-between p-6 md:p-10 min-h-[320px]"
               style={{ backgroundColor: '#0c0a09', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {/* Top row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'Georgia', fontSize: '9px', letterSpacing: '0.5em', textTransform: 'uppercase', color: '#2e2822', fontWeight: 700 }}>
-                    {selectedIndex + 1} / {exhibits.length}
-                  </span>
+                  <span style={{ fontFamily: 'Georgia', fontSize: '9px', letterSpacing: '0.5em', textTransform: 'uppercase', color: '#2e2822', fontWeight: 700 }}>{selectedIndex + 1} / {exhibits.length}</span>
                   <button onClick={() => setSelectedExhibit(null)}
                     style={{ fontFamily: 'Georgia', fontSize: '10px', letterSpacing: '0.5em', textTransform: 'uppercase', color: '#444', fontWeight: 700, cursor: 'pointer', background: 'none', border: 'none' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
@@ -565,7 +481,6 @@ export default function ArchivePage() {
                   >Close ×</button>
                 </div>
 
-                {/* Catalog */}
                 <div className="fu1">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                     <span style={{ fontFamily: 'Georgia', fontSize: '9px', letterSpacing: '0.5em', textTransform: 'uppercase', color: '#333', fontWeight: 700 }}>{selectedExhibit.catalog_id}</span>
@@ -579,14 +494,12 @@ export default function ArchivePage() {
 
                 <div className="fu1" style={{ width: '28px', height: '1px', background: '#1e1e1e' }}></div>
 
-                {/* Story */}
                 <div className="fu2" style={{ position: 'relative' }}>
                   <div ref={storyRef} className="scrollbar-hide" style={{ maxHeight: '220px', overflowY: 'auto' }}
                     onScroll={(e) => {
                       const el = e.currentTarget;
                       if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1';
-                    }}
-                  >
+                    }}>
                     <p className="cg" style={{ fontSize: '15px', fontWeight: 300, fontStyle: 'italic', lineHeight: 1.7, color: 'rgba(255,255,255,0.65)' }}>
                       {selectedExhibit.description}
                     </p>
@@ -595,12 +508,9 @@ export default function ArchivePage() {
                 </div>
               </div>
 
-              {/* Bottom */}
               <div className="fu3" style={{ paddingTop: '20px', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {selectedExhibit.submitter_name && (
-                  <p className="cg" style={{ fontSize: '10px', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#333', fontStyle: 'italic' }}>
-                    — {selectedExhibit.submitter_name}
-                  </p>
+                  <p className="cg" style={{ fontSize: '10px', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#333', fontStyle: 'italic' }}>— {selectedExhibit.submitter_name}</p>
                 )}
                 <button onClick={() => handleShare(selectedExhibit)}
                   style={{ width: '100%', padding: '12px', fontFamily: 'Georgia', fontSize: '10px', letterSpacing: '0.45em', textTransform: 'uppercase', fontWeight: 700, color: '#555', border: '1px solid rgba(255,255,255,0.07)', background: 'none', cursor: 'pointer', transition: 'all 0.3s' }}
@@ -613,10 +523,9 @@ export default function ArchivePage() {
         </div>
       )}
 
-      {/* ── BOTTOM CTA ── */}
+      {/* BOTTOM CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-50 px-6 md:px-10 py-4 flex items-center justify-between"
-        style={{ backgroundColor: 'rgba(13,11,10,0.97)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(255,255,255,0.04)' }}
-      >
+        style={{ backgroundColor: 'rgba(13,11,10,0.97)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', animation: 'pulse 2s infinite' }}></div>
           <span style={{ fontFamily: 'Georgia', fontSize: '10px', letterSpacing: '0.4em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.22)' }}>
