@@ -273,7 +273,7 @@ export default function ArchivePage() {
           </div>
 
           {/* CENTER — always perfectly centered */}
-          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 8px', width:'100%', maxWidth:'min(86vw, 520px)' }}>
+          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 56px', width:'100%', maxWidth:'min(92vw, 520px)' }}>
 
             {/* Wire from ceiling */}
             <div style={{ width:'1px', height:'36px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15))' }} />
@@ -438,23 +438,25 @@ export default function ArchivePage() {
           <div
             className="modal-anim relative w-full z-10 flex flex-col md:flex-row"
             style={{
-              // Mobile: bottom sheet style, full width
-              // Desktop: centered card with max width
               maxWidth:'900px',
               maxHeight:'92dvh',
               overflowY:'auto',
               WebkitOverflowScrolling:'touch',
               border:'1px solid rgba(255,255,255,0.3)',
-              // Mobile: comes from bottom
-              borderRadius:'0',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Image side */}
-            <div className="w-full md:w-[50%] shrink-0" style={{ backgroundColor:'#0a0807', padding:'16px md:20px' }}>
-              <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'8px', boxShadow:'0 24px 70px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#ede7db', padding:'8px 8px 26px 8px' }}>
-                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
+            {/* Image side — mobile: compact height so story is visible without scroll */}
+            <div className="w-full md:w-[50%] shrink-0" style={{ backgroundColor:'#0a0807', padding:'12px' }}>
+              <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'7px', boxShadow:'0 24px 70px rgba(0,0,0,0.9)' }}>
+                <div style={{ background:'#ede7db', padding:'7px 7px 20px 7px' }}>
+                  {/* Mobile: fixed height ~45vw so story text shows below without scroll */}
+                  <div className="md:hidden" style={{ position:'relative', height:'45vw', overflow:'hidden' }}>
+                    <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)', objectPosition:'center' }} />
+                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.35)' }} />
+                  </div>
+                  {/* Desktop: full square */}
+                  <div className="hidden md:block" style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
                     <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
                     <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.1) 0%, transparent 60%)' }} />
                     <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 50px rgba(0,0,0,0.4)' }} />
@@ -464,10 +466,8 @@ export default function ArchivePage() {
             </div>
 
             {/* Info side */}
-            <div className="w-full md:w-[50%] flex flex-col justify-between p-5 md:p-10"
-              style={{ backgroundColor:'#090706', borderLeft:'0 solid transparent', minHeight:'280px' }}>
-
-              {/* On mobile: left border becomes top border */}
+            <div className="w-full md:w-[50%] flex flex-col justify-between p-4 md:p-10"
+              style={{ backgroundColor:'#090706', minHeight:'200px' }}>
               <div className="hidden md:block" style={{ position:'absolute', top:0, bottom:0, left:'50%', width:'1px', background:'rgba(255,255,255,0.08)' }} />
 
               <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
