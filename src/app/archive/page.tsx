@@ -328,24 +328,38 @@ export default function ArchivePage() {
             style={{ maxWidth:'900px', maxHeight:'92dvh', overflowY:'auto', WebkitOverflowScrolling:'touch' as any, border:'1px solid rgba(255,255,255,0.3)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ── IMAGE SIDE ── */}
-            <div className="w-full md:w-[50%] shrink-0" style={{ backgroundColor:'#0a0807', padding:'12px' }}>
+            {/* ── MOBILE: küçük fotoğraf üstte yatay ── */}
+            <div className="md:hidden w-full flex flex-row" style={{ backgroundColor:'#0a0807', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ width:'110px', flexShrink:0, padding:'10px 6px 10px 10px' }}>
+                <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'5px', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
+                  <div style={{ background:'#ede7db', padding:'4px 4px 10px 4px' }}>
+                    <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
+                      <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ flex:1, padding:'14px 12px', display:'flex', flexDirection:'column', justifyContent:'center', gap:'5px' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                  <span style={{ fontSize:'8px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
+                  <div style={{ width:'8px', height:'1px', background:'rgba(255,255,255,0.15)' }} />
+                  <span style={{ fontSize:'8px', letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', fontWeight:700 }}>{selectedExhibit.year}</span>
+                </div>
+                <h2 className="cg" style={{ fontSize:'17px', fontWeight:300, fontStyle:'italic', color:'rgba(255,255,255,0.95)', lineHeight:1.25 }}>"{selectedExhibit.title}"</h2>
+                {selectedExhibit.submitter_name && <p className="cg" style={{ fontSize:'11px', letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', fontStyle:'italic' }}>— {selectedExhibit.submitter_name}</p>}
+              </div>
+              <button onClick={() => setSelectedExhibit(null)} style={{ alignSelf:'flex-start', margin:'10px 10px 0 0', fontSize:'10px', letterSpacing:'0.4em', color:'rgba(255,255,255,0.5)', background:'none', border:'none', cursor:'pointer', fontFamily:'Georgia', flexShrink:0 }}>×</button>
+            </div>
+
+            {/* ── DESKTOP: full framed image ── */}
+            <div className="hidden md:block w-full md:w-[50%] shrink-0" style={{ backgroundColor:'#0a0807', padding:'12px' }}>
               <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'7px', boxShadow:'0 24px 70px rgba(0,0,0,0.9)' }}>
                 <div style={{ background:'#ede7db', padding:'7px 7px 20px 7px' }}>
-
-                  {/* MOBILE: fixed small height so story is immediately visible */}
-                  <div className="md:hidden" style={{ position:'relative', height:'38vw', overflow:'hidden' }}>
-                    <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)', objectPosition:'center' }} />
-                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.35)' }} />
-                  </div>
-
-                  {/* DESKTOP: full square */}
-                  <div className="hidden md:block" style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
+                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
                     <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
                     <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.1) 0%, transparent 60%)' }} />
                     <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 50px rgba(0,0,0,0.4)' }} />
                   </div>
-
                 </div>
               </div>
             </div>
@@ -361,6 +375,7 @@ export default function ArchivePage() {
                     {String(activeIndex+1).padStart(2,'0')} / {String(exhibits.length).padStart(2,'0')}
                   </span>
                   <button onClick={() => setSelectedExhibit(null)}
+                    className="hidden md:block"
                     style={{ fontSize:'10px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.85)', fontWeight:700, cursor:'pointer', background:'none', border:'none', fontFamily:'Georgia' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color='white')}
                     onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.85)')}
