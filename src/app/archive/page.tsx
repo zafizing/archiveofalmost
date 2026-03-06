@@ -81,11 +81,9 @@ export default function ArchivePage() {
     const url = encodeURIComponent(getShareUrl());
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&via=archiveofalmost`, '_blank');
   };
-
   const shareFacebook = (item: any) => {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`, '_blank');
   };
-
   const shareWhatsApp = (item: any) => {
     const text = encodeURIComponent(`"${item.title}" — ${item.catalog_id}, ${item.year}.\n\nArchived at Archive of Almost:\n${getShareUrl()}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
@@ -102,55 +100,56 @@ export default function ArchivePage() {
     const img = document.createElement('img') as HTMLImageElement;
     img.crossOrigin = 'anonymous';
     await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); img.src = item.image_url; });
-    const frameX = 120, frameY = 320, frameW = 840, frameH = 840;
-    ctx.fillStyle = '#4a3220'; ctx.fillRect(frameX-18, frameY-18, frameW+36, frameH+36);
-    ctx.strokeStyle = 'rgba(200,162,88,0.6)'; ctx.lineWidth = 1.5;
-    ctx.strokeRect(frameX-18, frameY-18, frameW+36, frameH+36);
-    ctx.fillStyle = '#ede7db'; ctx.fillRect(frameX, frameY, frameW, frameH+60);
+    const fx = 120, fy = 320, fw = 840, fh = 840;
+    ctx.fillStyle = '#4a3220'; ctx.fillRect(fx-18, fy-18, fw+36, fh+36);
+    ctx.strokeStyle = 'rgba(200,162,88,0.6)'; ctx.lineWidth = 1.5; ctx.strokeRect(fx-18, fy-18, fw+36, fh+36);
+    ctx.fillStyle = '#ede7db'; ctx.fillRect(fx, fy, fw, fh+60);
     if (img.width > 0) {
-      ctx.save(); ctx.rect(frameX+14, frameY+14, frameW-28, frameH-28); ctx.clip();
-      const scale = Math.max((frameW-28)/img.width, (frameH-28)/img.height);
-      const dw = img.width*scale, dh = img.height*scale;
-      ctx.drawImage(img, frameX+14+((frameW-28)-dw)/2, frameY+14+((frameH-28)-dh)/2, dw, dh);
+      ctx.save(); ctx.rect(fx+14, fy+14, fw-28, fh-28); ctx.clip();
+      const sc = Math.max((fw-28)/img.width, (fh-28)/img.height);
+      ctx.drawImage(img, fx+14+((fw-28)-img.width*sc)/2, fy+14+((fh-28)-img.height*sc)/2, img.width*sc, img.height*sc);
       ctx.restore();
     }
-    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '700 22px Georgia'; ctx.textAlign = 'center';
-    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 540, frameY+frameH+110);
-    ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.font = 'italic 300 52px Georgia';
-    const words = `"${item.title}"`.split(' ');
-    let line = '', lines: string[] = [];
-    for (const w of words) { const t = line+w+' '; if (ctx.measureText(t).width > 820 && line) { lines.push(line.trim()); line = w+' '; } else line = t; }
-    if (line) lines.push(line.trim());
-    lines.forEach((l, i) => ctx.fillText(l, 540, frameY+frameH+185+i*68));
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(420, 1750); ctx.lineTo(660, 1750); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '700 20px Georgia';
-    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1800);
-    const link = document.createElement('a');
-    link.download = `archive-of-almost-${item.catalog_id?.toLowerCase() || 'object'}.jpg`;
-    link.href = canvas.toDataURL('image/jpeg', 0.95); link.click();
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='700 22px Georgia'; ctx.textAlign='center';
+    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 540, fy+fh+110);
+    ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.font='italic 300 52px Georgia';
+    const words=`"${item.title}"`.split(' '); let line='', lines:string[]=[];
+    for(const w of words){const t=line+w+' ';if(ctx.measureText(t).width>820&&line){lines.push(line.trim());line=w+' ';}else line=t;}
+    if(line)lines.push(line.trim());
+    lines.forEach((l,i)=>ctx.fillText(l,540,fy+fh+185+i*68));
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(420,1750); ctx.lineTo(660,1750); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.font='700 20px Georgia'; ctx.fillText('ARCHIVEOFALMOST.CO',540,1800);
+    const link=document.createElement('a'); link.download=`archive-of-almost-${item.catalog_id?.toLowerCase()||'object'}.jpg`;
+    link.href=canvas.toDataURL('image/jpeg',0.95); link.click();
   };
 
+  const shareOptions = (item: any) => [
+    { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(item) },
+    { label: 'f  Share on Facebook',   fn: () => shareFacebook(item) },
+    { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(item) },
+    { label: '↓  Download Story Card', fn: () => downloadCard(item) },
+  ];
+
   return (
-    <main className="text-white select-none" style={{ height: '100dvh', overflow: 'hidden', backgroundColor: '#0c0a09', fontFamily: 'Georgia, serif' }}>
+    <main className="text-white select-none" style={{ height:'100dvh', overflow:'hidden', backgroundColor:'#0c0a09', fontFamily:'Georgia, serif' }}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
         .cg { font-family: 'Cormorant Garamond', Georgia, serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes modalIn { from { opacity:0; transform:scale(0.97) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes progressFill { from { transform:scaleX(0); } to { transform:scaleX(1); } }
-        @keyframes swipeAnim { 0%,100%{transform:translateX(-4px);opacity:0.4;} 50%{transform:translateX(4px);opacity:0.9;} }
-        @keyframes blink { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
+        @keyframes modalIn { from{opacity:0;transform:scale(0.97) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+        @keyframes progressFill { from{transform:scaleX(0);}to{transform:scaleX(1);} }
+        @keyframes swipeAnim { 0%,100%{transform:translateX(-4px);opacity:0.4;}50%{transform:translateX(4px);opacity:0.9;} }
+        @keyframes blink { 0%,100%{opacity:0.35;}50%{opacity:1;} }
         .modal-anim { animation: modalIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
         .fu1 { animation: fadeUp 0.5s ease-out 0.05s forwards; opacity:0; }
         .fu2 { animation: fadeUp 0.5s ease-out 0.18s forwards; opacity:0; }
         .fu3 { animation: fadeUp 0.5s ease-out 0.30s forwards; opacity:0; }
         .navbtn { transition: all 0.25s; }
         .navbtn:hover { color:white !important; border-color:rgba(255,255,255,0.5) !important; background:rgba(255,255,255,0.07) !important; }
-        .side-frame { transition: all 0.65s cubic-bezier(0.25,0.46,0.45,0.94); cursor:pointer; }
-        .side-frame:hover { opacity:0.85 !important; }
+        .side-frame { transition: opacity 0.65s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); cursor:pointer; }
+        .side-frame:hover > div { opacity:0.65 !important; }
       `}</style>
 
       {/* TOP BAR */}
@@ -167,53 +166,75 @@ export default function ArchivePage() {
         </div>
       </div>
 
-      {/* STAGE */}
+      {/* ═══ STAGE ═══ */}
       <div
         style={{ height:'100dvh', overflow:'hidden', position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}
-        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
+        onTouchStart={(e) => { touchStartX.current=e.touches[0].clientX; touchStartY.current=e.touches[0].clientY; }}
         onTouchEnd={(e) => {
-          const dx = touchStartX.current - e.changedTouches[0].clientX;
-          const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
-          if (Math.abs(dx) > 45 && Math.abs(dx) > dy * 1.2) dx > 0 ? next() : prev();
+          const dx=touchStartX.current-e.changedTouches[0].clientX;
+          const dy=Math.abs(touchStartY.current-e.changedTouches[0].clientY);
+          if(Math.abs(dx)>45&&Math.abs(dx)>dy*1.2) dx>0?next():prev();
         }}
       >
+        {/* Wall texture */}
         <div style={{ position:'absolute', inset:0, backgroundImage:'repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.004) 59px, rgba(255,255,255,0.004) 60px)', pointerEvents:'none', zIndex:0 }} />
+        {/* Ceiling rail line */}
         <div style={{ position:'absolute', top:'95px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 20%, rgba(255,255,255,0.07) 80%, transparent)', pointerEvents:'none', zIndex:1 }} />
+        {/* Floor line */}
         <div style={{ position:'absolute', bottom:'66px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.04) 80%, transparent)', pointerEvents:'none', zIndex:1 }} />
 
         {exhibits.length > 0 && (<>
 
-          {/* LEFT SLIVER — desktop only, no frame */}
-          <div className="side-frame hidden md:flex items-center justify-end" onClick={prev}
-            style={{ position:'absolute', left:0, top:0, bottom:0, width:'clamp(60px, 8vw, 180px)', zIndex:10, overflow:'hidden' }}>
-            <div style={{ width:'260px', opacity:0.5, filter:'brightness(0.5) saturate(0.6)', transform:'scale(0.88) translateX(60px)', transformOrigin:'right center', flexShrink:0 }}>
-              <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
+          {/* ── LEFT SLIVER ── desktop only */}
+          <div className="side-frame hidden md:block" onClick={prev}
+            style={{ position:'absolute', left:0, top:0, bottom:0, width:'clamp(80px, 10vw, 200px)', zIndex:10, overflow:'hidden' }}>
+            {/* Fade to black at left edge */}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #0c0a09 15%, transparent 100%)', zIndex:2, pointerEvents:'none' }} />
+            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end' }}>
+              <div style={{ width:'300px', opacity:0.4, filter:'brightness(0.4) saturate(0.5)', transform:'translateX(55%)', flexShrink:0, transition:'opacity 0.4s' }}>
+                <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                  <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* CENTER — no frame */}
-          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 56px', width:'100%', maxWidth:'min(92vw, 520px)' }}>
-            <div style={{ width:'1px', height:'36px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.12))' }} />
+          {/* ── CENTER PHOTO ── */}
+          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 clamp(56px, 12vw, 220px)', width:'100%', maxWidth:'760px' }}>
+
+            {/* Hanging wire */}
+            <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2))' }} />
 
             <div
               onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-              style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.4s ease',
-                boxShadow:'0 0 80px rgba(255,248,220,0.1), 0 40px 100px rgba(0,0,0,0.98)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
+              style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.45s ease' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}
             >
-              <div style={{ position:'absolute', inset:'-50px', background:'radial-gradient(ellipse 70% 50% at 50% 30%, rgba(255,244,200,0.07) 0%, transparent 65%)', pointerEvents:'none', zIndex:-1 }} />
-              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+              {/* Spotlight cone from ceiling — museum key effect */}
+              <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', width:'200%', height:'160px',
+                background:'radial-gradient(ellipse 45% 100% at 50% 0%, rgba(255,248,210,0.22) 0%, transparent 70%)',
+                pointerEvents:'none', zIndex:-1 }} />
+              {/* Ambient wall glow */}
+              <div style={{ position:'absolute', inset:'-70px',
+                background:'radial-gradient(ellipse 75% 55% at 50% 45%, rgba(255,244,200,0.16) 0%, transparent 60%)',
+                pointerEvents:'none', zIndex:-1 }} />
+              {/* Shadow below */}
+              <div style={{ position:'absolute', top:'100%', left:'5%', right:'5%', height:'60px',
+                background:'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,0,0,0.9) 0%, transparent 80%)',
+                pointerEvents:'none', zIndex:-1 }} />
+
+              {/* Photo */}
+              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111',
+                boxShadow:'0 0 0 1px rgba(255,255,255,0.06)' }}>
                 <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title}
                   fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
-                <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.5)' }} />
+                <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.45)' }} />
               </div>
             </div>
 
             {/* Label */}
-            <div style={{ marginTop:'16px', width:'100%' }}>
+            <div style={{ marginTop:'18px', width:'100%' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'7px' }}>
                 <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'white', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].catalog_id}</span>
                 <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
@@ -224,70 +245,76 @@ export default function ArchivePage() {
                 "{exhibits[activeIndex].title}"
               </p>
               <span onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.55)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color='white')}
-                onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.55)')}
+                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.5)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.9)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.5)')}
               >View object →</span>
+              {/* Progress bar */}
               <div style={{ marginTop:'14px', height:'1.5px', background:'rgba(255,255,255,0.07)', overflow:'hidden', borderRadius:'1px' }}>
                 {!isPaused && !selectedExhibit && (
-                  <div key={progressKey} style={{ height:'100%', background:'rgba(255,255,255,0.42)', transformOrigin:'left', borderRadius:'1px', animation:`progressFill ${AUTO_INTERVAL}ms linear forwards` }} />
+                  <div key={progressKey} style={{ height:'100%', background:'rgba(255,255,255,0.4)', transformOrigin:'left', borderRadius:'1px', animation:`progressFill ${AUTO_INTERVAL}ms linear forwards` }} />
                 )}
               </div>
             </div>
           </div>
 
-          {/* RIGHT SLIVER — desktop only, no frame */}
-          <div className="side-frame hidden md:flex items-center justify-start" onClick={next}
-            style={{ position:'absolute', right:0, top:0, bottom:0, width:'clamp(60px, 8vw, 180px)', zIndex:10, overflow:'hidden' }}>
-            <div style={{ width:'260px', opacity:0.5, filter:'brightness(0.5) saturate(0.6)', transform:'scale(0.88) translateX(-60px)', transformOrigin:'left center', flexShrink:0 }}>
-              <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
+          {/* ── RIGHT SLIVER ── desktop only */}
+          <div className="side-frame hidden md:block" onClick={next}
+            style={{ position:'absolute', right:0, top:0, bottom:0, width:'clamp(80px, 10vw, 200px)', zIndex:10, overflow:'hidden' }}>
+            {/* Fade to black at right edge */}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left, #0c0a09 15%, transparent 100%)', zIndex:2, pointerEvents:'none' }} />
+            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-start' }}>
+              <div style={{ width:'300px', opacity:0.4, filter:'brightness(0.4) saturate(0.5)', transform:'translateX(-55%)', flexShrink:0, transition:'opacity 0.4s' }}>
+                <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                  <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
+                </div>
               </div>
             </div>
           </div>
+
         </>)}
 
         {/* NAV ARROWS */}
         <button className="navbtn absolute z-20 flex items-center justify-center" onClick={prev}
-          style={{ left:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.65)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>←</button>
+          style={{ left:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.45)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>←</button>
         <button className="navbtn absolute z-20 flex items-center justify-center" onClick={next}
-          style={{ right:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.5)', background:'rgba(0,0,0,0.65)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>→</button>
+          style={{ right:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.45)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>→</button>
 
         {/* DOT NAV */}
         {exhibits.length > 1 && (
           <div style={{ position:'absolute', bottom:'80px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'6px', alignItems:'center', zIndex:10 }}>
             {exhibits.map((_, i) => (
-              <button key={i} onClick={() => goTo(i)} style={{ width: i===activeIndex ? '20px' : '5px', height:'4px', borderRadius:'2px', background: i===activeIndex ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', padding:0, transition:'all 0.4s ease' }} />
+              <button key={i} onClick={() => goTo(i)} style={{ width:i===activeIndex?'20px':'5px', height:'4px', borderRadius:'2px', background:i===activeIndex?'rgba(255,255,255,0.55)':'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', padding:0, transition:'all 0.4s ease' }} />
             ))}
           </div>
         )}
 
-        {/* SWIPE HINT */}
-        <div className="md:hidden" style={{ position:'absolute', bottom:'56px', left:'50%', transform:'translateX(-50%)', display:'flex', alignItems:'center', gap:'6px', zIndex:10, opacity: showSwipeHint ? 1 : 0, transition:'opacity 1.2s ease', pointerEvents:'none', whiteSpace:'nowrap' }}>
+        {/* SWIPE HINT — mobile only */}
+        <div className="md:hidden" style={{ position:'absolute', bottom:'56px', left:'50%', transform:'translateX(-50%)', display:'flex', alignItems:'center', gap:'6px', zIndex:10, opacity:showSwipeHint?1:0, transition:'opacity 1.2s ease', pointerEvents:'none', whiteSpace:'nowrap' }}>
           <span style={{ fontSize:'8px', letterSpacing:'0.4em', color:'rgba(255,255,255,0.45)', textTransform:'uppercase' }}>Swipe to navigate</span>
           <div style={{ animation:'swipeAnim 1.4s ease-in-out infinite', color:'rgba(255,255,255,0.45)', fontSize:'11px' }}>→</div>
         </div>
       </div>
 
-      {/* ══════════════ MODAL ══════════════ */}
+      {/* ═══ MODAL ═══ */}
       {selectedExhibit && (
         <div
           className="fixed inset-0 z-[200] flex items-start md:items-center justify-center"
           style={{ padding:'0', paddingTop:'57px' }}
           onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }}
-          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
+          onTouchStart={(e) => { touchStartX.current=e.touches[0].clientX; touchStartY.current=e.touches[0].clientY; }}
           onTouchEnd={(e) => {
-            const dx = touchStartX.current - e.changedTouches[0].clientX;
-            const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
-            if (Math.abs(dx) > 50 && Math.abs(dx) > dy * 1.5) {
-              const n = dx > 0 ? (activeIndex+1)%exhibits.length : ((activeIndex-1)+exhibits.length)%exhibits.length;
+            const dx=touchStartX.current-e.changedTouches[0].clientX;
+            const dy=Math.abs(touchStartY.current-e.changedTouches[0].clientY);
+            if(Math.abs(dx)>50&&Math.abs(dx)>dy*1.5){
+              const n=dx>0?(activeIndex+1)%exhibits.length:((activeIndex-1)+exhibits.length)%exhibits.length;
               setActiveIndex(n); setSelectedExhibit(exhibits[n]);
             }
           }}
         >
           <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(4,3,2,0.97)', backdropFilter:'blur(30px)' }} />
 
-          {/* Desktop nav arrows */}
+          {/* Desktop prev/next */}
           <button className="navbtn hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center"
             onClick={(e) => { e.stopPropagation(); const n=((activeIndex-1)+exhibits.length)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
             style={{ border:'1px solid rgba(255,255,255,0.2)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.85)', cursor:'pointer', fontSize:'17px' }}>←</button>
@@ -301,53 +328,49 @@ export default function ArchivePage() {
             style={{ height:'calc(100dvh - 57px)', overflowY:'hidden', borderTop:'1px solid rgba(255,255,255,0.12)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
-              style={{ position:'absolute', top:'8px', right:'8px', zIndex:20, width:'36px', height:'36px', background:'rgba(0,0,0,0.7)', border:'1px solid rgba(255,255,255,0.3)', color:'white', fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}
+            {/* Big X button */}
+            <button onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
+              style={{ position:'absolute', top:'8px', right:'8px', zIndex:20, width:'36px', height:'36px', background:'rgba(0,0,0,0.75)', border:'1px solid rgba(255,255,255,0.3)', color:'white', fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}
             >×</button>
 
-            {/* Photo — no frame, 16:10 */}
+            {/* Photo — compact height so story is always visible */}
             <div
-              style={{ position:'relative', width:'100%', aspectRatio:'16/10', overflow:'hidden', cursor:'zoom-in', flexShrink:0 }}
+              style={{ position:'relative', width:'100%', height:'38vw', maxHeight:'220px', overflow:'hidden', cursor:'zoom-in', flexShrink:0 }}
               onClick={() => setShowFullImage(true)}
             >
               <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
                 style={{ filter:'saturate(0.88) contrast(1.05)', objectPosition:'center' }} />
-              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.35) 100%)', pointerEvents:'none' }} />
-              <div style={{ position:'absolute', bottom:'10px', right:'10px', background:'rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.18)', padding:'4px 8px', backdropFilter:'blur(4px)' }}>
-                <span style={{ fontSize:'7px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.65)', textTransform:'uppercase' }}>⊕ Tap</span>
+              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 30%, transparent 65%, rgba(0,0,0,0.4) 100%)', pointerEvents:'none' }} />
+              <div style={{ position:'absolute', bottom:'8px', right:'8px', background:'rgba(0,0,0,0.55)', border:'1px solid rgba(255,255,255,0.2)', padding:'3px 7px', backdropFilter:'blur(4px)' }}>
+                <span style={{ fontSize:'7px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.7)', textTransform:'uppercase' }}>⊕ Tap</span>
               </div>
             </div>
 
-            <div className="scrollbar-hide" style={{ flex:1, overflowY:'auto', padding:'14px 16px', display:'flex', flexDirection:'column', gap:'9px' }}>
+            {/* Scrollable info */}
+            <div className="scrollbar-hide" style={{ flex:1, overflowY:'auto', padding:'12px 16px', display:'flex', flexDirection:'column', gap:'8px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                 <span style={{ fontSize:'8px', letterSpacing:'0.5em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
                 <div style={{ width:'10px', height:'1px', background:'rgba(255,255,255,0.25)' }} />
                 <span style={{ fontSize:'8px', letterSpacing:'0.4em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.year}</span>
               </div>
-              <h2 className="cg" style={{ fontSize:'20px', fontWeight:300, fontStyle:'italic', color:'white', lineHeight:1.25 }}>"{selectedExhibit.title}"</h2>
+              <h2 className="cg" style={{ fontSize:'19px', fontWeight:300, fontStyle:'italic', color:'white', lineHeight:1.25 }}>"{selectedExhibit.title}"</h2>
               <div style={{ width:'20px', height:'1px', background:'rgba(255,255,255,0.18)' }} />
-              <p className="cg" style={{ fontSize:'15px', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.85)' }}>
+              <p className="cg" style={{ fontSize:'14px', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.85)' }}>
                 {selectedExhibit.description}
               </p>
               {selectedExhibit.submitter_name && (
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', paddingTop:'2px' }}>
                   <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
-                  <p className="cg" style={{ fontSize:'14px', letterSpacing:'0.18em', textTransform:'uppercase', color:'white', fontStyle:'italic' }}>{selectedExhibit.submitter_name}</p>
+                  <p className="cg" style={{ fontSize:'13px', letterSpacing:'0.18em', textTransform:'uppercase', color:'white', fontStyle:'italic' }}>{selectedExhibit.submitter_name}</p>
                 </div>
               )}
               <div style={{ paddingTop:'8px', borderTop:'1px solid rgba(255,255,255,0.08)' }}>
                 <button onClick={() => setShowShareMenu(s => !s)}
-                  style={{ width:'100%', padding:'11px', fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', background:'none', cursor:'pointer', fontFamily:'Georgia' }}
+                  style={{ width:'100%', padding:'10px', fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', background:'none', cursor:'pointer', fontFamily:'Georgia' }}
                 >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
                 {showShareMenu && (
-                  <div style={{ marginTop:'5px', display:'flex', flexDirection:'column', gap:'4px' }}>
-                    {[
-                      { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(selectedExhibit) },
-                      { label: 'f  Share on Facebook',   fn: () => shareFacebook(selectedExhibit) },
-                      { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(selectedExhibit) },
-                      { label: '↓  Download Story Card', fn: () => downloadCard(selectedExhibit) },
-                    ].map((opt) => (
+                  <div style={{ marginTop:'4px', display:'flex', flexDirection:'column', gap:'3px' }}>
+                    {shareOptions(selectedExhibit).map((opt) => (
                       <button key={opt.label} onClick={opt.fn}
                         style={{ width:'100%', padding:'9px 14px', fontSize:'9px', letterSpacing:'0.3em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.6)', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.02)', cursor:'pointer', fontFamily:'Georgia', textAlign:'left' }}
                       >{opt.label}</button>
@@ -358,20 +381,16 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          {/* ── DESKTOP modal — photo LEFT (no frame, full height), info RIGHT ── */}
+          {/* ── DESKTOP modal — photo left (full), info right ── */}
           <div
             className="hidden md:flex modal-anim relative w-full z-10 flex-row"
-            style={{ maxWidth:'900px', maxHeight:'88dvh', border:'1px solid rgba(255,255,255,0.25)', overflow:'hidden' }}
+            style={{ maxWidth:'900px', maxHeight:'88dvh', border:'1px solid rgba(255,255,255,0.22)', overflow:'hidden' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Photo — fills entire left half, no frame */}
-            <div className="w-[50%] shrink-0" style={{ position:'relative', minHeight:'400px' }}>
-              <Image
-                src={selectedExhibit.image_url}
-                alt={selectedExhibit.title}
-                fill unoptimized className="object-cover"
-                style={{ filter:'saturate(0.85) contrast(1.05)' }}
-              />
+            {/* Photo — full left half, no frame */}
+            <div className="w-[50%] shrink-0" style={{ position:'relative', minHeight:'420px' }}>
+              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
+                style={{ filter:'saturate(0.85) contrast(1.05)' }} />
               <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.06) 0%, transparent 60%)' }} />
               <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 60px rgba(0,0,0,0.5)' }} />
             </div>
@@ -379,10 +398,9 @@ export default function ArchivePage() {
             {/* Info side */}
             <div className="w-[50%] flex flex-col justify-between p-10"
               style={{ backgroundColor:'#090706', borderLeft:'1px solid rgba(255,255,255,0.08)', overflowY:'auto' }}>
-
               <div style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', fontWeight:700 }}>
+                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontWeight:700 }}>
                     {String(activeIndex+1).padStart(2,'0')} / {String(exhibits.length).padStart(2,'0')}
                   </span>
                   <button onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
@@ -391,7 +409,6 @@ export default function ArchivePage() {
                     onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.85)')}
                   >Close ×</button>
                 </div>
-
                 <div className="fu1">
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
                     <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.9)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
@@ -402,16 +419,11 @@ export default function ArchivePage() {
                     "{selectedExhibit.title}"
                   </h2>
                 </div>
-
                 <div className="fu1" style={{ width:'24px', height:'1px', background:'rgba(255,255,255,0.15)' }} />
-
                 <div className="fu2" style={{ position:'relative' }}>
                   <div ref={storyRef} className="scrollbar-hide"
                     style={{ maxHeight:'clamp(160px, 30vh, 260px)', overflowY:'auto', WebkitOverflowScrolling:'touch' as any }}
-                    onScroll={(e) => {
-                      const el = e.currentTarget;
-                      if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1';
-                    }}
+                    onScroll={(e) => { const el=e.currentTarget; if(fadeRef.current) fadeRef.current.style.opacity=el.scrollHeight-el.scrollTop<=el.clientHeight+5?'0':'1'; }}
                   >
                     <p className="cg" style={{ fontSize:'clamp(15px, 1.6vw, 18px)', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.88)' }}>
                       {selectedExhibit.description}
@@ -420,7 +432,6 @@ export default function ArchivePage() {
                   <div ref={fadeRef} style={{ position:'absolute', bottom:0, left:0, right:0, height:'36px', background:'linear-gradient(to top, #090706, transparent)', pointerEvents:'none', transition:'opacity 0.3s' }} />
                 </div>
               </div>
-
               <div className="fu3" style={{ paddingTop:'16px', marginTop:'16px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:'10px' }}>
                 {selectedExhibit.submitter_name && (
                   <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
@@ -438,12 +449,7 @@ export default function ArchivePage() {
                   >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
                   {showShareMenu && (
                     <div style={{ marginTop:'5px', display:'flex', flexDirection:'column', gap:'4px' }}>
-                      {[
-                        { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(selectedExhibit) },
-                        { label: 'f  Share on Facebook',   fn: () => shareFacebook(selectedExhibit) },
-                        { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(selectedExhibit) },
-                        { label: '↓  Download Story Card', fn: () => downloadCard(selectedExhibit) },
-                      ].map((opt) => (
+                      {shareOptions(selectedExhibit).map((opt) => (
                         <button key={opt.label} onClick={opt.fn}
                           style={{ width:'100%', padding:'9px 14px', fontSize:'9px', letterSpacing:'0.3em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.6)', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.02)', cursor:'pointer', transition:'all 0.25s', fontFamily:'Georgia', textAlign:'left' }}
                           onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.35)'; e.currentTarget.style.background='rgba(255,255,255,0.06)'; }}
@@ -461,8 +467,7 @@ export default function ArchivePage() {
 
       {/* FULL IMAGE OVERLAY — mobile only */}
       {showFullImage && selectedExhibit && (
-        <div
-          className="fixed inset-0 z-[300] flex items-center justify-center"
+        <div className="fixed inset-0 z-[300] flex items-center justify-center"
           style={{ backgroundColor:'rgba(0,0,0,0.97)', backdropFilter:'blur(20px)' }}
           onClick={() => setShowFullImage(false)}
         >
