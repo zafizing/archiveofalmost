@@ -185,13 +185,14 @@ export default function ArchivePage() {
 
         {exhibits.length > 0 && (<>
 
-          {/* ── LEFT SLIVER ── desktop only, fully visible, centered in its column */}
-          <div className="side-frame hidden md:flex items-center justify-center" onClick={prev}
-            style={{ position:'absolute', left:0, top:0, bottom:0, width:'18vw', maxWidth:'240px', zIndex:10,
-              cursor:'pointer' }}>
-            {/* Fade at outer edge only */}
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #0c0a09 0%, transparent 40%)', zIndex:2, pointerEvents:'none' }} />
-            <div style={{ width:'90%', opacity:0.55, filter:'brightness(0.55) saturate(0.6)', flexShrink:0 }}>
+          {/* ── LEFT SIDE PHOTO ── centered in gap left of center photo */}
+          <div className="hidden md:flex items-center justify-center" onClick={prev}
+            style={{ position:'absolute', left:'60px', top:0, bottom:0, width:'calc(50% - 300px)', zIndex:10, cursor:'pointer' }}>
+            <div
+              style={{ width:'min(200px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}
+            >
               <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
                 <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
@@ -200,7 +201,7 @@ export default function ArchivePage() {
 
           {/* ── CENTER PHOTO ── */}
           <div className="relative z-10 flex flex-col items-center"
-            style={{ width:'min(480px, calc(100vw - 36vw - 40px))', flexShrink:0 }}>
+            style={{ width:'480px', maxWidth:'calc(100vw - 520px)', flexShrink:0 }}>
 
             {/* Hanging wire */}
             <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2))' }} />
@@ -211,17 +212,17 @@ export default function ArchivePage() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}
             >
-              {/* Warm backlight glow — behind the photo, not a cone */}
+              {/* Strong warm backlight */}
               <div style={{
-                position:'absolute', inset:'-55px',
-                background:'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,240,190,0.22) 0%, rgba(255,228,160,0.10) 35%, transparent 65%)',
+                position:'absolute', inset:'-50px',
+                background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,235,170,0.60) 0%, rgba(255,220,130,0.28) 32%, transparent 62%)',
                 pointerEvents:'none', zIndex:-1,
-                filter:'blur(12px)',
+                filter:'blur(20px)',
               }} />
-              {/* Softer outer halo */}
+              {/* Wide soft halo */}
               <div style={{
-                position:'absolute', inset:'-100px',
-                background:'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,235,170,0.08) 0%, transparent 60%)',
+                position:'absolute', inset:'-110px',
+                background:'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(255,228,150,0.20) 0%, transparent 58%)',
                 pointerEvents:'none', zIndex:-1,
               }} />
               {/* Shadow below */}
@@ -263,13 +264,14 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          {/* ── RIGHT SLIVER ── desktop only, fully visible, centered in its column */}
-          <div className="side-frame hidden md:flex items-center justify-center" onClick={next}
-            style={{ position:'absolute', right:0, top:0, bottom:0, width:'18vw', maxWidth:'240px', zIndex:10,
-              cursor:'pointer' }}>
-            {/* Fade at outer edge only */}
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left, #0c0a09 0%, transparent 40%)', zIndex:2, pointerEvents:'none' }} />
-            <div style={{ width:'90%', opacity:0.55, filter:'brightness(0.55) saturate(0.6)', flexShrink:0 }}>
+          {/* ── RIGHT SIDE PHOTO ── centered in gap right of center photo */}
+          <div className="hidden md:flex items-center justify-center" onClick={next}
+            style={{ position:'absolute', right:'60px', top:0, bottom:0, width:'calc(50% - 300px)', zIndex:10, cursor:'pointer' }}>
+            <div
+              style={{ width:'min(200px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}
+            >
               <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
                 <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
