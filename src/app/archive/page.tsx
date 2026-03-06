@@ -185,22 +185,22 @@ export default function ArchivePage() {
 
         {exhibits.length > 0 && (<>
 
-          {/* ── LEFT SLIVER ── desktop only */}
-          <div className="side-frame hidden md:block" onClick={prev}
-            style={{ position:'absolute', left:0, top:0, bottom:0, width:'clamp(80px, 10vw, 200px)', zIndex:10, overflow:'hidden' }}>
-            {/* Fade to black at left edge */}
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #0c0a09 15%, transparent 100%)', zIndex:2, pointerEvents:'none' }} />
-            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end' }}>
-              <div style={{ width:'300px', opacity:0.4, filter:'brightness(0.4) saturate(0.5)', transform:'translateX(55%)', flexShrink:0, transition:'opacity 0.4s' }}>
-                <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                  <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
-                </div>
+          {/* ── LEFT SLIVER ── desktop only, fully visible, centered in its column */}
+          <div className="side-frame hidden md:flex items-center justify-center" onClick={prev}
+            style={{ position:'absolute', left:0, top:0, bottom:0, width:'18vw', maxWidth:'240px', zIndex:10,
+              cursor:'pointer' }}>
+            {/* Fade at outer edge only */}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #0c0a09 0%, transparent 40%)', zIndex:2, pointerEvents:'none' }} />
+            <div style={{ width:'90%', opacity:0.55, filter:'brightness(0.55) saturate(0.6)', flexShrink:0 }}>
+              <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
             </div>
           </div>
 
           {/* ── CENTER PHOTO ── */}
-          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 clamp(56px, 12vw, 220px)', width:'100%', maxWidth:'760px' }}>
+          <div className="relative z-10 flex flex-col items-center"
+            style={{ width:'min(480px, calc(100vw - 36vw - 40px))', flexShrink:0 }}>
 
             {/* Hanging wire */}
             <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2))' }} />
@@ -211,17 +211,22 @@ export default function ArchivePage() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}
             >
-              {/* Spotlight cone from ceiling — museum key effect */}
-              <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', width:'200%', height:'160px',
-                background:'radial-gradient(ellipse 45% 100% at 50% 0%, rgba(255,248,210,0.22) 0%, transparent 70%)',
-                pointerEvents:'none', zIndex:-1 }} />
-              {/* Ambient wall glow */}
-              <div style={{ position:'absolute', inset:'-70px',
-                background:'radial-gradient(ellipse 75% 55% at 50% 45%, rgba(255,244,200,0.16) 0%, transparent 60%)',
-                pointerEvents:'none', zIndex:-1 }} />
+              {/* Warm backlight glow — behind the photo, not a cone */}
+              <div style={{
+                position:'absolute', inset:'-55px',
+                background:'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,240,190,0.22) 0%, rgba(255,228,160,0.10) 35%, transparent 65%)',
+                pointerEvents:'none', zIndex:-1,
+                filter:'blur(12px)',
+              }} />
+              {/* Softer outer halo */}
+              <div style={{
+                position:'absolute', inset:'-100px',
+                background:'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,235,170,0.08) 0%, transparent 60%)',
+                pointerEvents:'none', zIndex:-1,
+              }} />
               {/* Shadow below */}
-              <div style={{ position:'absolute', top:'100%', left:'5%', right:'5%', height:'60px',
-                background:'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,0,0,0.9) 0%, transparent 80%)',
+              <div style={{ position:'absolute', top:'98%', left:'8%', right:'8%', height:'50px',
+                background:'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,0,0,0.85) 0%, transparent 80%)',
                 pointerEvents:'none', zIndex:-1 }} />
 
               {/* Photo */}
@@ -258,16 +263,15 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          {/* ── RIGHT SLIVER ── desktop only */}
-          <div className="side-frame hidden md:block" onClick={next}
-            style={{ position:'absolute', right:0, top:0, bottom:0, width:'clamp(80px, 10vw, 200px)', zIndex:10, overflow:'hidden' }}>
-            {/* Fade to black at right edge */}
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left, #0c0a09 15%, transparent 100%)', zIndex:2, pointerEvents:'none' }} />
-            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-start' }}>
-              <div style={{ width:'300px', opacity:0.4, filter:'brightness(0.4) saturate(0.5)', transform:'translateX(-55%)', flexShrink:0, transition:'opacity 0.4s' }}>
-                <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                  <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
-                </div>
+          {/* ── RIGHT SLIVER ── desktop only, fully visible, centered in its column */}
+          <div className="side-frame hidden md:flex items-center justify-center" onClick={next}
+            style={{ position:'absolute', right:0, top:0, bottom:0, width:'18vw', maxWidth:'240px', zIndex:10,
+              cursor:'pointer' }}>
+            {/* Fade at outer edge only */}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left, #0c0a09 0%, transparent 40%)', zIndex:2, pointerEvents:'none' }} />
+            <div style={{ width:'90%', opacity:0.55, filter:'brightness(0.55) saturate(0.6)', flexShrink:0 }}>
+              <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
             </div>
           </div>
