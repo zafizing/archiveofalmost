@@ -97,6 +97,35 @@ export default function ArchivePage() {
         .navbtn { transition: all 0.25s; }
         .navbtn:hover { color:white !important; border-color:rgba(255,255,255,0.5) !important; background:rgba(255,255,255,0.07) !important; }
         .side-frame { transition: all 0.65s cubic-bezier(0.25,0.46,0.45,0.94); cursor:pointer; }
+
+        /* Ornate frame corners */
+        .museum-frame { position: relative; }
+        .museum-frame::before,
+        .museum-frame::after {
+          content: '';
+          position: absolute;
+          width: 28px;
+          height: 28px;
+          border-color: rgba(200,162,88,0.7);
+          border-style: solid;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .museum-frame::before { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
+        .museum-frame::after  { top: 6px; right: 6px; border-width: 1px 1px 0 0; }
+        .museum-frame-b::before,
+        .museum-frame-b::after {
+          content: '';
+          position: absolute;
+          width: 28px;
+          height: 28px;
+          border-color: rgba(200,162,88,0.7);
+          border-style: solid;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .museum-frame-b::before { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
+        .museum-frame-b::after  { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
         .side-frame:hover { opacity:0.85 !important; filter: brightness(0.85) !important; }
       `}</style>
 
@@ -152,24 +181,22 @@ export default function ArchivePage() {
             <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.18))' }} />
 
             {/* Frame */}
-            <div
+            <div className="museum-frame museum-frame-b"
               onClick={() => setSelectedExhibit(exhibits[activeIndex])}
               style={{
-                background:'linear-gradient(145deg, #6b5038 0%, #3a2210 25%, #6b5038 50%, #3a2210 75%, #6b5038 100%)',
-                padding:'14px',
-                outline:'1px solid rgba(212,175,100,0.3)',
-                outlineOffset:'-7px',
-                boxShadow:'0 0 0 1px rgba(212,175,100,0.18), 0 0 60px rgba(255,252,240,0.18), 0 0 120px rgba(255,252,240,0.08), 0 40px 100px rgba(0,0,0,0.95)',
+                background:'linear-gradient(160deg, #7a5c3a 0%, #4a2c12 20%, #6a4c2e 40%, #3e2010 60%, #6a4c2e 80%, #7a5c3a 100%)',
+                padding:'16px',
+                boxShadow:'0 0 0 1px rgba(200,162,88,0.45), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.2), 0 0 50px rgba(255,248,220,0.22), 0 0 100px rgba(255,248,220,0.1), 0 40px 100px rgba(0,0,0,0.95)',
                 cursor:'pointer',
                 transition:'transform 0.4s ease, box-shadow 0.4s ease',
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(212,175,100,0.28), 0 0 80px rgba(255,252,240,0.28), 0 0 160px rgba(255,252,240,0.12), 0 50px 120px rgba(0,0,0,0.95)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(200,162,88,0.55), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.3), 0 0 80px rgba(255,248,220,0.38), 0 0 160px rgba(255,248,220,0.18), 0 50px 120px rgba(0,0,0,0.95)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(212,175,100,0.18), 0 0 60px rgba(255,252,240,0.18), 0 0 120px rgba(255,252,240,0.08), 0 40px 100px rgba(0,0,0,0.95)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(200,162,88,0.45), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.2), 0 0 50px rgba(255,248,220,0.22), 0 0 100px rgba(255,248,220,0.1), 0 40px 100px rgba(0,0,0,0.95)';
               }}
             >
               <div style={{ background:'#ede7db', padding:'12px 12px 36px 12px' }}>
@@ -190,18 +217,18 @@ export default function ArchivePage() {
             {/* Label */}
             <div style={{ marginTop:'18px', width:'clamp(240px, min(34vw, 80vw), 460px)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
-                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'rgba(255,255,255,0.88)', textTransform:'uppercase', fontWeight:700 }}>
+                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'white', textTransform:'uppercase', fontWeight:700 }}>
                   {exhibits[activeIndex].catalog_id}
                 </span>
                 <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
-                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.88)', textTransform:'uppercase', fontWeight:700 }}>
+                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'white', textTransform:'uppercase', fontWeight:700 }}>
                   {exhibits[activeIndex].year}
                 </span>
               </div>
               <p
                 className="cg"
                 onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                style={{ fontSize:'clamp(17px, 2vw, 23px)', fontStyle:'italic', fontWeight:300, color:'rgba(255,255,255,0.88)', lineHeight:1.3, marginBottom:'10px', cursor:'pointer' }}
+                style={{ fontSize:'clamp(17px, 2vw, 23px)', fontStyle:'italic', fontWeight:300, color:'white', lineHeight:1.3, marginBottom:'10px', cursor:'pointer' }}
               >
                 "{exhibits[activeIndex].title}"
               </p>
@@ -245,9 +272,9 @@ export default function ArchivePage() {
 
         {/* NAV ARROWS */}
         <button className="navbtn absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center z-20" onClick={prev}
-          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.88)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'18px' }}>←</button>
+          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.55)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'18px' }}>←</button>
         <button className="navbtn absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center z-20" onClick={next}
-          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.88)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'18px' }}>→</button>
+          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.55)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'18px' }}>→</button>
 
         {/* DOT NAV */}
         {exhibits.length > 1 && (
