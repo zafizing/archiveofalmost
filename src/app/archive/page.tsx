@@ -19,52 +19,36 @@ export default function ArchivePage() {
   const fadeRef = useRef<HTMLDivElement>(null);
 
   const fetchTotalCount = useCallback(async () => {
-    const { count } = await supabase
-      .from('exhibits').select('*', { count: 'exact', head: true }).eq('is_approved', true);
+    const { count } = await supabase.from('exhibits').select('*', { count: 'exact', head: true }).eq('is_approved', true);
     if (count !== null) setTotalCount(count);
   }, []);
   useEffect(() => { fetchTotalCount(); }, [fetchTotalCount]);
 
   const fetchExhibits = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('exhibits').select('*').eq('is_approved', true)
-      .order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('exhibits').select('*').eq('is_approved', true).order('created_at', { ascending: false });
     if (!error && data) setExhibits(data);
   }, []);
   useEffect(() => { fetchExhibits(); }, [fetchExhibits]);
 
-  // Auto-rotate
   useEffect(() => {
     if (exhibits.length === 0 || isPaused || selectedExhibit) return;
-    const t = setInterval(() => {
-      setActiveIndex(i => (i + 1) % exhibits.length);
-      setProgressKey(k => k + 1);
-    }, AUTO_INTERVAL);
+    const t = setInterval(() => { setActiveIndex(i => (i + 1) % exhibits.length); setProgressKey(k => k + 1); }, AUTO_INTERVAL);
     return () => clearInterval(t);
   }, [exhibits.length, isPaused, selectedExhibit]);
 
-  // Swipe hint fades after 5s
-  useEffect(() => {
-    const t = setTimeout(() => setShowSwipeHint(false), 5000);
-    return () => clearTimeout(t);
-  }, []);
+  useEffect(() => { const t = setTimeout(() => setShowSwipeHint(false), 5000); return () => clearTimeout(t); }, []);
 
   const goTo = (i: number) => {
-    const n = ((i % exhibits.length) + exhibits.length) % exhibits.length;
-    setActiveIndex(n);
+    setActiveIndex(((i % exhibits.length) + exhibits.length) % exhibits.length);
     setProgressKey(k => k + 1);
     setIsPaused(true);
     setShowSwipeHint(false);
     setTimeout(() => setIsPaused(false), 12000);
   };
-
   const next = () => goTo(activeIndex + 1);
   const prev = () => goTo(activeIndex - 1);
+  const getIdx = (offset: number) => ((activeIndex + offset) % exhibits.length + exhibits.length) % exhibits.length;
 
-  const getIndex = (offset: number) =>
-    ((activeIndex + offset) % exhibits.length + exhibits.length) % exhibits.length;
-
-  // Keyboard
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (selectedExhibit) {
@@ -95,232 +79,203 @@ export default function ArchivePage() {
   };
 
   return (
-    <main className="text-white overflow-hidden select-none" style={{ height: '100dvh', backgroundColor: '#0c0a09', fontFamily: 'Georgia, serif' }}>
+    <main className="text-white select-none" style={{ height: '100dvh', overflow: 'hidden', backgroundColor: '#0c0a09', fontFamily: 'Georgia, serif' }}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
         .cg { font-family: 'Cormorant Garamond', Georgia, serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-        @keyframes modalIn {
-          from { opacity: 0; transform: scale(0.97) translateY(10px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes progressFill {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
-        }
-        @keyframes swipeAnim {
-          0%   { transform: translateX(-4px); opacity: 0.4; }
-          50%  { transform: translateX(4px);  opacity: 1; }
-          100% { transform: translateX(-4px); opacity: 0.4; }
-        }
-        @keyframes blink {
-          0%,100% { opacity:0.3; } 50% { opacity:0.9; }
-        }
-
+        @keyframes modalIn { from { opacity:0; transform:scale(0.97) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes progressFill { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+        @keyframes swipeAnim { 0%,100%{transform:translateX(-5px);opacity:0.4;} 50%{transform:translateX(5px);opacity:1;} }
+        @keyframes blink { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
         .modal-anim { animation: modalIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
         .fu1 { animation: fadeUp 0.5s ease-out 0.05s forwards; opacity:0; }
         .fu2 { animation: fadeUp 0.5s ease-out 0.18s forwards; opacity:0; }
         .fu3 { animation: fadeUp 0.5s ease-out 0.30s forwards; opacity:0; }
-
         .navbtn { transition: all 0.25s; }
-        .navbtn:hover { color: white !important; border-color: rgba(255,255,255,0.4) !important; background: rgba(255,255,255,0.06) !important; }
-
-        .side-frame { transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94); cursor: pointer; }
-        .side-frame:hover { opacity: 0.65 !important; transform: translateY(-4px) scale(0.86) !important; }
+        .navbtn:hover { color:white !important; border-color:rgba(255,255,255,0.5) !important; background:rgba(255,255,255,0.07) !important; }
+        .side-frame { transition: all 0.65s cubic-bezier(0.25,0.46,0.45,0.94); cursor:pointer; }
+        .side-frame:hover { opacity:0.6 !important; }
       `}</style>
 
       {/* TOP BAR */}
       <div className="fixed top-[57px] md:top-[61px] left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-3"
-        style={{ backgroundColor: 'rgba(12,10,9,0.96)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <span className="cg tracking-[0.55em] uppercase italic" style={{ fontSize: '11px', color: '#555' }}>Permanent Collection</span>
+        style={{ backgroundColor:'rgba(12,10,9,0.96)', backdropFilter:'blur(16px)', borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
+        <span className="cg tracking-[0.5em] uppercase italic" style={{ fontSize:'11px', color:'rgba(255,255,255,0.55)' }}>Permanent Collection</span>
         <div className="flex items-center gap-5">
           {exhibits.length > 0 && (
-            <span style={{ fontSize: '10px', letterSpacing: '0.5em', color: '#444', textTransform: 'uppercase', fontWeight: 700 }}>
-              {String(activeIndex + 1).padStart(2,'0')} <span style={{ color: '#282828' }}>/ {String(exhibits.length).padStart(2,'0')}</span>
+            <span style={{ fontSize:'10px', letterSpacing:'0.5em', color:'rgba(255,255,255,0.5)', textTransform:'uppercase', fontWeight:700 }}>
+              {String(activeIndex+1).padStart(2,'0')} <span style={{ color:'rgba(255,255,255,0.2)' }}>/ {String(exhibits.length).padStart(2,'0')}</span>
             </span>
           )}
-          <span className="hidden md:block" style={{ fontSize: '9px', letterSpacing: '0.35em', color: '#2e2e2e', textTransform: 'uppercase' }}>← → Navigate</span>
+          <span className="hidden md:block" style={{ fontSize:'9px', letterSpacing:'0.35em', color:'rgba(255,255,255,0.3)', textTransform:'uppercase' }}>← → Navigate</span>
         </div>
       </div>
 
-      {/* STAGE */}
+      {/* FULL-HEIGHT STAGE */}
       <div
-        className="relative flex items-center justify-center"
-        style={{ height: '100dvh', overflow: 'hidden' }}
+        className="relative"
+        style={{ height:'100dvh', display:'grid', gridTemplateColumns:'1fr auto 1fr', gridTemplateRows:'1fr', alignItems:'center' }}
         onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => { const d = touchStartX.current - e.changedTouches[0].clientX; if (Math.abs(d) > 40) d > 0 ? next() : prev(); }}
       >
-        {/* Subtle wall texture */}
-        <div style={{ position:'absolute', inset:0, backgroundImage:'repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.006) 59px, rgba(255,255,255,0.006) 60px)', pointerEvents:'none' }} />
+        {/* Wall texture */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:'repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.005) 59px, rgba(255,255,255,0.005) 60px)', pointerEvents:'none', zIndex:0 }} />
         {/* Ceiling line */}
-        <div style={{ position:'absolute', top:'95px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 15%, rgba(255,255,255,0.07) 85%, transparent)', pointerEvents:'none' }} />
-        {/* Spotlight */}
-        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'400px', height:'100%', background:'radial-gradient(ellipse 30% 80% at 50% 0%, rgba(255,244,210,0.11) 0%, transparent 60%)', pointerEvents:'none' }} />
-        {/* Side vignette */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(0,0,0,0.65) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.65) 100%)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:'95px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent)', pointerEvents:'none', zIndex:1 }} />
+        {/* SPOTLIGHT — cone from top center */}
+        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'520px', height:'100%', pointerEvents:'none', zIndex:1,
+          background:'radial-gradient(ellipse 38% 75% at 50% -5%, rgba(255,248,220,0.18) 0%, rgba(255,244,200,0.06) 40%, transparent 70%)' }} />
+        {/* Extra tight beam */}
+        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'240px', height:'60%', pointerEvents:'none', zIndex:1,
+          background:'radial-gradient(ellipse 30% 80% at 50% 0%, rgba(255,252,230,0.1) 0%, transparent 60%)' }} />
+        {/* Side vignettes */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)', pointerEvents:'none', zIndex:1 }} />
         {/* Floor line */}
-        <div style={{ position:'absolute', bottom:'66px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.04) 80%, transparent)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', bottom:'66px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.05) 20%, rgba(255,255,255,0.05) 80%, transparent)', pointerEvents:'none', zIndex:1 }} />
 
-        {exhibits.length > 0 && (
-          <div style={{ position:'relative', width:'100%', display:'flex', alignItems:'flex-end', justifyContent:'center', gap:'0', paddingBottom:'80px' }}>
+        {exhibits.length > 0 && (<>
 
-            {/* LEFT SIDE CARD */}
-            <div
-              className="side-frame hidden md:block absolute"
-              style={{
-                left: 'calc(50% - 530px)',
-                bottom: '80px',
-                width: '200px',
-                opacity: 0.38,
-                filter: 'brightness(0.45) saturate(0.5)',
-                transform: 'translateY(50px) scale(0.78)',
-                transformOrigin: 'center bottom',
-              }}
-              onClick={prev}
-            >
-              <div style={{ display:'flex', justifyContent:'center', height:'16px' }}>
-                <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.07)' }} />
+          {/* LEFT SIDE CARD — vertically centered in left column */}
+          <div className="side-frame hidden md:flex items-center justify-end pr-8 relative z-10" style={{ height:'100%' }} onClick={prev}>
+            <div style={{ width:'180px', opacity:0.35, filter:'brightness(0.4) saturate(0.4)', transform:'scale(0.82)', transformOrigin:'center center' }}>
+              <div style={{ display:'flex', justifyContent:'center', height:'14px' }}>
+                <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.08)' }} />
               </div>
-              <div style={{ background:'linear-gradient(135deg,#3a2e20 0%,#251a0e 50%,#3a2e20 100%)', padding:'6px', boxShadow:'0 20px 50px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#e8e2d6', padding:'6px 6px 20px 6px' }}>
+              <div style={{ background:'linear-gradient(135deg,#3a2e20 0%,#251a0e 50%,#3a2e20 100%)', padding:'5px', boxShadow:'0 20px 50px rgba(0,0,0,0.95)' }}>
+                <div style={{ background:'#e5dfd3', padding:'5px 5px 18px 5px' }}>
                   <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                    <Image src={exhibits[getIndex(-1)].image_url} alt="" fill unoptimized className="object-cover" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CENTER CARD */}
-            <div style={{ position:'relative', zIndex:10, display:'flex', flexDirection:'column', alignItems:'center' }}>
-              {/* Wire */}
-              <div style={{ width:'1px', height:'32px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15))', marginBottom:'0' }} />
-
-              {/* Main frame */}
-              <div
-                onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                style={{
-                  background:'linear-gradient(145deg, #4e3c28 0%, #2e1e0f 35%, #4e3c28 65%, #1e1005 100%)',
-                  padding:'12px',
-                  boxShadow:'0 60px 140px rgba(0,0,0,0.97), 0 0 0 1px rgba(255,255,255,0.08), 0 0 80px rgba(255,244,200,0.05)',
-                  cursor:'pointer',
-                  transition:'box-shadow 0.4s ease, transform 0.4s ease',
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 70px 160px rgba(0,0,0,0.97), 0 0 0 1px rgba(255,255,255,0.12), 0 0 100px rgba(255,244,200,0.07)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 60px 140px rgba(0,0,0,0.97), 0 0 0 1px rgba(255,255,255,0.08), 0 0 80px rgba(255,244,200,0.05)'; }}
-              >
-                {/* Passepartout */}
-                <div style={{ background:'#ede7db', padding:'12px 12px 36px 12px' }}>
-                  <div style={{ position:'relative', width:'clamp(300px, 38vw, 500px)', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                    <Image
-                      src={exhibits[activeIndex].image_url}
-                      alt={exhibits[activeIndex].title}
-                      fill unoptimized className="object-cover"
-                      style={{ filter:'saturate(0.88) contrast(1.04)', transition:'transform 0.8s ease' }}
-                    />
-                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,244,200,0.12) 0%, transparent 60%)' }} />
-                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 50px rgba(0,0,0,0.45)' }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Museum label */}
-              <div style={{ marginTop:'20px', width:'clamp(300px, 38vw, 500px)' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
-                  <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'#555', textTransform:'uppercase', fontWeight:700 }}>
-                    {exhibits[activeIndex].catalog_id}
-                  </span>
-                  <div style={{ width:'16px', height:'1px', background:'#333' }} />
-                  <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'#555', textTransform:'uppercase', fontWeight:700 }}>
-                    {exhibits[activeIndex].year}
-                  </span>
-                </div>
-                <p className="cg" onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                  style={{ fontSize:'clamp(18px, 2vw, 24px)', fontStyle:'italic', fontWeight:300, color:'rgba(255,255,255,0.78)', lineHeight:1.3, marginBottom:'10px', cursor:'pointer' }}>
-                  "{exhibits[activeIndex].title}"
-                </p>
-                <span onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                  style={{ fontSize:'9px', letterSpacing:'0.45em', color:'#555', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.7)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color='#555')}
-                >View object →</span>
-
-                {/* Progress bar */}
-                <div style={{ marginTop:'18px', height:'2px', background:'rgba(255,255,255,0.06)', overflow:'hidden', borderRadius:'1px' }}>
-                  {!isPaused && !selectedExhibit && (
-                    <div key={progressKey} style={{
-                      height:'100%',
-                      background:'rgba(255,255,255,0.35)',
-                      transformOrigin:'left',
-                      animation:`progressFill ${AUTO_INTERVAL}ms linear forwards`,
-                      borderRadius:'1px',
-                    }} />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT SIDE CARD */}
-            <div
-              className="side-frame hidden md:block absolute"
-              style={{
-                right: 'calc(50% - 530px)',
-                bottom: '80px',
-                width: '200px',
-                opacity: 0.38,
-                filter: 'brightness(0.45) saturate(0.5)',
-                transform: 'translateY(50px) scale(0.78)',
-                transformOrigin: 'center bottom',
-              }}
-              onClick={next}
-            >
-              <div style={{ display:'flex', justifyContent:'center', height:'16px' }}>
-                <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.07)' }} />
-              </div>
-              <div style={{ background:'linear-gradient(135deg,#3a2e20 0%,#251a0e 50%,#3a2e20 100%)', padding:'6px', boxShadow:'0 20px 50px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#e8e2d6', padding:'6px 6px 20px 6px' }}>
-                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                    <Image src={exhibits[getIndex(1)].image_url} alt="" fill unoptimized className="object-cover" />
+                    <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+
+          {/* CENTER CARD */}
+          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 16px' }}>
+            {/* Wire from ceiling */}
+            <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.18))' }} />
+
+            {/* Frame */}
+            <div
+              onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+              style={{
+                background:'linear-gradient(145deg, #52402a 0%, #301e0c 35%, #52402a 65%, #1e0e05 100%)',
+                padding:'12px',
+                boxShadow:'0 50px 130px rgba(0,0,0,0.98), 0 0 0 1px rgba(255,255,255,0.1), 0 -10px 40px rgba(255,248,200,0.06)',
+                cursor:'pointer',
+                transition:'transform 0.4s ease, box-shadow 0.4s ease',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 60px 150px rgba(0,0,0,0.98), 0 0 0 1px rgba(255,255,255,0.14), 0 -10px 50px rgba(255,248,200,0.09)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 50px 130px rgba(0,0,0,0.98), 0 0 0 1px rgba(255,255,255,0.1), 0 -10px 40px rgba(255,248,200,0.06)';
+              }}
+            >
+              <div style={{ background:'#ede7db', padding:'12px 12px 36px 12px' }}>
+                <div style={{ position:'relative', width:'clamp(280px, 34vw, 460px)', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                  <Image
+                    key={activeIndex}
+                    src={exhibits[activeIndex].image_url}
+                    alt={exhibits[activeIndex].title}
+                    fill unoptimized className="object-cover"
+                    style={{ filter:'saturate(0.88) contrast(1.05)' }}
+                  />
+                  <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255,248,210,0.14) 0%, transparent 55%)' }} />
+                  <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 55px rgba(0,0,0,0.45)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Label */}
+            <div style={{ marginTop:'18px', width:'clamp(280px, 34vw, 460px)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
+                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'rgba(255,255,255,0.6)', textTransform:'uppercase', fontWeight:700 }}>
+                  {exhibits[activeIndex].catalog_id}
+                </span>
+                <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
+                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.6)', textTransform:'uppercase', fontWeight:700 }}>
+                  {exhibits[activeIndex].year}
+                </span>
+              </div>
+              <p
+                className="cg"
+                onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+                style={{ fontSize:'clamp(17px, 2vw, 23px)', fontStyle:'italic', fontWeight:300, color:'rgba(255,255,255,0.88)', lineHeight:1.3, marginBottom:'10px', cursor:'pointer' }}
+              >
+                "{exhibits[activeIndex].title}"
+              </p>
+              <span
+                onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.45)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.85)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.45)')}
+              >View object →</span>
+
+              {/* Progress bar */}
+              <div style={{ marginTop:'16px', height:'2px', background:'rgba(255,255,255,0.08)', overflow:'hidden', borderRadius:'1px' }}>
+                {!isPaused && !selectedExhibit && (
+                  <div key={progressKey} style={{
+                    height:'100%', background:'rgba(255,255,255,0.45)',
+                    transformOrigin:'left', borderRadius:'1px',
+                    animation:`progressFill ${AUTO_INTERVAL}ms linear forwards`,
+                  }} />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE CARD — vertically centered in right column */}
+          <div className="side-frame hidden md:flex items-center justify-start pl-8 relative z-10" style={{ height:'100%' }} onClick={next}>
+            <div style={{ width:'180px', opacity:0.35, filter:'brightness(0.4) saturate(0.4)', transform:'scale(0.82)', transformOrigin:'center center' }}>
+              <div style={{ display:'flex', justifyContent:'center', height:'14px' }}>
+                <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.08)' }} />
+              </div>
+              <div style={{ background:'linear-gradient(135deg,#3a2e20 0%,#251a0e 50%,#3a2e20 100%)', padding:'5px', boxShadow:'0 20px 50px rgba(0,0,0,0.95)' }}>
+                <div style={{ background:'#e5dfd3', padding:'5px 5px 18px 5px' }}>
+                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                    <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </>)}
 
         {/* NAV ARROWS */}
-        <button className="navbtn absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center" onClick={prev}
-          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.15)', background:'rgba(0,0,0,0.5)', color:'rgba(255,255,255,0.55)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'17px' }}>←</button>
-        <button className="navbtn absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center" onClick={next}
-          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.15)', background:'rgba(0,0,0,0.5)', color:'rgba(255,255,255,0.55)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'17px' }}>→</button>
+        <button className="navbtn absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center z-20" onClick={prev}
+          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.65)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'17px' }}>←</button>
+        <button className="navbtn absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center z-20" onClick={next}
+          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.65)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'17px' }}>→</button>
 
         {/* DOT NAV */}
         {exhibits.length > 1 && (
-          <div style={{ position:'absolute', bottom:'84px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'7px', alignItems:'center' }}>
+          <div style={{ position:'absolute', bottom:'82px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'7px', alignItems:'center', zIndex:10 }}>
             {exhibits.map((_, i) => (
               <button key={i} onClick={() => goTo(i)} style={{
-                width: i === activeIndex ? '22px' : '5px',
-                height:'4px', borderRadius:'2px',
-                background: i === activeIndex ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.12)',
+                width: i === activeIndex ? '22px' : '5px', height:'4px', borderRadius:'2px',
+                background: i === activeIndex ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)',
                 border:'none', cursor:'pointer', padding:0, transition:'all 0.4s ease',
               }} />
             ))}
           </div>
         )}
 
-        {/* SWIPE HINT mobile */}
+        {/* SWIPE HINT */}
         <div className="md:hidden" style={{
-          position:'absolute', bottom:'110px', left:'50%', transform:'translateX(-50%)',
-          display:'flex', alignItems:'center', gap:'8px',
-          opacity: showSwipeHint ? 1 : 0, transition:'opacity 1s ease', pointerEvents:'none',
+          position:'absolute', bottom:'108px', left:'50%', transform:'translateX(-50%)',
+          display:'flex', alignItems:'center', gap:'8px', zIndex:10,
+          opacity: showSwipeHint ? 1 : 0, transition:'opacity 1.2s ease', pointerEvents:'none',
         }}>
-          <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.35)', textTransform:'uppercase' }}>Swipe</span>
-          <div style={{ animation:'swipeAnim 1.4s ease-in-out infinite', color:'rgba(255,255,255,0.35)', fontSize:'13px' }}>→</div>
+          <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.45)', textTransform:'uppercase' }}>Swipe</span>
+          <div style={{ animation:'swipeAnim 1.4s ease-in-out infinite', color:'rgba(255,255,255,0.45)', fontSize:'13px' }}>→</div>
         </div>
       </div>
 
@@ -339,28 +294,28 @@ export default function ArchivePage() {
           }}
         >
           <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(4,3,2,0.97)', backdropFilter:'blur(30px)' }} />
-          <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'500px', height:'350px', pointerEvents:'none', background:'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(255,244,200,0.07) 0%, transparent 70%)' }} />
+          <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'500px', height:'350px', pointerEvents:'none',
+            background:'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(255,244,200,0.08) 0%, transparent 70%)' }} />
 
-          {/* Modal arrows */}
           <button className="navbtn hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center"
             onClick={(e) => { e.stopPropagation(); const n=((activeIndex-1)+exhibits.length)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
-            style={{ border:'1px solid rgba(255,255,255,0.15)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.55)', cursor:'pointer', fontSize:'17px' }}>←</button>
+            style={{ border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.65)', cursor:'pointer', fontSize:'17px' }}>←</button>
           <button className="navbtn hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center"
             onClick={(e) => { e.stopPropagation(); const n=(activeIndex+1)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
-            style={{ border:'1px solid rgba(255,255,255,0.15)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.55)', cursor:'pointer', fontSize:'17px' }}>→</button>
+            style={{ border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.65)', cursor:'pointer', fontSize:'17px' }}>→</button>
 
           <div
             className="modal-anim relative w-full max-w-5xl flex flex-col md:flex-row z-10 max-h-[90vh] overflow-y-auto scrollbar-hide"
-            style={{ border:'1px solid rgba(255,255,255,0.1)' }}
+            style={{ border:'1px solid rgba(255,255,255,0.12)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
             <div className="w-full md:w-[52%] shrink-0" style={{ backgroundColor:'#0a0807', padding:'20px' }}>
-              <div style={{ background:'linear-gradient(145deg,#4e3c28 0%,#2e1e0f 35%,#4e3c28 65%,#1e1005 100%)', padding:'9px', boxShadow:'0 24px 70px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#ede7db', padding:'10px 10px 28px 10px' }}>
+              <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'9px', boxShadow:'0 24px 70px rgba(0,0,0,0.9)' }}>
+                <div style={{ background:'#ede7db', padding:'10px 10px 30px 10px' }}>
                   <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
                     <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
-                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.09) 0%, transparent 60%)' }} />
+                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.1) 0%, transparent 60%)' }} />
                     <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 50px rgba(0,0,0,0.4)' }} />
                   </div>
                 </div>
@@ -369,32 +324,31 @@ export default function ArchivePage() {
 
             {/* Info */}
             <div className="w-full md:w-[48%] flex flex-col justify-between p-6 md:p-10"
-              style={{ backgroundColor:'#090706', borderLeft:'1px solid rgba(255,255,255,0.07)', minHeight:'300px' }}>
+              style={{ backgroundColor:'#090706', borderLeft:'1px solid rgba(255,255,255,0.08)', minHeight:'300px' }}>
               <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-                {/* Header */}
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', fontWeight:700 }}>
+                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.45)', fontWeight:700 }}>
                     {String(activeIndex+1).padStart(2,'0')} / {String(exhibits.length).padStart(2,'0')}
                   </span>
                   <button onClick={() => setSelectedExhibit(null)}
-                    style={{ fontSize:'10px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.5)', fontWeight:700, cursor:'pointer', background:'none', border:'none', transition:'color 0.2s' }}
+                    style={{ fontSize:'11px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', fontWeight:700, cursor:'pointer', background:'none', border:'none', transition:'color 0.2s', fontFamily:'Georgia' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color='white')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.5)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.6)')}
                   >Close ×</button>
                 </div>
 
                 <div className="fu1">
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
-                    <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
-                    <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.15)' }} />
-                    <span style={{ fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', color:'rgba(255,255,255,0.4)', fontWeight:700 }}>{selectedExhibit.year}</span>
+                    <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
+                    <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
+                    <span style={{ fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontWeight:700 }}>{selectedExhibit.year}</span>
                   </div>
-                  <h2 className="cg" style={{ fontSize:'clamp(20px, 3vw, 34px)', fontWeight:300, fontStyle:'italic', color:'rgba(255,255,255,0.92)', lineHeight:1.2 }}>
+                  <h2 className="cg" style={{ fontSize:'clamp(20px, 3vw, 34px)', fontWeight:300, fontStyle:'italic', color:'rgba(255,255,255,0.95)', lineHeight:1.2 }}>
                     "{selectedExhibit.title}"
                   </h2>
                 </div>
 
-                <div className="fu1" style={{ width:'28px', height:'1px', background:'rgba(255,255,255,0.12)' }} />
+                <div className="fu1" style={{ width:'28px', height:'1px', background:'rgba(255,255,255,0.15)' }} />
 
                 <div className="fu2" style={{ position:'relative' }}>
                   <div ref={storyRef} className="scrollbar-hide" style={{ maxHeight:'220px', overflowY:'auto' }}
@@ -402,7 +356,7 @@ export default function ArchivePage() {
                       const el = e.currentTarget;
                       if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1';
                     }}>
-                    <p className="cg" style={{ fontSize:'15px', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.65)' }}>
+                    <p className="cg" style={{ fontSize:'15px', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.72)' }}>
                       {selectedExhibit.description}
                     </p>
                   </div>
@@ -410,16 +364,16 @@ export default function ArchivePage() {
                 </div>
               </div>
 
-              <div className="fu3" style={{ paddingTop:'20px', marginTop:'20px', borderTop:'1px solid rgba(255,255,255,0.08)', display:'flex', flexDirection:'column', gap:'12px' }}>
+              <div className="fu3" style={{ paddingTop:'20px', marginTop:'20px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:'12px' }}>
                 {selectedExhibit.submitter_name && (
-                  <p className="cg" style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', fontStyle:'italic' }}>
+                  <p className="cg" style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(255,255,255,0.45)', fontStyle:'italic' }}>
                     — {selectedExhibit.submitter_name}
                   </p>
                 )}
                 <button onClick={() => handleShare(selectedExhibit)}
-                  style={{ width:'100%', padding:'13px', fontSize:'10px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.55)', border:'1px solid rgba(255,255,255,0.18)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.5)'; e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color='rgba(255,255,255,0.55)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.18)'; e.currentTarget.style.background='none'; }}
+                  style={{ width:'100%', padding:'13px', fontSize:'10px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.65)', border:'1px solid rgba(255,255,255,0.22)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.6)'; e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color='rgba(255,255,255,0.65)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.22)'; e.currentTarget.style.background='none'; }}
                 >Share this object</button>
               </div>
             </div>
@@ -429,15 +383,15 @@ export default function ArchivePage() {
 
       {/* BOTTOM BAR */}
       <div className="fixed bottom-0 left-0 right-0 z-50 px-6 md:px-10 py-4 flex items-center justify-between"
-        style={{ backgroundColor:'rgba(12,10,9,0.97)', backdropFilter:'blur(12px)', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+        style={{ backgroundColor:'rgba(12,10,9,0.97)', backdropFilter:'blur(12px)', borderTop:'1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-          <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'rgba(255,255,255,0.3)', animation:'blink 2.5s infinite' }} />
-          <span style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.3)' }}>
+          <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'rgba(255,255,255,0.4)', animation:'blink 2.5s infinite' }} />
+          <span style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.4)' }}>
             {totalCount} of {TOTAL_SLOTS} objects archived
           </span>
         </div>
         <a href="/submit"
-          style={{ padding:'10px 28px', fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', fontWeight:700, color:'white', border:'1px solid rgba(255,255,255,0.3)', textDecoration:'none', transition:'all 0.3s', fontFamily:'Georgia' }}
+          style={{ padding:'10px 28px', fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', fontWeight:700, color:'white', border:'1px solid rgba(255,255,255,0.35)', textDecoration:'none', transition:'all 0.3s', fontFamily:'Georgia' }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background='white'; (e.currentTarget as HTMLElement).style.color='black'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background='transparent'; (e.currentTarget as HTMLElement).style.color='white'; }}
         >Apply</a>
