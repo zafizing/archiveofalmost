@@ -300,8 +300,8 @@ export default function ArchivePage() {
       {/* ══════════════ MODAL ══════════════ */}
       {selectedExhibit && (
         <div
-          className="fixed inset-0 z-[200] flex items-end md:items-center justify-center"
-          style={{ padding:'0' }}
+          className="fixed inset-0 z-[200] flex items-start justify-center md:items-center"
+          style={{ padding:'0', paddingTop:'57px' }}
           onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }}
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
           onTouchEnd={(e) => {
