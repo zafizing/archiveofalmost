@@ -117,7 +117,7 @@ export default function ArchivePage() {
       {/* FULL-HEIGHT STAGE */}
       <div
         className="relative"
-        style={{ height:'100dvh', display:'grid', gridTemplateColumns:'1fr auto 1fr', gridTemplateRows:'1fr', alignItems:'center' }}
+        style={{ height:'100dvh', display:'grid', gridTemplateColumns:'minmax(0,1fr) auto minmax(0,1fr)', gridTemplateRows:'1fr', alignItems:'center', overflow:'hidden' }}
         onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => { const d = touchStartX.current - e.changedTouches[0].clientX; if (Math.abs(d) > 40) d > 0 ? next() : prev(); }}
       >
@@ -155,7 +155,7 @@ export default function ArchivePage() {
           </div>
 
           {/* CENTER CARD */}
-          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 16px' }}>
+          <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 clamp(8px, 2vw, 16px)', maxWidth:'100vw' }}>
             {/* Wire from ceiling */}
             <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.18))' }} />
 
@@ -163,9 +163,11 @@ export default function ArchivePage() {
             <div
               onClick={() => setSelectedExhibit(exhibits[activeIndex])}
               style={{
-                background:'linear-gradient(145deg, #52402a 0%, #301e0c 35%, #52402a 65%, #1e0e05 100%)',
+                background:'linear-gradient(145deg, #5a4830 0%, #32200e 35%, #5a4830 65%, #221205 100%)',
                 padding:'12px',
-                boxShadow:'0 50px 130px rgba(0,0,0,0.98), 0 0 0 1px rgba(255,255,255,0.1), 0 -10px 40px rgba(255,248,200,0.06)',
+                outline:'1px solid rgba(212,180,120,0.15)',
+                outlineOffset:'-6px',
+                boxShadow:'0 50px 130px rgba(0,0,0,0.98), 0 0 0 1px rgba(255,255,255,0.12), 0 -10px 40px rgba(255,248,200,0.08), inset 0 0 0 1px rgba(100,70,30,0.4)',
                 cursor:'pointer',
                 transition:'transform 0.4s ease, box-shadow 0.4s ease',
               }}
@@ -179,7 +181,7 @@ export default function ArchivePage() {
               }}
             >
               <div style={{ background:'#ede7db', padding:'12px 12px 36px 12px' }}>
-                <div style={{ position:'relative', width:'clamp(280px, 34vw, 460px)', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <div style={{ position:'relative', width:'clamp(240px, min(34vw, 80vw), 460px)', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
                   <Image
                     key={activeIndex}
                     src={exhibits[activeIndex].image_url}
@@ -194,7 +196,7 @@ export default function ArchivePage() {
             </div>
 
             {/* Label */}
-            <div style={{ marginTop:'18px', width:'clamp(280px, 34vw, 460px)' }}>
+            <div style={{ marginTop:'18px', width:'clamp(240px, min(34vw, 80vw), 460px)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
                 <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'rgba(255,255,255,0.78)', textTransform:'uppercase', fontWeight:700 }}>
                   {exhibits[activeIndex].catalog_id}
@@ -251,9 +253,9 @@ export default function ArchivePage() {
 
         {/* NAV ARROWS */}
         <button className="navbtn absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center z-20" onClick={prev}
-          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.65)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'17px' }}>←</button>
+          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.88)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'18px' }}>←</button>
         <button className="navbtn absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center z-20" onClick={next}
-          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.65)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'17px' }}>→</button>
+          style={{ width:'44px', height:'44px', border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.55)', color:'rgba(255,255,255,0.88)', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'18px' }}>→</button>
 
         {/* DOT NAV */}
         {exhibits.length > 1 && (
@@ -294,6 +296,11 @@ export default function ArchivePage() {
           }}
         >
           <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(4,3,2,0.97)', backdropFilter:'blur(30px)' }} />
+          {/* Mobile swipe hints in modal */}
+          <div className="md:hidden" style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'space-between', pointerEvents:'none', padding:'0 16px', zIndex:5 }}>
+            <div style={{ fontSize:'11px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.2)', textTransform:'uppercase' }}>← Swipe</div>
+            <div style={{ fontSize:'11px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.2)', textTransform:'uppercase' }}>Swipe →</div>
+          </div>
           <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'500px', height:'350px', pointerEvents:'none',
             background:'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(255,244,200,0.08) 0%, transparent 70%)' }} />
 
@@ -356,7 +363,7 @@ export default function ArchivePage() {
                       const el = e.currentTarget;
                       if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1';
                     }}>
-                    <p className="cg" style={{ fontSize:'15px', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.72)' }}>
+                    <p className="cg" style={{ fontSize:'17px', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.82)' }}>
                       {selectedExhibit.description}
                     </p>
                   </div>
@@ -366,9 +373,9 @@ export default function ArchivePage() {
 
               <div className="fu3" style={{ paddingTop:'20px', marginTop:'20px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:'12px' }}>
                 {selectedExhibit.submitter_name && (
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                    <div style={{ width:'18px', height:'1px', background:'rgba(255,255,255,0.35)' }} />
-                    <p className="cg" style={{ fontSize:'14px', letterSpacing:'0.3em', textTransform:'uppercase', color:'rgba(255,255,255,0.95)', fontStyle:'italic', fontWeight:400 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                    <div style={{ width:'20px', height:'1px', background:'rgba(255,255,255,0.4)' }} />
+                    <p className="cg" style={{ fontSize:'17px', letterSpacing:'0.25em', textTransform:'uppercase', color:'white', fontStyle:'italic', fontWeight:400, textDecoration:'underline', textUnderlineOffset:'4px', textDecorationColor:'rgba(255,255,255,0.3)', textDecorationThickness:'1px' }}>
                       {selectedExhibit.submitter_name}
                     </p>
                   </div>
