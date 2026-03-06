@@ -187,9 +187,9 @@ export default function ArchivePage() {
 
           {/* ── LEFT SIDE PHOTO ── centered in gap left of center photo */}
           <div className="hidden md:flex items-center justify-center" onClick={prev}
-            style={{ position:'absolute', left:'60px', top:0, bottom:0, width:'calc(50% - 300px)', zIndex:10, cursor:'pointer' }}>
+            style={{ position:'absolute', left:'50px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
             <div
-              style={{ width:'min(200px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
+              style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}
             >
@@ -203,27 +203,18 @@ export default function ArchivePage() {
           <div className="relative z-10 flex flex-col items-center"
             style={{ width:'480px', maxWidth:'calc(100vw - 520px)', flexShrink:0 }}>
 
-            {/* Hanging wire */}
-            <div style={{ width:'1px', height:'40px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.2))' }} />
-
             <div
               onClick={() => setSelectedExhibit(exhibits[activeIndex])}
               style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.45s ease' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}
             >
-              {/* Strong warm backlight */}
+              {/* White backlight */}
               <div style={{
                 position:'absolute', inset:'-50px',
-                background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,235,170,0.60) 0%, rgba(255,220,130,0.28) 32%, transparent 62%)',
+                background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, transparent 62%)',
                 pointerEvents:'none', zIndex:-1,
-                filter:'blur(20px)',
-              }} />
-              {/* Wide soft halo */}
-              <div style={{
-                position:'absolute', inset:'-110px',
-                background:'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(255,228,150,0.20) 0%, transparent 58%)',
-                pointerEvents:'none', zIndex:-1,
+                filter:'blur(15px)',
               }} />
               {/* Shadow below */}
               <div style={{ position:'absolute', top:'98%', left:'8%', right:'8%', height:'50px',
@@ -266,9 +257,9 @@ export default function ArchivePage() {
 
           {/* ── RIGHT SIDE PHOTO ── centered in gap right of center photo */}
           <div className="hidden md:flex items-center justify-center" onClick={next}
-            style={{ position:'absolute', right:'60px', top:0, bottom:0, width:'calc(50% - 300px)', zIndex:10, cursor:'pointer' }}>
+            style={{ position:'absolute', right:'50px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
             <div
-              style={{ width:'min(200px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
+              style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}
             >
