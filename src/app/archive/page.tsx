@@ -326,6 +326,22 @@ export default function ArchivePage() {
           height: 4px;
           background: linear-gradient(to top, rgba(255,255,255,0.05), transparent);
         }
+
+        /* Responsive grid */
+        @media (max-width: 768px) {
+          .museum-grid {
+            grid-template-columns: 1fr !important;
+            gap: 60px 0 !important;
+            padding: 40px 24px !important;
+          }
+        }
+        @media (min-width: 769px) and (max-width: 1100px) {
+          .museum-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 60px 40px !important;
+            padding: 60px 40px !important;
+          }
+        }
       `}</style>
 
       {/* Sticky top bar */}
@@ -365,7 +381,7 @@ export default function ArchivePage() {
 
         {/* === ARTWORK GRID === */}
         <div
-          className="relative z-10"
+          className="museum-grid relative z-10"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -449,23 +465,6 @@ export default function ArchivePage() {
           })}
         </div>
 
-        {/* Mobile grid — simpler for small screens */}
-        <style jsx>{`
-          @media (max-width: 768px) {
-            .museum-grid-override {
-              grid-template-columns: 1fr !important;
-              gap: 60px 0 !important;
-              padding: 40px 24px !important;
-            }
-          }
-          @media (min-width: 769px) and (max-width: 1100px) {
-            .museum-grid-override {
-              grid-template-columns: repeat(2, 1fr) !important;
-              gap: 60px 40px !important;
-              padding: 60px 40px !important;
-            }
-          }
-        `}</style>
 
         {/* Floor shadow */}
         <div className="floor-line"></div>
