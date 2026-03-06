@@ -229,18 +229,25 @@ export default function ArchivePage() {
               {/* Spotlight glow on wall */}
               <div style={{ position:'absolute', inset:'-40px', background:'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,244,200,0.10) 0%, transparent 65%)', pointerEvents:'none', zIndex:-1 }} />
 
-              {/* IMAGE behind frame — padded to sit inside frame opening */}
-              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', backgroundColor:'#0c0a09' }}>
-                <div style={{ position:'absolute', inset:'14%', overflow:'hidden' }}>
-                  <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
-                  <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 30px rgba(0,0,0,0.4)' }} />
+              {/* FRAME: CSS walnut + gold inner line */}
+              <div style={{
+                width:'100%',
+                background:'linear-gradient(145deg, #3a2410 0%, #5c3820 15%, #3a2410 30%, #6a4428 50%, #3a2410 70%, #5c3820 85%, #3a2410 100%)',
+                padding:'14px',
+                boxShadow:'inset 1px 1px 3px rgba(255,255,255,0.08), inset -1px -1px 4px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)',
+              }}>
+                {/* Gold inner bead line */}
+                <div style={{ padding:'2px', background:'linear-gradient(135deg, #a07828 0%, #d4a843 30%, #8a6420 60%, #c49838 100%)' }}>
+                  <div style={{ padding:'2px', background:'#1a0e06' }}>
+                    {/* Cream mat */}
+                    <div style={{ background:'#ece6d8', padding:'6px 6px 22px 6px', boxShadow:'inset 0 0 16px rgba(0,0,0,0.2)' }}>
+                      <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                        <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
+                        <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 30px rgba(0,0,0,0.35)' }} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                {/* Frame PNG — screen blend mode makes black invisible */}
-                <img
-                  src="https://kfsllwsvqzshggvyuqvm.supabase.co/storage/v1/object/public/assets/frame.png"
-                  alt=""
-                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', zIndex:2, mixBlendMode:'screen' }}
-                />
               </div>
             </div>
 
