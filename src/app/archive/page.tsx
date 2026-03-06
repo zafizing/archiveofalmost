@@ -326,7 +326,14 @@ export default function ArchivePage() {
           {/* Modal card */}
           <div
             className="modal-anim relative w-full z-10 flex flex-col md:flex-row"
-            style={{ maxWidth:'900px', maxHeight:'92dvh', overflowY:'auto', WebkitOverflowScrolling:'touch' as any, border:'1px solid rgba(255,255,255,0.3)' }}
+            style={{
+              maxWidth:'900px',
+              height:'calc(100dvh - 57px)',
+              overflowY:'auto',
+              WebkitOverflowScrolling:'touch' as any,
+              border:'none',
+              borderTop:'1px solid rgba(255,255,255,0.15)',
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* ── MOBILE: küçük fotoğraf üstte yatay ── */}
@@ -459,18 +466,20 @@ export default function ArchivePage() {
           style={{ backgroundColor:'rgba(0,0,0,0.97)', backdropFilter:'blur(20px)' }}
           onClick={() => setShowFullImage(false)}
         >
-          <div style={{ position:'relative', width:'92vw', maxWidth:'500px', aspectRatio:'1/1' }}>
+          <div style={{ position:'relative', width:'92vw', maxWidth:'500px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'8px', boxShadow:'0 30px 80px rgba(0,0,0,0.9)' }}>
               <div style={{ background:'#ede7db', padding:'6px 6px 20px 6px' }}>
                 <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
                   <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
+                  {/* X on image corner */}
+                  <button
+                    onClick={() => setShowFullImage(false)}
+                    style={{ position:'absolute', top:'8px', right:'8px', width:'28px', height:'28px', background:'rgba(0,0,0,0.65)', border:'none', color:'white', fontSize:'14px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}
+                  >×</button>
                 </div>
               </div>
             </div>
           </div>
-          <button onClick={() => setShowFullImage(false)} style={{ position:'absolute', top:'20px', right:'20px', fontSize:'11px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', background:'none', border:'1px solid rgba(255,255,255,0.15)', padding:'8px 14px', cursor:'pointer', fontFamily:'Georgia' }}>
-            Close ×
-          </button>
         </div>
       )}
 
