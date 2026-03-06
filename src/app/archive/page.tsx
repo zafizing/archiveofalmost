@@ -366,9 +366,12 @@ export default function ArchivePage() {
 
               <div className="fu3" style={{ paddingTop:'20px', marginTop:'20px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:'12px' }}>
                 {selectedExhibit.submitter_name && (
-                  <p className="cg" style={{ fontSize:'10px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(255,255,255,0.65)', fontStyle:'italic' }}>
-                    — {selectedExhibit.submitter_name}
-                  </p>
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                    <div style={{ width:'18px', height:'1px', background:'rgba(255,255,255,0.35)' }} />
+                    <p className="cg" style={{ fontSize:'14px', letterSpacing:'0.3em', textTransform:'uppercase', color:'rgba(255,255,255,0.95)', fontStyle:'italic', fontWeight:400 }}>
+                      {selectedExhibit.submitter_name}
+                    </p>
+                  </div>
                 )}
                 <button onClick={() => handleShare(selectedExhibit)}
                   style={{ width:'100%', padding:'13px', fontSize:'10px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.65)', border:'1px solid rgba(255,255,255,0.22)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
