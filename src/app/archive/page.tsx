@@ -201,7 +201,7 @@ export default function ArchivePage() {
 
           {/* ── CENTER PHOTO ── */}
           <div className="relative z-10 flex flex-col items-center"
-            style={{ width:'480px', maxWidth:'calc(100vw - 520px)', flexShrink:0 }}>
+            style={{ width:'min(480px, 90vw)', flexShrink:0 }}>
 
             <div
               onClick={() => setSelectedExhibit(exhibits[activeIndex])}
@@ -209,8 +209,8 @@ export default function ArchivePage() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}
             >
-              {/* White backlight */}
-              <div style={{
+              {/* White backlight — desktop only to avoid layout issues on mobile */}
+              <div className="hidden md:block" style={{
                 position:'absolute', inset:'-50px',
                 background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.28) 35%, transparent 62%)',
                 pointerEvents:'none', zIndex:-1,
