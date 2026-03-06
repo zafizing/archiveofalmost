@@ -221,75 +221,27 @@ export default function ArchivePage() {
                 position:'relative',
                 cursor:'pointer',
                 transition:'transform 0.4s ease',
-                /* Outer drop shadow — frame weight on wall */
-                filter:'drop-shadow(0 40px 80px rgba(0,0,0,0.95)) drop-shadow(0 8px 20px rgba(0,0,0,0.8))',
+                filter:'drop-shadow(0 30px 60px rgba(0,0,0,0.95)) drop-shadow(0 6px 16px rgba(0,0,0,0.7))',
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
             >
-              {/* LAYER 1 — outer walnut frame body */}
-              <div style={{
-                background:'linear-gradient(145deg, #5c3d1e 0%, #3a220c 20%, #4e3218 45%, #2a1608 65%, #4e3218 80%, #5c3d1e 100%)',
-                padding:'16px',
-                boxShadow:
-                  'inset 2px 2px 6px rgba(255,255,255,0.06), inset -2px -2px 8px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(0,0,0,0.4)',
-              }}>
-                {/* LAYER 2 — thin bronze inner lip */}
-                <div style={{
-                  background:'linear-gradient(135deg, #c8a84b 0%, #8b6914 25%, #c8a84b 50%, #7a5c10 75%, #c8a84b 100%)',
-                  padding:'2px',
-                }}>
-                  {/* LAYER 3 — dark rebate shadow line */}
-                  <div style={{
-                    background:'#0a0604',
-                    padding:'3px',
-                    boxShadow:'inset 0 0 8px rgba(0,0,0,0.9)',
-                  }}>
-                    {/* LAYER 4 — cream mat */}
-                    <div style={{
-                      background:'linear-gradient(160deg, #f0ebe0 0%, #e8e0d0 40%, #ede5d5 100%)',
-                      padding:'8px 8px 24px 8px',
-                      boxShadow:'inset 0 0 20px rgba(0,0,0,0.15)',
-                    }}>
-                      {/* IMAGE */}
-                      <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                        <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
-                        <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255,248,210,0.10) 0%, transparent 55%)' }} />
-                        <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.35)' }} />
-                      </div>
-                    </div>
-                  </div>
+              {/* Spotlight glow on wall */}
+              <div style={{ position:'absolute', inset:'-40px', background:'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,244,200,0.10) 0%, transparent 65%)', pointerEvents:'none', zIndex:-1 }} />
+
+              {/* IMAGE behind frame — padded to sit inside frame opening */}
+              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', backgroundColor:'#0c0a09' }}>
+                <div style={{ position:'absolute', inset:'13.5%', overflow:'hidden' }}>
+                  <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
+                  <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 30px rgba(0,0,0,0.4)' }} />
                 </div>
+                {/* Frame PNG overlay — sits on top of photo */}
+                <img
+                  src="https://kfsllwsvqzshggvyuqvm.supabase.co/storage/v1/object/public/assets/frame.png"
+                  alt=""
+                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', zIndex:2 }}
+                />
               </div>
-
-              {/* CORNER BRACKETS — thin gold L-shapes */}
-              {[
-                { top:0, left:0, borderWidth:'1px 0 0 1px' },
-                { top:0, right:0, borderWidth:'1px 1px 0 0' },
-                { bottom:0, left:0, borderWidth:'0 0 1px 1px' },
-                { bottom:0, right:0, borderWidth:'0 1px 1px 0' },
-              ].map((pos, i) => (
-                <div key={i} style={{
-                  position:'absolute',
-                  ...pos,
-                  width:'20px',
-                  height:'20px',
-                  borderStyle:'solid',
-                  borderColor:'rgba(200,162,70,0.8)',
-                  borderWidth: pos.borderWidth,
-                  zIndex:3,
-                  pointerEvents:'none',
-                }} />
-              ))}
-
-              {/* Spotlight glow on wall behind frame */}
-              <div style={{
-                position:'absolute',
-                inset:'-30px',
-                background:'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,244,200,0.08) 0%, transparent 65%)',
-                pointerEvents:'none',
-                zIndex:-1,
-              }} />
             </div>
 
             {/* Label */}
