@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 const TOTAL_SLOTS = 150;
-const AUTO_INTERVAL = 15000;
+const AUTO_INTERVAL = 10000;
 
 export default function ArchivePage() {
   const [exhibits, setExhibits] = useState<any[]>([]);
@@ -186,7 +186,7 @@ export default function ArchivePage() {
               style={{
                 background:'linear-gradient(160deg, #7a5c3a 0%, #4a2c12 20%, #6a4c2e 40%, #3e2010 60%, #6a4c2e 80%, #7a5c3a 100%)',
                 padding:'16px',
-                boxShadow:'0 0 0 1px rgba(200,162,88,0.45), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.2), 0 0 50px rgba(255,248,220,0.22), 0 0 100px rgba(255,248,220,0.1), 0 40px 100px rgba(0,0,0,0.95)',
+                boxShadow:'0 0 0 1px rgba(200,162,88,0.55), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.3), 0 0 80px rgba(255,248,220,0.38), 0 0 160px rgba(255,248,220,0.18), 0 50px 120px rgba(0,0,0,0.95)',
                 cursor:'pointer',
                 transition:'transform 0.4s ease, box-shadow 0.4s ease',
               }}
@@ -196,7 +196,7 @@ export default function ArchivePage() {
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(200,162,88,0.45), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.2), 0 0 50px rgba(255,248,220,0.22), 0 0 100px rgba(255,248,220,0.1), 0 40px 100px rgba(0,0,0,0.95)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(200,162,88,0.55), 0 0 0 3px rgba(20,14,8,0.9), 0 0 0 4px rgba(200,162,88,0.3), 0 0 80px rgba(255,248,220,0.38), 0 0 160px rgba(255,248,220,0.18), 0 50px 120px rgba(0,0,0,0.95)';
               }}
             >
               <div style={{ background:'#ede7db', padding:'12px 12px 36px 12px' }}>
@@ -332,7 +332,7 @@ export default function ArchivePage() {
 
           <div
             className="modal-anim relative w-full max-w-5xl flex flex-col md:flex-row z-10 max-h-[90vh] overflow-y-auto scrollbar-hide"
-            style={{ border:'1px solid rgba(255,255,255,0.12)' }}
+            style={{ border:'1px solid rgba(255,255,255,0.35)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
