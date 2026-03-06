@@ -329,8 +329,7 @@ export default function ArchivePage() {
             style={{
               maxWidth:'900px',
               height:'calc(100dvh - 57px)',
-              overflowY:'auto',
-              WebkitOverflowScrolling:'touch' as any,
+              overflowY:'hidden',
               border:'none',
               borderTop:'1px solid rgba(255,255,255,0.15)',
             }}
@@ -379,10 +378,10 @@ export default function ArchivePage() {
 
             {/* ── INFO SIDE ── */}
             <div className="w-full md:w-[50%] flex flex-col justify-between p-4 md:p-10"
-              style={{ backgroundColor:'#090706', minHeight:'200px' }}>
+              style={{ backgroundColor:'#090706', flex:1, overflow:'hidden' }}>
               <div className="hidden md:block" style={{ position:'absolute', top:0, bottom:0, left:'50%', width:'1px', background:'rgba(255,255,255,0.08)' }} />
 
-              <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:'12px', flex:1, overflow:'hidden' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                   <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.7)', fontWeight:700 }}>
                     {String(activeIndex+1).padStart(2,'0')} / {String(exhibits.length).padStart(2,'0')}
@@ -406,17 +405,16 @@ export default function ArchivePage() {
                   </h2>
                 </div>
 
-                <div className="fu1" style={{ width:'24px', height:'1px', background:'rgba(255,255,255,0.15)' }} />
+                <div className="fu1" style={{ width:'24px', height:'1px', background:'rgba(255,255,255,0.15)', flexShrink:0 }} />
 
-                <div className="fu2" style={{ position:'relative' }}>
-                  <div ref={storyRef} className="scrollbar-hide"
-                    style={{ maxHeight:'clamp(100px, 22vh, 220px)', overflowY:'auto', WebkitOverflowScrolling:'touch' as any }}
+                <div className="fu2 scrollbar-hide" style={{ position:'relative', flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch' as any }}
                     onScroll={(e) => { const el = e.currentTarget; if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1'; }}>
+                  <div ref={storyRef}>
                     <p className="cg" style={{ fontSize:'clamp(14px, 1.8vw, 17px)', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.88)' }}>
                       {selectedExhibit.description}
                     </p>
                   </div>
-                  <div ref={fadeRef} style={{ position:'absolute', bottom:0, left:0, right:0, height:'36px', background:'linear-gradient(to top, #090706, transparent)', pointerEvents:'none', transition:'opacity 0.3s' }} />
+                  <div ref={fadeRef} style={{ position:'sticky', bottom:0, left:0, right:0, height:'36px', background:'linear-gradient(to top, #090706, transparent)', pointerEvents:'none', transition:'opacity 0.3s' }} />
                 </div>
               </div>
 
