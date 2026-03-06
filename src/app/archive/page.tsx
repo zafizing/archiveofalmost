@@ -55,7 +55,7 @@ export default function ArchivePage() {
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (selectedExhibit) {
-        if (e.key === 'Escape') setSelectedExhibit(null);
+        if (e.key === 'Escape') { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }
         if (e.key === 'ArrowRight') { const n = (activeIndex + 1) % exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }
         if (e.key === 'ArrowLeft') { const n = ((activeIndex - 1) + exhibits.length) % exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }
       } else {
@@ -151,20 +151,6 @@ export default function ArchivePage() {
         .navbtn:hover { color:white !important; border-color:rgba(255,255,255,0.5) !important; background:rgba(255,255,255,0.07) !important; }
         .side-frame { transition: all 0.65s cubic-bezier(0.25,0.46,0.45,0.94); cursor:pointer; }
         .side-frame:hover { opacity:0.85 !important; }
-        .museum-frame { position: relative; }
-        .museum-frame::before, .museum-frame::after {
-          content: ''; position: absolute; width: 24px; height: 24px;
-          border-color: rgba(200,162,88,0.65); border-style: solid; z-index: 2; pointer-events: none;
-        }
-        .museum-frame::before { top: 7px; left: 7px; border-width: 1px 0 0 1px; }
-        .museum-frame::after  { top: 7px; right: 7px; border-width: 1px 1px 0 0; }
-        .museum-frame-b { position: relative; }
-        .museum-frame-b::before, .museum-frame-b::after {
-          content: ''; position: absolute; width: 24px; height: 24px;
-          border-color: rgba(200,162,88,0.65); border-style: solid; z-index: 2; pointer-events: none;
-        }
-        .museum-frame-b::before { bottom: 7px; left: 7px; border-width: 0 0 1px 1px; }
-        .museum-frame-b::after  { bottom: 7px; right: 7px; border-width: 0 1px 1px 0; }
       `}</style>
 
       {/* TOP BAR */}
@@ -197,75 +183,50 @@ export default function ArchivePage() {
 
         {exhibits.length > 0 && (<>
 
-          {/* LEFT SLIVER — desktop only */}
+          {/* LEFT SLIVER — desktop only, no frame */}
           <div className="side-frame hidden md:flex items-center justify-end" onClick={prev}
             style={{ position:'absolute', left:0, top:0, bottom:0, width:'clamp(60px, 8vw, 180px)', zIndex:10, overflow:'hidden' }}>
-            <div style={{ width:'260px', opacity:0.6, filter:'brightness(0.6) saturate(0.7)', transform:'scale(0.88) translateX(60px)', transformOrigin:'right center', flexShrink:0 }}>
-              <div style={{ background:'linear-gradient(135deg,#3a2e20 0%,#251a0e 50%,#3a2e20 100%)', padding:'5px', boxShadow:'0 20px 50px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#e5dfd3', padding:'5px 5px 18px 5px' }}>
-                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                    <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
-                  </div>
-                </div>
+            <div style={{ width:'260px', opacity:0.5, filter:'brightness(0.5) saturate(0.6)', transform:'scale(0.88) translateX(60px)', transformOrigin:'right center', flexShrink:0 }}>
+              <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
             </div>
           </div>
 
-          {/* CENTER FRAME */}
+          {/* CENTER — no frame */}
           <div className="relative z-10 flex flex-col items-center" style={{ padding:'0 56px', width:'100%', maxWidth:'min(92vw, 520px)' }}>
-            <div style={{ width:'1px', height:'36px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15))' }} />
+            <div style={{ width:'1px', height:'36px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.12))' }} />
+
             <div
               onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-              style={{
-                width:'100%',
-                position:'relative',
-                cursor:'pointer',
-                transition:'transform 0.4s ease',
-                filter:'drop-shadow(0 30px 60px rgba(0,0,0,0.95)) drop-shadow(0 6px 16px rgba(0,0,0,0.7))',
-              }}
+              style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.4s ease',
+                boxShadow:'0 0 80px rgba(255,248,220,0.1), 0 40px 100px rgba(0,0,0,0.98)' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
             >
-              {/* Spotlight glow on wall */}
-              <div style={{ position:'absolute', inset:'-40px', background:'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,244,200,0.10) 0%, transparent 65%)', pointerEvents:'none', zIndex:-1 }} />
-
-              {/* FRAME: CSS walnut + gold inner line */}
-              <div style={{
-                width:'100%',
-                background:'linear-gradient(145deg, #3a2410 0%, #5c3820 15%, #3a2410 30%, #6a4428 50%, #3a2410 70%, #5c3820 85%, #3a2410 100%)',
-                padding:'14px',
-                boxShadow:'inset 1px 1px 3px rgba(255,255,255,0.08), inset -1px -1px 4px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)',
-              }}>
-                {/* Gold inner bead line */}
-                <div style={{ padding:'2px', background:'linear-gradient(135deg, #a07828 0%, #d4a843 30%, #8a6420 60%, #c49838 100%)' }}>
-                  <div style={{ padding:'2px', background:'#1a0e06' }}>
-                    {/* Cream mat */}
-                    <div style={{ background:'#ece6d8', padding:'6px 6px 22px 6px', boxShadow:'inset 0 0 16px rgba(0,0,0,0.2)' }}>
-                      <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                        <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
-                        <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 30px rgba(0,0,0,0.35)' }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div style={{ position:'absolute', inset:'-50px', background:'radial-gradient(ellipse 70% 50% at 50% 30%, rgba(255,244,200,0.07) 0%, transparent 65%)', pointerEvents:'none', zIndex:-1 }} />
+              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title}
+                  fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
+                <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.5)' }} />
               </div>
             </div>
 
             {/* Label */}
             <div style={{ marginTop:'16px', width:'100%' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'7px' }}>
-                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'rgba(255,255,255,1)', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].catalog_id}</span>
-                <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.4)' }} />
-                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,1)', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].year}</span>
+                <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'white', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].catalog_id}</span>
+                <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
+                <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'white', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].year}</span>
               </div>
               <p className="cg" onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                style={{ fontSize:'clamp(16px, 2.2vw, 22px)', fontStyle:'italic', fontWeight:300, color:'rgba(255,255,255,1)', lineHeight:1.3, marginBottom:'8px', cursor:'pointer' }}>
+                style={{ fontSize:'clamp(16px, 2.2vw, 22px)', fontStyle:'italic', fontWeight:300, color:'white', lineHeight:1.3, marginBottom:'8px', cursor:'pointer' }}>
                 "{exhibits[activeIndex].title}"
               </p>
               <span onClick={() => setSelectedExhibit(exhibits[activeIndex])}
-                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.7)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
+                style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.55)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color='white')}
-                onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.7)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.55)')}
               >View object →</span>
               <div style={{ marginTop:'14px', height:'1.5px', background:'rgba(255,255,255,0.07)', overflow:'hidden', borderRadius:'1px' }}>
                 {!isPaused && !selectedExhibit && (
@@ -275,16 +236,12 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          {/* RIGHT SLIVER — desktop only */}
+          {/* RIGHT SLIVER — desktop only, no frame */}
           <div className="side-frame hidden md:flex items-center justify-start" onClick={next}
             style={{ position:'absolute', right:0, top:0, bottom:0, width:'clamp(60px, 8vw, 180px)', zIndex:10, overflow:'hidden' }}>
-            <div style={{ width:'260px', opacity:0.6, filter:'brightness(0.6) saturate(0.7)', transform:'scale(0.88) translateX(-60px)', transformOrigin:'left center', flexShrink:0 }}>
-              <div style={{ background:'linear-gradient(135deg,#3a2e20 0%,#251a0e 50%,#3a2e20 100%)', padding:'5px', boxShadow:'0 20px 50px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#e5dfd3', padding:'5px 5px 18px 5px' }}>
-                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
-                    <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
-                  </div>
-                </div>
+            <div style={{ width:'260px', opacity:0.5, filter:'brightness(0.5) saturate(0.6)', transform:'scale(0.88) translateX(-60px)', transformOrigin:'left center', flexShrink:0 }}>
+              <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
             </div>
           </div>
@@ -315,7 +272,7 @@ export default function ArchivePage() {
       {/* ══════════════ MODAL ══════════════ */}
       {selectedExhibit && (
         <div
-          className="fixed inset-0 z-[200] flex items-start justify-center md:items-center"
+          className="fixed inset-0 z-[200] flex items-start md:items-center justify-center"
           style={{ padding:'0', paddingTop:'57px' }}
           onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }}
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
@@ -330,7 +287,7 @@ export default function ArchivePage() {
         >
           <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(4,3,2,0.97)', backdropFilter:'blur(30px)' }} />
 
-          {/* Desktop nav */}
+          {/* Desktop nav arrows */}
           <button className="navbtn hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center"
             onClick={(e) => { e.stopPropagation(); const n=((activeIndex-1)+exhibits.length)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
             style={{ border:'1px solid rgba(255,255,255,0.2)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.85)', cursor:'pointer', fontSize:'17px' }}>←</button>
@@ -338,161 +295,147 @@ export default function ArchivePage() {
             onClick={(e) => { e.stopPropagation(); const n=(activeIndex+1)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
             style={{ border:'1px solid rgba(255,255,255,0.2)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.85)', cursor:'pointer', fontSize:'17px' }}>→</button>
 
-          {/* Modal card */}
+          {/* ── MOBILE modal ── */}
           <div
-            className="modal-anim relative w-full z-10 flex flex-col md:flex-row"
-            style={{
-              maxWidth:'900px',
-              height:'calc(100dvh - 57px)',
-              overflowY:'hidden',
-              border:'none',
-              borderTop:'1px solid rgba(255,255,255,0.15)',
-            }}
+            className="md:hidden modal-anim relative w-full z-10 flex flex-col"
+            style={{ height:'calc(100dvh - 57px)', overflowY:'hidden', borderTop:'1px solid rgba(255,255,255,0.12)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ── MOBILE: tam genişlik fotoğraf + altında hikaye ── */}
-            <div className="md:hidden w-full flex flex-col" style={{ backgroundColor:'#0a0807', flex:1, overflow:'hidden' }}>
-
-              {/* Fotoğraf — çerçevesiz, tam genişlik, yatay */}
-              <div
-                style={{ position:'relative', width:'100%', aspectRatio:'16/10', overflow:'hidden', cursor:'zoom-in', flexShrink:0 }}
-                onClick={() => setShowFullImage(true)}
-              >
-                <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)', objectPosition:'center' }} />
-                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)', pointerEvents:'none' }} />
-                {/* Büyüt ipucu */}
-                <div style={{ position:'absolute', bottom:'10px', right:'10px', background:'rgba(0,0,0,0.55)', border:'1px solid rgba(255,255,255,0.2)', padding:'5px 8px', backdropFilter:'blur(4px)' }}>
-                  <span style={{ fontSize:'8px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.7)', textTransform:'uppercase' }}>⊕ Tap</span>
-                </div>
-              </div>
-
-              {/* Künye + hikaye + share — scroll edilebilir */}
-              <div className="scrollbar-hide" style={{ flex:1, overflowY:'auto', padding:'16px 16px 16px 16px', display:'flex', flexDirection:'column', gap:'10px' }}>
-                {/* Künye */}
-                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                  <span style={{ fontSize:'8px', letterSpacing:'0.5em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
-                  <div style={{ width:'10px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
-                  <span style={{ fontSize:'8px', letterSpacing:'0.4em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.year}</span>
-                </div>
-                <h2 className="cg" style={{ fontSize:'20px', fontWeight:300, fontStyle:'italic', color:'white', lineHeight:1.25 }}>"{selectedExhibit.title}"</h2>
-                <div style={{ width:'20px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
-                <p className="cg" style={{ fontSize:'15px', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.85)' }}>
-                  {selectedExhibit.description}
-                </p>
-                {selectedExhibit.submitter_name && (
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px', paddingTop:'4px' }}>
-                    <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.35)' }} />
-                    <p className="cg" style={{ fontSize:'14px', letterSpacing:'0.18em', textTransform:'uppercase', color:'white', fontStyle:'italic' }}>{selectedExhibit.submitter_name}</p>
-                  </div>
-                )}
-                {/* Share */}
-                <div style={{ paddingTop:'8px', borderTop:'1px solid rgba(255,255,255,0.08)' }}>
-                  <button onClick={() => setShowShareMenu(s => !s)}
-                    style={{ width:'100%', padding:'11px', fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', background:'none', cursor:'pointer', fontFamily:'Georgia' }}
-                  >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
-                  {showShareMenu && (
-                    <div style={{ marginTop:'5px', display:'flex', flexDirection:'column', gap:'4px' }}>
-                      {[
-                        { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(selectedExhibit) },
-                        { label: 'f  Share on Facebook',   fn: () => shareFacebook(selectedExhibit) },
-                        { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(selectedExhibit) },
-                        { label: '↓  Download Story Card', fn: () => downloadCard(selectedExhibit) },
-                      ].map((opt) => (
-                        <button key={opt.label} onClick={opt.fn}
-                          style={{ width:'100%', padding:'9px 14px', fontSize:'9px', letterSpacing:'0.3em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.6)', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.02)', cursor:'pointer', fontFamily:'Georgia', textAlign:'left' }}
-                        >{opt.label}</button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 2: X butonu — mobil için büyük ve görünür */}
             <button
-              className="md:hidden"
               onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
-              style={{
-                position:'absolute', top:'8px', right:'8px', zIndex:20,
-                width:'36px', height:'36px',
-                background:'rgba(0,0,0,0.7)', border:'1px solid rgba(255,255,255,0.3)',
-                color:'white', fontSize:'18px', cursor:'pointer',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                backdropFilter:'blur(8px)',
-              }}
+              style={{ position:'absolute', top:'8px', right:'8px', zIndex:20, width:'36px', height:'36px', background:'rgba(0,0,0,0.7)', border:'1px solid rgba(255,255,255,0.3)', color:'white', fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}
             >×</button>
 
-            {/* ── DESKTOP: full framed image ── */}
-            <div className="hidden md:block w-full md:w-[50%] shrink-0" style={{ backgroundColor:'#0a0807', padding:'12px' }}>
-              <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'7px', boxShadow:'0 24px 70px rgba(0,0,0,0.9)' }}>
-                <div style={{ background:'#ede7db', padding:'7px 7px 20px 7px' }}>
-                  <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
-                    <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
-                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.1) 0%, transparent 60%)' }} />
-                    <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 50px rgba(0,0,0,0.4)' }} />
-                  </div>
-                </div>
+            {/* Photo — no frame, 16:10 */}
+            <div
+              style={{ position:'relative', width:'100%', aspectRatio:'16/10', overflow:'hidden', cursor:'zoom-in', flexShrink:0 }}
+              onClick={() => setShowFullImage(true)}
+            >
+              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
+                style={{ filter:'saturate(0.88) contrast(1.05)', objectPosition:'center' }} />
+              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.35) 100%)', pointerEvents:'none' }} />
+              <div style={{ position:'absolute', bottom:'10px', right:'10px', background:'rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.18)', padding:'4px 8px', backdropFilter:'blur(4px)' }}>
+                <span style={{ fontSize:'7px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.65)', textTransform:'uppercase' }}>⊕ Tap</span>
               </div>
             </div>
 
-            {/* ── INFO SIDE ── */}
-            <div className="w-full md:w-[50%] flex flex-col justify-between p-4 md:p-10"
-              style={{ backgroundColor:'#090706', flex:1, overflow:'hidden' }}>
-              <div className="hidden md:block" style={{ position:'absolute', top:0, bottom:0, left:'50%', width:'1px', background:'rgba(255,255,255,0.08)' }} />
+            <div className="scrollbar-hide" style={{ flex:1, overflowY:'auto', padding:'14px 16px', display:'flex', flexDirection:'column', gap:'9px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                <span style={{ fontSize:'8px', letterSpacing:'0.5em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
+                <div style={{ width:'10px', height:'1px', background:'rgba(255,255,255,0.25)' }} />
+                <span style={{ fontSize:'8px', letterSpacing:'0.4em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.year}</span>
+              </div>
+              <h2 className="cg" style={{ fontSize:'20px', fontWeight:300, fontStyle:'italic', color:'white', lineHeight:1.25 }}>"{selectedExhibit.title}"</h2>
+              <div style={{ width:'20px', height:'1px', background:'rgba(255,255,255,0.18)' }} />
+              <p className="cg" style={{ fontSize:'15px', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.85)' }}>
+                {selectedExhibit.description}
+              </p>
+              {selectedExhibit.submitter_name && (
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', paddingTop:'2px' }}>
+                  <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
+                  <p className="cg" style={{ fontSize:'14px', letterSpacing:'0.18em', textTransform:'uppercase', color:'white', fontStyle:'italic' }}>{selectedExhibit.submitter_name}</p>
+                </div>
+              )}
+              <div style={{ paddingTop:'8px', borderTop:'1px solid rgba(255,255,255,0.08)' }}>
+                <button onClick={() => setShowShareMenu(s => !s)}
+                  style={{ width:'100%', padding:'11px', fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', background:'none', cursor:'pointer', fontFamily:'Georgia' }}
+                >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
+                {showShareMenu && (
+                  <div style={{ marginTop:'5px', display:'flex', flexDirection:'column', gap:'4px' }}>
+                    {[
+                      { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(selectedExhibit) },
+                      { label: 'f  Share on Facebook',   fn: () => shareFacebook(selectedExhibit) },
+                      { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(selectedExhibit) },
+                      { label: '↓  Download Story Card', fn: () => downloadCard(selectedExhibit) },
+                    ].map((opt) => (
+                      <button key={opt.label} onClick={opt.fn}
+                        style={{ width:'100%', padding:'9px 14px', fontSize:'9px', letterSpacing:'0.3em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.6)', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.02)', cursor:'pointer', fontFamily:'Georgia', textAlign:'left' }}
+                      >{opt.label}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-              <div style={{ display:'flex', flexDirection:'column', gap:'12px', flex:1, overflow:'hidden' }}>
+          {/* ── DESKTOP modal — photo LEFT (no frame, full height), info RIGHT ── */}
+          <div
+            className="hidden md:flex modal-anim relative w-full z-10 flex-row"
+            style={{ maxWidth:'900px', maxHeight:'88dvh', border:'1px solid rgba(255,255,255,0.25)', overflow:'hidden' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Photo — fills entire left half, no frame */}
+            <div className="w-[50%] shrink-0" style={{ position:'relative', minHeight:'400px' }}>
+              <Image
+                src={selectedExhibit.image_url}
+                alt={selectedExhibit.title}
+                fill unoptimized className="object-cover"
+                style={{ filter:'saturate(0.85) contrast(1.05)' }}
+              />
+              <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.06) 0%, transparent 60%)' }} />
+              <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 60px rgba(0,0,0,0.5)' }} />
+            </div>
+
+            {/* Info side */}
+            <div className="w-[50%] flex flex-col justify-between p-10"
+              style={{ backgroundColor:'#090706', borderLeft:'1px solid rgba(255,255,255,0.08)', overflowY:'auto' }}>
+
+              <div style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.7)', fontWeight:700 }}>
+                  <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', fontWeight:700 }}>
                     {String(activeIndex+1).padStart(2,'0')} / {String(exhibits.length).padStart(2,'0')}
                   </span>
-                  <button onClick={() => setSelectedExhibit(null)}
-                    className="hidden md:block"
-                    style={{ fontSize:'10px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.85)', fontWeight:700, cursor:'pointer', background:'none', border:'none', fontFamily:'Georgia' }}
+                  <button onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
+                    style={{ fontSize:'10px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.85)', fontWeight:700, cursor:'pointer', background:'none', border:'none', transition:'color 0.2s', fontFamily:'Georgia' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color='white')}
                     onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.85)')}
                   >Close ×</button>
                 </div>
 
                 <div className="fu1">
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
                     <span style={{ fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.9)', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
                     <div style={{ width:'12px', height:'1px', background:'rgba(255,255,255,0.2)' }} />
                     <span style={{ fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', color:'rgba(255,255,255,0.9)', fontWeight:700 }}>{selectedExhibit.year}</span>
                   </div>
-                  <h2 className="cg" style={{ fontSize:'clamp(18px, 2.8vw, 32px)', fontWeight:300, fontStyle:'italic', color:'rgba(255,255,255,0.96)', lineHeight:1.25 }}>
+                  <h2 className="cg" style={{ fontSize:'clamp(20px, 2.8vw, 34px)', fontWeight:300, fontStyle:'italic', color:'rgba(255,255,255,0.96)', lineHeight:1.25 }}>
                     "{selectedExhibit.title}"
                   </h2>
                 </div>
 
-                <div className="fu1" style={{ width:'24px', height:'1px', background:'rgba(255,255,255,0.15)', flexShrink:0 }} />
+                <div className="fu1" style={{ width:'24px', height:'1px', background:'rgba(255,255,255,0.15)' }} />
 
-                <div className="fu2 scrollbar-hide" style={{ position:'relative', flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch' as any }}
-                    onScroll={(e) => { const el = e.currentTarget; if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1'; }}>
-                  <div ref={storyRef}>
-                    <p className="cg" style={{ fontSize:'clamp(14px, 1.8vw, 17px)', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.88)' }}>
+                <div className="fu2" style={{ position:'relative' }}>
+                  <div ref={storyRef} className="scrollbar-hide"
+                    style={{ maxHeight:'clamp(160px, 30vh, 260px)', overflowY:'auto', WebkitOverflowScrolling:'touch' as any }}
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      if (fadeRef.current) fadeRef.current.style.opacity = el.scrollHeight - el.scrollTop <= el.clientHeight + 5 ? '0' : '1';
+                    }}
+                  >
+                    <p className="cg" style={{ fontSize:'clamp(15px, 1.6vw, 18px)', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.88)' }}>
                       {selectedExhibit.description}
                     </p>
                   </div>
-                  <div ref={fadeRef} style={{ position:'sticky', bottom:0, left:0, right:0, height:'36px', background:'linear-gradient(to top, #090706, transparent)', pointerEvents:'none', transition:'opacity 0.3s' }} />
+                  <div ref={fadeRef} style={{ position:'absolute', bottom:0, left:0, right:0, height:'36px', background:'linear-gradient(to top, #090706, transparent)', pointerEvents:'none', transition:'opacity 0.3s' }} />
                 </div>
               </div>
 
-              <div className="fu3 hidden md:flex" style={{ paddingTop:'12px', marginTop:'12px', borderTop:'1px solid rgba(255,255,255,0.1)', flexDirection:'column', gap:'8px' }}>
+              <div className="fu3" style={{ paddingTop:'16px', marginTop:'16px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:'10px' }}>
                 {selectedExhibit.submitter_name && (
                   <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
                     <div style={{ width:'18px', height:'1px', background:'rgba(255,255,255,0.35)' }} />
-                    <p className="cg" style={{ fontSize:'15px', letterSpacing:'0.2em', textTransform:'uppercase', color:'white', fontStyle:'italic', fontWeight:400, textDecoration:'underline', textUnderlineOffset:'4px', textDecorationColor:'rgba(255,255,255,0.25)', textDecorationThickness:'1px' }}>
+                    <p className="cg" style={{ fontSize:'16px', letterSpacing:'0.2em', textTransform:'uppercase', color:'white', fontStyle:'italic', fontWeight:400, textDecoration:'underline', textUnderlineOffset:'4px', textDecorationColor:'rgba(255,255,255,0.25)', textDecorationThickness:'1px' }}>
                       {selectedExhibit.submitter_name}
                     </p>
                   </div>
                 )}
-                <div style={{ position:'relative' }}>
+                <div>
                   <button onClick={() => setShowShareMenu(s => !s)}
-                    style={{ width:'100%', padding:'11px', fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
+                    style={{ width:'100%', padding:'12px', fontSize:'9px', letterSpacing:'0.45em', textTransform:'uppercase', fontWeight:700, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', background:'none', cursor:'pointer', transition:'all 0.3s', fontFamily:'Georgia' }}
                     onMouseEnter={(e) => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.5)'; e.currentTarget.style.background='rgba(255,255,255,0.04)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color='rgba(255,255,255,0.8)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.2)'; e.currentTarget.style.background='none'; }}
                   >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
-
                   {showShareMenu && (
                     <div style={{ marginTop:'5px', display:'flex', flexDirection:'column', gap:'4px' }}>
                       {[
@@ -516,26 +459,21 @@ export default function ArchivePage() {
         </div>
       )}
 
-      {/* FULL IMAGE OVERLAY — mobile only, tap to close */}
+      {/* FULL IMAGE OVERLAY — mobile only */}
       {showFullImage && selectedExhibit && (
         <div
           className="fixed inset-0 z-[300] flex items-center justify-center"
           style={{ backgroundColor:'rgba(0,0,0,0.97)', backdropFilter:'blur(20px)' }}
           onClick={() => setShowFullImage(false)}
         >
-          <div style={{ position:'relative', width:'92vw', maxWidth:'500px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'8px', boxShadow:'0 30px 80px rgba(0,0,0,0.9)' }}>
-              <div style={{ background:'#ede7db', padding:'6px 6px 20px 6px' }}>
-                <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
-                  <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
-                  {/* X on image corner */}
-                  <button
-                    onClick={() => setShowFullImage(false)}
-                    style={{ position:'absolute', top:'8px', right:'8px', width:'28px', height:'28px', background:'rgba(0,0,0,0.65)', border:'none', color:'white', fontSize:'14px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}
-                  >×</button>
-                </div>
-              </div>
+          <div style={{ position:'relative', width:'96vw', maxWidth:'520px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
+              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
+                style={{ filter:'saturate(0.85) contrast(1.05)' }} />
             </div>
+            <button onClick={() => setShowFullImage(false)}
+              style={{ position:'absolute', top:'10px', right:'10px', width:'34px', height:'34px', background:'rgba(0,0,0,0.75)', border:'1px solid rgba(255,255,255,0.35)', color:'white', fontSize:'16px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}
+            >×</button>
           </div>
         </div>
       )}
