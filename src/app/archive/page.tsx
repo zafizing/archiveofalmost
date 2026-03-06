@@ -213,6 +213,20 @@ export default function ArchivePage() {
         .fu3 { animation: fadeUp 0.5s ease-out 0.30s forwards; opacity:0; }
         .navbtn { transition: all 0.25s; }
         .navbtn:hover { color:white !important; border-color:rgba(255,255,255,0.5) !important; background:rgba(255,255,255,0.07) !important; }
+        /* Archive stage: grid on desktop, flex center on mobile */
+        .archive-stage {
+          display: grid;
+          grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+          grid-template-rows: 1fr;
+          align-items: center;
+        }
+        @media (max-width: 767px) {
+          .archive-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
         .side-frame { transition: all 0.65s cubic-bezier(0.25,0.46,0.45,0.94); cursor:pointer; }
 
         /* Ornate frame corners */
@@ -263,7 +277,7 @@ export default function ArchivePage() {
       {/* FULL-HEIGHT STAGE */}
       <div
         className="relative"
-        style={{ height:'100dvh', display:'grid', gridTemplateColumns:'minmax(0,1fr) auto minmax(0,1fr)', gridTemplateRows:'1fr', alignItems:'center', overflow:'hidden' }}
+        className="archive-stage" style={{ height:'100dvh', overflow:'hidden' }}
         onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => { const d = touchStartX.current - e.changedTouches[0].clientX; if (Math.abs(d) > 40) d > 0 ? next() : prev(); }}
       >
@@ -277,8 +291,8 @@ export default function ArchivePage() {
         {exhibits.length > 0 && (<>
 
           {/* LEFT SIDE CARD — vertically centered in left column */}
-          <div className="side-frame hidden md:flex items-center justify-end pr-8 relative z-10" style={{ height:'100%' }} onClick={prev}>
-            <div style={{ width:'240px', opacity:0.72, filter:'brightness(0.72) saturate(0.75)', transform:'scale(0.92)', transformOrigin:'center center' }}>
+          <div className="side-frame md:flex items-center justify-end md:pr-8 relative z-10 flex" style={{ height:'100%', position:'absolute', left:0, top:0, bottom:0, width:'clamp(24px, 6vw, 200px)', overflow:'hidden' }} onClick={prev}>
+            <div style={{ width:'240px', opacity:0.72, filter:'brightness(0.72) saturate(0.75)', transform:'scale(0.92)', transformOrigin:'center center', flexShrink:0 }}>
               <div style={{ display:'flex', justifyContent:'center', height:'14px' }}>
                 <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.08)' }} />
               </div>
@@ -317,7 +331,7 @@ export default function ArchivePage() {
               }}
             >
               <div style={{ background:'#ede7db', padding:'12px 12px 36px 12px' }}>
-                <div style={{ position:'relative', width:'clamp(240px, min(34vw, 80vw), 460px)', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
+                <div style={{ position:'relative', width:'min(80vw, 460px)', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
                   <Image
                     key={activeIndex}
                     src={exhibits[activeIndex].image_url}
@@ -332,7 +346,7 @@ export default function ArchivePage() {
             </div>
 
             {/* Label */}
-            <div style={{ marginTop:'18px', width:'clamp(240px, min(34vw, 80vw), 460px)' }}>
+            <div style={{ marginTop:'18px', width:'min(80vw, 460px)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
                 <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'white', textTransform:'uppercase', fontWeight:700 }}>
                   {exhibits[activeIndex].catalog_id}
@@ -370,8 +384,8 @@ export default function ArchivePage() {
           </div>
 
           {/* RIGHT SIDE CARD — vertically centered in right column */}
-          <div className="side-frame hidden md:flex items-center justify-start pl-8 relative z-10" style={{ height:'100%' }} onClick={next}>
-            <div style={{ width:'240px', opacity:0.72, filter:'brightness(0.72) saturate(0.75)', transform:'scale(0.92)', transformOrigin:'center center' }}>
+          <div className="side-frame md:flex items-center justify-start md:pl-8 relative z-10 flex" style={{ height:'100%', position:'absolute', right:0, top:0, bottom:0, width:'clamp(24px, 6vw, 200px)', overflow:'hidden' }} onClick={next}>
+            <div style={{ width:'240px', opacity:0.72, filter:'brightness(0.72) saturate(0.75)', transform:'scale(0.92)', transformOrigin:'center center', flexShrink:0 }}>
               <div style={{ display:'flex', justifyContent:'center', height:'14px' }}>
                 <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,0.08)' }} />
               </div>
@@ -422,11 +436,12 @@ export default function ArchivePage() {
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-12"
           onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
-          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; (e.currentTarget as HTMLElement)._touchY = e.touches[0].clientY; }}
           onTouchEnd={(e) => {
-            const d = touchStartX.current - e.changedTouches[0].clientX;
-            if (Math.abs(d) > 50) {
-              const n = d > 0 ? (activeIndex+1)%exhibits.length : ((activeIndex-1)+exhibits.length)%exhibits.length;
+            const dx = touchStartX.current - e.changedTouches[0].clientX;
+            const dy = Math.abs(((e.currentTarget as any)._touchY || 0) - e.changedTouches[0].clientY);
+            if (Math.abs(dx) > 50 && Math.abs(dx) > dy * 1.5) {
+              const n = dx > 0 ? (activeIndex+1)%exhibits.length : ((activeIndex-1)+exhibits.length)%exhibits.length;
               setActiveIndex(n); setSelectedExhibit(exhibits[n]);
             }
           }}
@@ -448,8 +463,7 @@ export default function ArchivePage() {
             style={{ border:'1px solid rgba(255,255,255,0.18)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.82)', cursor:'pointer', fontSize:'17px' }}>→</button>
 
           <div
-            className="modal-anim relative w-full max-w-5xl flex flex-col md:flex-row z-10 max-h-[90vh] overflow-y-auto scrollbar-hide"
-            style={{ border:'1px solid rgba(255,255,255,0.35)' }}
+            className="modal-anim relative w-full max-w-5xl flex flex-col md:flex-row z-10" style={{ maxHeight:'90dvh', overflowY:'auto', WebkitOverflowScrolling:'touch', border:'1px solid rgba(255,255,255,0.35)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
