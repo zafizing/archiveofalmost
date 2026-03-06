@@ -15,6 +15,7 @@ export default function ArchivePage() {
   const [progressKey, setProgressKey] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showFullImage, setShowFullImage] = useState(false);
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const storyRef = useRef<HTMLDivElement>(null);
@@ -301,7 +302,7 @@ export default function ArchivePage() {
         <div
           className="fixed inset-0 z-[200] flex items-end md:items-center justify-center"
           style={{ padding:'0' }}
-          onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
+          onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }}
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
           onTouchEnd={(e) => {
             const dx = touchStartX.current - e.changedTouches[0].clientX;
@@ -330,11 +331,16 @@ export default function ArchivePage() {
           >
             {/* ── MOBILE: küçük fotoğraf üstte yatay ── */}
             <div className="md:hidden w-full flex flex-row" style={{ backgroundColor:'#0a0807', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ width:'110px', flexShrink:0, padding:'10px 6px 10px 10px' }}>
+              <div style={{ width:'110px', flexShrink:0, padding:'10px 6px 10px 10px', cursor:'zoom-in' }}
+                onClick={() => setShowFullImage(true)}>
                 <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'5px', boxShadow:'0 8px 24px rgba(0,0,0,0.8)' }}>
                   <div style={{ background:'#ede7db', padding:'4px 4px 10px 4px' }}>
                     <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
                       <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
+                      {/* Zoom hint */}
+                      <div style={{ position:'absolute', bottom:'4px', right:'4px', background:'rgba(0,0,0,0.5)', borderRadius:'2px', padding:'2px 4px' }}>
+                        <span style={{ fontSize:'8px', color:'rgba(255,255,255,0.7)' }}>⊕</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -443,6 +449,28 @@ export default function ArchivePage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* FULL IMAGE OVERLAY — mobile only, tap to close */}
+      {showFullImage && selectedExhibit && (
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center"
+          style={{ backgroundColor:'rgba(0,0,0,0.97)', backdropFilter:'blur(20px)' }}
+          onClick={() => setShowFullImage(false)}
+        >
+          <div style={{ position:'relative', width:'92vw', maxWidth:'500px', aspectRatio:'1/1' }}>
+            <div style={{ background:'linear-gradient(145deg,#52402a 0%,#301e0c 35%,#52402a 65%,#1e0e05 100%)', padding:'8px', boxShadow:'0 30px 80px rgba(0,0,0,0.9)' }}>
+              <div style={{ background:'#ede7db', padding:'6px 6px 20px 6px' }}>
+                <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
+                  <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <button onClick={() => setShowFullImage(false)} style={{ position:'absolute', top:'20px', right:'20px', fontSize:'11px', letterSpacing:'0.5em', textTransform:'uppercase', color:'rgba(255,255,255,0.6)', background:'none', border:'1px solid rgba(255,255,255,0.15)', padding:'8px 14px', cursor:'pointer', fontFamily:'Georgia' }}>
+            Close ×
+          </button>
         </div>
       )}
 
