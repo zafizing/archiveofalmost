@@ -26,17 +26,18 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
 
   const downloadCard = async () => {
     const canvas = document.createElement('canvas');
-    canvas.width = 1080; canvas.height = 1920;
+    canvas.width = 1080;
+    canvas.height = 1920;
     const ctx = canvas.getContext('2d')!;
 
     // Background
     ctx.fillStyle = '#0c0a09';
     ctx.fillRect(0, 0, 1080, 1920);
 
-    // Vignette
-    const vignette = ctx.createRadialGradient(540, 960, 200, 540, 960, 960);
+    // Subtle vignette
+    const vignette = ctx.createRadialGradient(540, 960, 300, 540, 960, 960);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
-    vignette.addColorStop(1, 'rgba(0,0,0,0.75)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, 1080, 1920);
 
@@ -49,8 +50,8 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
       img.src = exhibit.image_url;
     });
 
-    // Photo — top half
-    const photoX = 60, photoY = 120, photoW = 960, photoH = 780;
+    // Photo — smaller, top portion (560px tall)
+    const photoX = 60, photoY = 100, photoW = 960, photoH = 560;
     if (img.width > 0) {
       ctx.save();
       ctx.rect(photoX, photoY, photoW, photoH);
@@ -59,45 +60,47 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
       const dw = img.width * sc, dh = img.height * sc;
       ctx.drawImage(img, photoX + (photoW - dw) / 2, photoY + (photoH - dh) / 2, dw, dh);
       ctx.restore();
-      // Photo shadow overlay
-      const photoGrad = ctx.createLinearGradient(0, photoY + photoH * 0.6, 0, photoY + photoH);
-      photoGrad.addColorStop(0, 'rgba(12,10,9,0)');
-      photoGrad.addColorStop(1, 'rgba(12,10,9,0.85)');
-      ctx.fillStyle = photoGrad;
+      // Bottom fade on photo
+      const fadeGrad = ctx.createLinearGradient(0, photoY + photoH * 0.6, 0, photoY + photoH);
+      fadeGrad.addColorStop(0, 'rgba(12,10,9,0)');
+      fadeGrad.addColorStop(1, 'rgba(12,10,9,0.95)');
+      ctx.fillStyle = fadeGrad;
       ctx.fillRect(photoX, photoY, photoW, photoH);
     }
 
-    // Thin divider line
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    // Divider line
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(60, 940);
-    ctx.lineTo(1020, 940);
+    ctx.moveTo(60, 700);
+    ctx.lineTo(1020, 700);
     ctx.stroke();
 
-    // Catalog ID + year
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '700 24px Georgia';
+    // Catalog + year
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.font = '700 22px Georgia';
     ctx.textAlign = 'left';
-    ctx.fillText(`${exhibit.catalog_id}  —  ${exhibit.year}`, 60, 1000);
+    ctx.fillText(`${exhibit.catalog_id}  —  ${exhibit.year}`, 60, 755);
 
-    // Title
+    // Title — wrap at 960px
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.font = 'italic 300 58px Georgia';
+    ctx.font = 'italic 300 52px Georgia';
     const titleWords = `"${exhibit.title}"`.split(' ');
-    let line = '', titleLines: string[] = [];
+    let tLine = '', tLines: string[] = [];
     for (const w of titleWords) {
-      const t = line + w + ' ';
-      if (ctx.measureText(t).width > 960 && line) { titleLines.push(line.trim()); line = w + ' '; }
-      else line = t;
+      const t = tLine + w + ' ';
+      if (ctx.measureText(t).width > 960 && tLine) { tLines.push(tLine.trim()); tLine = w + ' '; }
+      else tLine = t;
     }
-    if (line) titleLines.push(line.trim());
-    titleLines.forEach((l, i) => ctx.fillText(l, 60, 1080 + i * 72));
+    if (tLine) tLines.push(tLine.trim());
+    tLines.forEach((l, i) => ctx.fillText(l, 60, 830 + i * 66));
 
-    // Description — truncated to ~3 lines
-    const descY = 1080 + titleLines.length * 72 + 50;
-    ctx.fillStyle = 'rgba(255,255,255,0.65)';
-    ctx.font = 'italic 300 30px Georgia';
+    // Description — fit as many lines as possible up to y=1720
+    const descStartY = 830 + tLines.length * 66 + 40;
+    ctx.fillStyle = 'rgba(255,255,255,0.68)';
+    ctx.font = 'italic 300 28px Georgia';
+    const maxDescY = 1720;
+    const lineH = 44;
     const descWords = exhibit.description.split(' ');
     let dLine = '', dLines: string[] = [];
     for (const w of descWords) {
@@ -105,31 +108,40 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
       if (ctx.measureText(t).width > 960 && dLine) {
         dLines.push(dLine.trim());
         dLine = w + ' ';
-        if (dLines.length >= 4) break;
-      } else dLine = t;
+        // Stop if next line would overflow
+        if (descStartY + (dLines.length + 1) * lineH > maxDescY - 80) break;
+      } else {
+        dLine = t;
+      }
     }
-    if (dLine && dLines.length < 4) dLines.push(dLine.trim() + (exhibit.description.length > dLine.length ? '…' : ''));
-    dLines.forEach((l, i) => ctx.fillText(l, 60, descY + i * 46));
+    // Add last line — with ellipsis if truncated
+    if (dLine.trim()) {
+      const remaining = exhibit.description.replace(dLines.join(' '), '').trim();
+      const isEnd = remaining.startsWith(dLine.trim());
+      dLines.push(dLine.trim() + (isEnd && remaining === dLine.trim() ? '' : '…'));
+    }
+    dLines.forEach((l, i) => ctx.fillText(l, 60, descStartY + i * lineH));
 
     // Submitter
     if (exhibit.submitter_name) {
-      const subY = descY + dLines.length * 46 + 50;
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      const subY = descStartY + dLines.length * lineH + 44;
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(60, subY - 10); ctx.lineTo(90, subY - 10); ctx.stroke();
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = 'italic 300 28px Georgia';
-      ctx.fillText(exhibit.submitter_name, 100, subY);
+      ctx.beginPath(); ctx.moveTo(60, subY - 8); ctx.lineTo(88, subY - 8); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = 'italic 300 26px Georgia';
+      ctx.textAlign = 'left';
+      ctx.fillText(exhibit.submitter_name, 98, subY);
     }
 
-    // Bottom — site
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    // Bottom branding
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(420, 1820); ctx.lineTo(660, 1820); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.font = '700 22px Georgia';
+    ctx.beginPath(); ctx.moveTo(400, 1840); ctx.lineTo(680, 1840); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '700 19px Georgia';
     ctx.textAlign = 'center';
-    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1868);
+    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1882);
 
     const link = document.createElement('a');
     link.download = `archive-of-almost-${exhibit.catalog_id.toLowerCase()}.jpg`;
@@ -158,27 +170,27 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
         .fu2 { animation-delay: 0.22s; }
         .fu3 { animation-delay: 0.36s; }
         .fu4 { animation-delay: 0.48s; }
+        .sharebtn { transition: all 0.25s; }
+        .sharebtn:hover { color: white !important; border-color: rgba(255,255,255,0.5) !important; background: rgba(255,255,255,0.06) !important; }
       `}</style>
 
       {/* TOP NAV */}
       <div className="fixed top-[57px] md:top-[61px] left-0 right-0 z-50 flex items-center justify-between px-5 md:px-10 py-3"
         style={{ backgroundColor: 'rgba(12,10,9,0.96)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <Link href="/archive"
-          style={{ fontSize: '9px', letterSpacing: '0.45em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontWeight: 700, transition: 'color 0.2s' }}
+          style={{ fontSize: '9px', letterSpacing: '0.45em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', fontWeight: 700, transition: 'color 0.2s' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
         >← Archive</Link>
-        <span className="cg" style={{ fontSize: '10px', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontStyle: 'italic' }}>Permanent Collection</span>
+        <span className="cg" style={{ fontSize: '10px', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', fontStyle: 'italic' }}>Permanent Collection</span>
       </div>
 
       {/* CONTENT */}
-      <div style={{ paddingTop: 'calc(57px + 44px)', paddingBottom: '80px', maxWidth: '900px', margin: '0 auto' }}>
-
-        {/* Desktop: side by side / Mobile: stacked */}
+      <div style={{ paddingTop: 'calc(57px + 44px + 24px)', paddingBottom: '100px', maxWidth: '900px', margin: '0 auto', padding: 'calc(57px + 44px + 24px) 0 100px' }}>
         <div className="flex flex-col md:flex-row" style={{ minHeight: '70vh' }}>
 
           {/* Photo */}
-          <div className="w-full md:w-[50%] shrink-0" style={{ position: 'relative' }}>
+          <div className="w-full md:w-[50%] shrink-0">
             <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', overflow: 'hidden', backgroundColor: '#111' }}>
               <Image src={exhibit.image_url} alt={exhibit.title} fill unoptimized className="object-cover"
                 style={{ filter: 'saturate(0.88) contrast(1.05)' }} />
@@ -192,9 +204,9 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
               <div className="fu fu1" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '9px', letterSpacing: '0.55em', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', fontWeight: 700 }}>{exhibit.catalog_id}</span>
+                <span style={{ fontSize: '9px', letterSpacing: '0.55em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', fontWeight: 700 }}>{exhibit.catalog_id}</span>
                 <div style={{ width: '12px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-                <span style={{ fontSize: '9px', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', fontWeight: 700 }}>{exhibit.year}</span>
+                <span style={{ fontSize: '9px', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', fontWeight: 700 }}>{exhibit.year}</span>
               </div>
 
               <h1 className="cg fu fu2" style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 300, fontStyle: 'italic', color: 'white', lineHeight: 1.2, margin: 0 }}>
@@ -218,19 +230,15 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
             </div>
 
             {/* Share */}
-            <div className="fu fu4" style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button onClick={() => setShowShareMenu(s => !s)}
-                style={{ width: '100%', padding: '12px', fontSize: '9px', letterSpacing: '0.45em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.2)', background: 'none', cursor: 'pointer', transition: 'all 0.3s', fontFamily: 'Georgia' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'none'; }}
+            <div className="fu fu4" style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <button className="sharebtn" onClick={() => setShowShareMenu(s => !s)}
+                style={{ width: '100%', padding: '12px', fontSize: '9px', letterSpacing: '0.45em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.2)', background: 'none', cursor: 'pointer', fontFamily: 'Georgia' }}
               >{showShareMenu ? 'Close ↑' : 'Share this object'}</button>
               {showShareMenu && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   {shareOptions.map((opt) => (
-                    <button key={opt.label} onClick={opt.fn}
-                      style={{ width: '100%', padding: '10px 14px', fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.25s', fontFamily: 'Georgia', textAlign: 'left' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                    <button key={opt.label} className="sharebtn" onClick={opt.fn}
+                      style={{ width: '100%', padding: '10px 14px', fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', fontFamily: 'Georgia', textAlign: 'left' }}
                     >{opt.label}</button>
                   ))}
                 </div>
@@ -244,9 +252,9 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
       <div className="fixed bottom-0 left-0 right-0 z-50 px-5 md:px-10 py-4 flex items-center justify-between"
         style={{ backgroundColor: 'rgba(12,10,9,0.97)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
         <Link href="/archive"
-          style={{ fontSize: '9px', letterSpacing: '0.35em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', transition: 'color 0.2s' }}
+          style={{ fontSize: '9px', letterSpacing: '0.35em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color 0.2s' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
         >← Back to collection</Link>
         <a href="/submit"
           style={{ padding: '9px 22px', fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase', fontWeight: 700, color: 'white', border: '1px solid rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'all 0.3s', fontFamily: 'Georgia' }}
