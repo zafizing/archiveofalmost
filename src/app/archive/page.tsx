@@ -74,59 +74,141 @@ export default function ArchivePage() {
     }
   }, [selectedExhibit]);
 
-  const getShareUrl = () => `https://archiveofalmost.co/archive`;
+  // Her objenin kendi URL'i
+  const getShareUrl = (item: any) =>
+    `https://archiveofalmost.co/archive/${item.catalog_id.toLowerCase()}`;
 
   const shareTwitter = (item: any) => {
     const text = encodeURIComponent(`"${item.title}" — ${item.catalog_id}, ${item.year}\n\nArchived at Archive of Almost.\n`);
-    const url = encodeURIComponent(getShareUrl());
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&via=archiveofalmost`, '_blank');
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(getShareUrl(item))}&via=archiveofalmost`, '_blank');
   };
   const shareFacebook = (item: any) => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`, '_blank');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl(item))}`, '_blank');
   };
   const shareWhatsApp = (item: any) => {
-    const text = encodeURIComponent(`"${item.title}" — ${item.catalog_id}, ${item.year}.\n\nArchived at Archive of Almost:\n${getShareUrl()}`);
+    const text = encodeURIComponent(`"${item.title}" — ${item.catalog_id}, ${item.year}.\n\nArchived at Archive of Almost:\n${getShareUrl(item)}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
+  const copyLink = (item: any) => {
+    navigator.clipboard.writeText(getShareUrl(item));
+  };
 
+  // Story card — foto üst yarı, hikaye alt yarı
   const downloadCard = async (item: any) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1080; canvas.height = 1920;
     const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = '#0c0a09'; ctx.fillRect(0, 0, 1080, 1920);
-    const vignette = ctx.createRadialGradient(540, 960, 200, 540, 960, 900);
-    vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,0.7)');
-    ctx.fillStyle = vignette; ctx.fillRect(0, 0, 1080, 1920);
+
+    // Background
+    ctx.fillStyle = '#0c0a09';
+    ctx.fillRect(0, 0, 1080, 1920);
+
+    // Vignette
+    const vignette = ctx.createRadialGradient(540, 960, 200, 540, 960, 960);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.75)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, 1080, 1920);
+
+    // Load image
     const img = document.createElement('img') as HTMLImageElement;
     img.crossOrigin = 'anonymous';
     await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); img.src = item.image_url; });
-    const fx = 120, fy = 320, fw = 840, fh = 840;
-    ctx.fillStyle = '#4a3220'; ctx.fillRect(fx-18, fy-18, fw+36, fh+36);
-    ctx.strokeStyle = 'rgba(200,162,88,0.6)'; ctx.lineWidth = 1.5; ctx.strokeRect(fx-18, fy-18, fw+36, fh+36);
-    ctx.fillStyle = '#ede7db'; ctx.fillRect(fx, fy, fw, fh+60);
+
+    // Photo — top portion
+    const photoX = 60, photoY = 100, photoW = 960, photoH = 760;
     if (img.width > 0) {
-      ctx.save(); ctx.rect(fx+14, fy+14, fw-28, fh-28); ctx.clip();
-      const sc = Math.max((fw-28)/img.width, (fh-28)/img.height);
-      ctx.drawImage(img, fx+14+((fw-28)-img.width*sc)/2, fy+14+((fh-28)-img.height*sc)/2, img.width*sc, img.height*sc);
+      ctx.save();
+      ctx.rect(photoX, photoY, photoW, photoH);
+      ctx.clip();
+      const sc = Math.max(photoW / img.width, photoH / img.height);
+      const dw = img.width * sc, dh = img.height * sc;
+      ctx.drawImage(img, photoX + (photoW - dw) / 2, photoY + (photoH - dh) / 2, dw, dh);
       ctx.restore();
+      // Photo bottom fade
+      const fadeGrad = ctx.createLinearGradient(0, photoY + photoH * 0.55, 0, photoY + photoH);
+      fadeGrad.addColorStop(0, 'rgba(12,10,9,0)');
+      fadeGrad.addColorStop(1, 'rgba(12,10,9,0.9)');
+      ctx.fillStyle = fadeGrad;
+      ctx.fillRect(photoX, photoY, photoW, photoH);
     }
-    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='700 22px Georgia'; ctx.textAlign='center';
-    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 540, fy+fh+110);
-    ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.font='italic 300 52px Georgia';
-    const words=`"${item.title}"`.split(' '); let line='', lines:string[]=[];
-    for(const w of words){const t=line+w+' ';if(ctx.measureText(t).width>820&&line){lines.push(line.trim());line=w+' ';}else line=t;}
-    if(line)lines.push(line.trim());
-    lines.forEach((l,i)=>ctx.fillText(l,540,fy+fh+185+i*68));
-    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(420,1750); ctx.lineTo(660,1750); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.font='700 20px Georgia'; ctx.fillText('ARCHIVEOFALMOST.CO',540,1800);
-    const link=document.createElement('a'); link.download=`archive-of-almost-${item.catalog_id?.toLowerCase()||'object'}.jpg`;
-    link.href=canvas.toDataURL('image/jpeg',0.95); link.click();
+
+    // Divider
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(60, 900); ctx.lineTo(1020, 900); ctx.stroke();
+
+    // Catalog + year
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '700 24px Georgia';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 60, 960);
+
+    // Title
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.font = 'italic 300 56px Georgia';
+    const titleWords = `"${item.title}"`.split(' ');
+    let tLine = '', tLines: string[] = [];
+    for (const w of titleWords) {
+      const t = tLine + w + ' ';
+      if (ctx.measureText(t).width > 960 && tLine) { tLines.push(tLine.trim()); tLine = w + ' '; }
+      else tLine = t;
+    }
+    if (tLine) tLines.push(tLine.trim());
+    tLines.forEach((l, i) => ctx.fillText(l, 60, 1045 + i * 70));
+
+    // Description — up to 4 lines
+    const descStartY = 1045 + tLines.length * 70 + 44;
+    ctx.fillStyle = 'rgba(255,255,255,0.62)';
+    ctx.font = 'italic 300 30px Georgia';
+    const descWords = item.description.split(' ');
+    let dLine = '', dLines: string[] = [];
+    for (const w of descWords) {
+      const t = dLine + w + ' ';
+      if (ctx.measureText(t).width > 960 && dLine) {
+        dLines.push(dLine.trim());
+        dLine = w + ' ';
+        if (dLines.length >= 4) break;
+      } else dLine = t;
+    }
+    if (dLine && dLines.length < 4) {
+      const isEnd = dLine.trim() === item.description.split(' ').slice(-dLine.trim().split(' ').length).join(' ').trim();
+      dLines.push(dLine.trim() + (isEnd ? '' : '…'));
+    }
+    dLines.forEach((l, i) => ctx.fillText(l, 60, descStartY + i * 48));
+
+    // Submitter
+    if (item.submitter_name) {
+      const subY = descStartY + dLines.length * 48 + 48;
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(60, subY - 8); ctx.lineTo(88, subY - 8); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.font = 'italic 300 26px Georgia';
+      ctx.textAlign = 'left';
+      ctx.fillText(item.submitter_name, 98, subY);
+    }
+
+    // Bottom
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(400, 1830); ctx.lineTo(680, 1830); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.font = '700 20px Georgia';
+    ctx.textAlign = 'center';
+    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1875);
+
+    const link = document.createElement('a');
+    link.download = `archive-of-almost-${item.catalog_id?.toLowerCase() || 'object'}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.click();
   };
 
   const shareOptions = (item: any) => [
     { label: '𝕏  Post on X / Twitter', fn: () => shareTwitter(item) },
     { label: 'f  Share on Facebook',   fn: () => shareFacebook(item) },
     { label: '◎  Send on WhatsApp',    fn: () => shareWhatsApp(item) },
+    { label: '⎘  Copy link',           fn: () => copyLink(item) },
     { label: '↓  Download Story Card', fn: () => downloadCard(item) },
   ];
 
@@ -166,7 +248,7 @@ export default function ArchivePage() {
         </div>
       </div>
 
-      {/* ═══ STAGE ═══ */}
+      {/* STAGE */}
       <div
         style={{ height:'100dvh', overflow:'hidden', position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}
         onTouchStart={(e) => { touchStartX.current=e.touches[0].clientX; touchStartY.current=e.touches[0].clientY; }}
@@ -176,61 +258,36 @@ export default function ArchivePage() {
           if(Math.abs(dx)>45&&Math.abs(dx)>dy*1.2) dx>0?next():prev();
         }}
       >
-        {/* Wall texture */}
         <div style={{ position:'absolute', inset:0, backgroundImage:'repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.004) 59px, rgba(255,255,255,0.004) 60px)', pointerEvents:'none', zIndex:0 }} />
-        {/* Ceiling rail line */}
         <div style={{ position:'absolute', top:'95px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 20%, rgba(255,255,255,0.07) 80%, transparent)', pointerEvents:'none', zIndex:1 }} />
-        {/* Floor line */}
         <div style={{ position:'absolute', bottom:'66px', left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.04) 80%, transparent)', pointerEvents:'none', zIndex:1 }} />
 
         {exhibits.length > 0 && (<>
-
-          {/* ── LEFT SIDE PHOTO ── centered in gap left of center photo */}
+          {/* LEFT SIDE */}
           <div className="hidden md:flex items-center justify-center" onClick={prev}
             style={{ position:'absolute', left:'20px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
-            <div
-              style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
+            <div style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}
-            >
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}>
               <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
                 <Image src={exhibits[getIdx(-1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
             </div>
           </div>
 
-          {/* ── CENTER PHOTO ── */}
-          <div className="relative z-10 flex flex-col items-center"
-            style={{ width:'min(480px, 90vw)', flexShrink:0 }}>
-
-            <div
-              onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+          {/* CENTER */}
+          <div className="relative z-10 flex flex-col items-center" style={{ width:'min(480px, 90vw)', flexShrink:0 }}>
+            <div onClick={() => setSelectedExhibit(exhibits[activeIndex])}
               style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.45s ease' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}
-            >
-              {/* White backlight — desktop only to avoid layout issues on mobile */}
-              <div className="hidden md:block" style={{
-                position:'absolute', inset:'-50px',
-                background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.28) 35%, transparent 62%)',
-                pointerEvents:'none', zIndex:-1,
-                filter:'blur(15px)',
-              }} />
-              {/* Shadow below */}
-              <div style={{ position:'absolute', top:'98%', left:'8%', right:'8%', height:'50px',
-                background:'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,0,0,0.85) 0%, transparent 80%)',
-                pointerEvents:'none', zIndex:-1 }} />
-
-              {/* Photo */}
-              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111',
-                boxShadow:'0 0 0 1px rgba(255,255,255,0.06)' }}>
-                <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title}
-                  fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}>
+              <div className="hidden md:block" style={{ position:'absolute', inset:'-50px', background:'radial-gradient(ellipse 110% 100% at 50% 50%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.28) 35%, transparent 62%)', pointerEvents:'none', zIndex:-1, filter:'blur(15px)' }} />
+              <div style={{ position:'absolute', top:'98%', left:'8%', right:'8%', height:'50px', background:'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,0,0,0.85) 0%, transparent 80%)', pointerEvents:'none', zIndex:-1 }} />
+              <div style={{ position:'relative', width:'100%', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111', boxShadow:'0 0 0 1px rgba(255,255,255,0.06)' }}>
+                <Image key={activeIndex} src={exhibits[activeIndex].image_url} alt={exhibits[activeIndex].title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)' }} />
                 <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 40px rgba(0,0,0,0.45)' }} />
               </div>
             </div>
-
-            {/* Label */}
             <div style={{ marginTop:'18px', width:'100%' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'7px' }}>
                 <span style={{ fontSize:'9px', letterSpacing:'0.55em', color:'white', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].catalog_id}</span>
@@ -246,7 +303,6 @@ export default function ArchivePage() {
                 onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.9)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.5)')}
               >View object →</span>
-              {/* Progress bar */}
               <div style={{ marginTop:'14px', height:'1.5px', background:'rgba(255,255,255,0.07)', overflow:'hidden', borderRadius:'1px' }}>
                 {!isPaused && !selectedExhibit && (
                   <div key={progressKey} style={{ height:'100%', background:'rgba(255,255,255,0.4)', transformOrigin:'left', borderRadius:'1px', animation:`progressFill ${AUTO_INTERVAL}ms linear forwards` }} />
@@ -255,29 +311,24 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          {/* ── RIGHT SIDE PHOTO ── centered in gap right of center photo */}
+          {/* RIGHT SIDE */}
           <div className="hidden md:flex items-center justify-center" onClick={next}
             style={{ position:'absolute', right:'20px', top:0, bottom:0, width:'calc(50% - 280px)', zIndex:10, cursor:'pointer' }}>
-            <div
-              style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
+            <div style={{ width:'min(230px, 90%)', opacity:0.5, filter:'brightness(0.5) saturate(0.55)', transition:'opacity 0.3s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.72')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}
-            >
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity='0.5')}>
               <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden', backgroundColor:'#111' }}>
                 <Image src={exhibits[getIdx(1)].image_url} alt="" fill unoptimized className="object-cover" />
               </div>
             </div>
           </div>
-
         </>)}
 
-        {/* NAV ARROWS */}
         <button className="navbtn hidden md:flex absolute z-20 items-center justify-center" onClick={prev}
           style={{ left:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.45)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>←</button>
         <button className="navbtn hidden md:flex absolute z-20 items-center justify-center" onClick={next}
           style={{ right:'12px', top:'50%', transform:'translateY(-50%)', width:'40px', height:'40px', border:'1px solid rgba(255,255,255,0.45)', background:'rgba(0,0,0,0.6)', color:'white', cursor:'pointer', backdropFilter:'blur(8px)', fontSize:'16px' }}>→</button>
 
-        {/* DOT NAV */}
         {exhibits.length > 1 && (
           <div style={{ position:'absolute', bottom:'80px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'6px', alignItems:'center', zIndex:10 }}>
             {exhibits.map((_, i) => (
@@ -286,14 +337,13 @@ export default function ArchivePage() {
           </div>
         )}
 
-        {/* SWIPE HINT — mobile only */}
         <div className="md:hidden" style={{ position:'absolute', bottom:'56px', left:'50%', transform:'translateX(-50%)', display:'flex', alignItems:'center', gap:'6px', zIndex:10, opacity:showSwipeHint?1:0, transition:'opacity 1.2s ease', pointerEvents:'none', whiteSpace:'nowrap' }}>
           <span style={{ fontSize:'8px', letterSpacing:'0.4em', color:'rgba(255,255,255,0.45)', textTransform:'uppercase' }}>Swipe to navigate</span>
           <div style={{ animation:'swipeAnim 1.4s ease-in-out infinite', color:'rgba(255,255,255,0.45)', fontSize:'11px' }}>→</div>
         </div>
       </div>
 
-      {/* ═══ MODAL ═══ */}
+      {/* MODAL */}
       {selectedExhibit && (
         <div
           className="fixed inset-0 z-[200] flex items-start md:items-center justify-center"
@@ -311,7 +361,6 @@ export default function ArchivePage() {
         >
           <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(4,3,2,0.97)', backdropFilter:'blur(30px)' }} />
 
-          {/* Desktop prev/next */}
           <button className="navbtn hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center"
             onClick={(e) => { e.stopPropagation(); const n=((activeIndex-1)+exhibits.length)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
             style={{ border:'1px solid rgba(255,255,255,0.2)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.85)', cursor:'pointer', fontSize:'17px' }}>←</button>
@@ -319,31 +368,20 @@ export default function ArchivePage() {
             onClick={(e) => { e.stopPropagation(); const n=(activeIndex+1)%exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }}
             style={{ border:'1px solid rgba(255,255,255,0.2)', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.85)', cursor:'pointer', fontSize:'17px' }}>→</button>
 
-          {/* ── MOBILE modal ── */}
-          <div
-            className="md:hidden modal-anim relative w-full z-10 flex flex-col"
+          {/* MOBILE modal */}
+          <div className="md:hidden modal-anim relative w-full z-10 flex flex-col"
             style={{ height:'calc(100dvh - 57px)', overflowY:'hidden', borderTop:'1px solid rgba(255,255,255,0.12)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Big X button */}
+            onClick={(e) => e.stopPropagation()}>
             <button onClick={() => { setSelectedExhibit(null); setShowShareMenu(false); }}
-              style={{ position:'absolute', top:'8px', right:'8px', zIndex:20, width:'36px', height:'36px', background:'rgba(0,0,0,0.75)', border:'1px solid rgba(255,255,255,0.3)', color:'white', fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}
-            >×</button>
-
-            {/* Photo — compact height so story is always visible */}
-            <div
-              style={{ position:'relative', width:'100%', height:'38vw', maxHeight:'220px', overflow:'hidden', cursor:'zoom-in', flexShrink:0 }}
-              onClick={() => setShowFullImage(true)}
-            >
-              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
-                style={{ filter:'saturate(0.88) contrast(1.05)', objectPosition:'center' }} />
+              style={{ position:'absolute', top:'8px', right:'8px', zIndex:20, width:'36px', height:'36px', background:'rgba(0,0,0,0.75)', border:'1px solid rgba(255,255,255,0.3)', color:'white', fontSize:'18px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}>×</button>
+            <div style={{ position:'relative', width:'100%', height:'38vw', maxHeight:'220px', overflow:'hidden', cursor:'zoom-in', flexShrink:0 }}
+              onClick={() => setShowFullImage(true)}>
+              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.88) contrast(1.05)', objectPosition:'center' }} />
               <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 30%, transparent 65%, rgba(0,0,0,0.4) 100%)', pointerEvents:'none' }} />
               <div style={{ position:'absolute', bottom:'8px', right:'8px', background:'rgba(0,0,0,0.55)', border:'1px solid rgba(255,255,255,0.2)', padding:'3px 7px', backdropFilter:'blur(4px)' }}>
                 <span style={{ fontSize:'7px', letterSpacing:'0.3em', color:'rgba(255,255,255,0.7)', textTransform:'uppercase' }}>⊕ Tap</span>
               </div>
             </div>
-
-            {/* Scrollable info */}
             <div className="scrollbar-hide" style={{ flex:1, overflowY:'auto', padding:'12px 16px', display:'flex', flexDirection:'column', gap:'8px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                 <span style={{ fontSize:'8px', letterSpacing:'0.5em', textTransform:'uppercase', color:'white', fontWeight:700 }}>{selectedExhibit.catalog_id}</span>
@@ -352,9 +390,7 @@ export default function ArchivePage() {
               </div>
               <h2 className="cg" style={{ fontSize:'19px', fontWeight:300, fontStyle:'italic', color:'white', lineHeight:1.25 }}>"{selectedExhibit.title}"</h2>
               <div style={{ width:'20px', height:'1px', background:'rgba(255,255,255,0.18)' }} />
-              <p className="cg" style={{ fontSize:'14px', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.85)' }}>
-                {selectedExhibit.description}
-              </p>
+              <p className="cg" style={{ fontSize:'14px', fontWeight:300, fontStyle:'italic', lineHeight:1.8, color:'rgba(255,255,255,0.85)' }}>{selectedExhibit.description}</p>
               {selectedExhibit.submitter_name && (
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', paddingTop:'2px' }}>
                   <div style={{ width:'16px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
@@ -378,21 +414,15 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          {/* ── DESKTOP modal — photo left (full), info right ── */}
-          <div
-            className="hidden md:flex modal-anim relative w-full z-10 flex-row"
+          {/* DESKTOP modal */}
+          <div className="hidden md:flex modal-anim relative w-full z-10 flex-row"
             style={{ maxWidth:'900px', maxHeight:'88dvh', border:'1px solid rgba(255,255,255,0.22)', overflow:'hidden' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Photo — full left half, no frame */}
+            onClick={(e) => e.stopPropagation()}>
             <div className="w-[50%] shrink-0" style={{ position:'relative', minHeight:'420px' }}>
-              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
-                style={{ filter:'saturate(0.85) contrast(1.05)' }} />
+              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
               <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,244,200,0.06) 0%, transparent 60%)' }} />
               <div style={{ position:'absolute', inset:0, pointerEvents:'none', boxShadow:'inset 0 0 60px rgba(0,0,0,0.5)' }} />
             </div>
-
-            {/* Info side */}
             <div className="w-[50%] flex flex-col justify-between p-10"
               style={{ backgroundColor:'#090706', borderLeft:'1px solid rgba(255,255,255,0.08)', overflowY:'auto' }}>
               <div style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
@@ -420,8 +450,7 @@ export default function ArchivePage() {
                 <div className="fu2" style={{ position:'relative' }}>
                   <div ref={storyRef} className="scrollbar-hide"
                     style={{ maxHeight:'clamp(160px, 30vh, 260px)', overflowY:'auto', WebkitOverflowScrolling:'touch' as any }}
-                    onScroll={(e) => { const el=e.currentTarget; if(fadeRef.current) fadeRef.current.style.opacity=el.scrollHeight-el.scrollTop<=el.clientHeight+5?'0':'1'; }}
-                  >
+                    onScroll={(e) => { const el=e.currentTarget; if(fadeRef.current) fadeRef.current.style.opacity=el.scrollHeight-el.scrollTop<=el.clientHeight+5?'0':'1'; }}>
                     <p className="cg" style={{ fontSize:'clamp(15px, 1.6vw, 18px)', fontWeight:300, fontStyle:'italic', lineHeight:1.85, color:'rgba(255,255,255,0.88)' }}>
                       {selectedExhibit.description}
                     </p>
@@ -462,20 +491,17 @@ export default function ArchivePage() {
         </div>
       )}
 
-      {/* FULL IMAGE OVERLAY — mobile only */}
+      {/* FULL IMAGE — mobile */}
       {showFullImage && selectedExhibit && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center"
           style={{ backgroundColor:'rgba(0,0,0,0.97)', backdropFilter:'blur(20px)' }}
-          onClick={() => setShowFullImage(false)}
-        >
+          onClick={() => setShowFullImage(false)}>
           <div style={{ position:'relative', width:'96vw', maxWidth:'520px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ position:'relative', aspectRatio:'1/1', overflow:'hidden' }}>
-              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover"
-                style={{ filter:'saturate(0.85) contrast(1.05)' }} />
+              <Image src={selectedExhibit.image_url} alt={selectedExhibit.title} fill unoptimized className="object-cover" style={{ filter:'saturate(0.85) contrast(1.05)' }} />
             </div>
             <button onClick={() => setShowFullImage(false)}
-              style={{ position:'absolute', top:'10px', right:'10px', width:'34px', height:'34px', background:'rgba(0,0,0,0.75)', border:'1px solid rgba(255,255,255,0.35)', color:'white', fontSize:'16px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}
-            >×</button>
+              style={{ position:'absolute', top:'10px', right:'10px', width:'34px', height:'34px', background:'rgba(0,0,0,0.75)', border:'1px solid rgba(255,255,255,0.35)', color:'white', fontSize:'16px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>×</button>
           </div>
         </div>
       )}
