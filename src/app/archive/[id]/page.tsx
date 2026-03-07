@@ -3,11 +3,12 @@ import { supabase } from '@/lib/supabase';
 import ExhibitClient from './ExhibitClient';
 import { notFound } from 'next/navigation';
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { data } = await supabase
     .from('exhibits')
     .select('*')
-    .eq('catalog_id', params.id.toUpperCase())
+    .eq('catalog_id', id.toUpperCase())
     .eq('is_approved', true)
     .single();
 
@@ -31,11 +32,12 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function ExhibitPage({ params }: { params: { id: string } }) {
+export default async function ExhibitPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { data } = await supabase
     .from('exhibits')
     .select('*')
-    .eq('catalog_id', params.id.toUpperCase())
+    .eq('catalog_id', id.toUpperCase())
     .eq('is_approved', true)
     .single();
 
