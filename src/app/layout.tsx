@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Analytics } from "@vercel/analytics/react";
 
 const cormorant = Cormorant_Garamond({ 
   subsets: ["latin"],
   weight: ['300', '400', '500', '600', '700'],
   style: ['normal', 'italic'],
 });
-
 export const metadata: Metadata = {
   title: "Archive of Almost — A Permanent Collection of Objects Left Behind",
   description: "150 objects. 150 stories. A permanent digital archive for the things we kept when we couldn't keep each other.",
@@ -38,7 +38,6 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
 };
-
 export default function RootLayout({
   children,
 }: {
@@ -49,6 +48,7 @@ export default function RootLayout({
       <body className={`${cormorant.className} bg-black antialiased`}>
         <Navbar />
         {children}
+        <Analytics />
       </body>
     </html>
   );
