@@ -2,10 +2,25 @@
 // src/app/archive/[id]/ExhibitClient.tsx
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-export default function ExhibitClient({ exhibit }: { exhibit: any }) {
+export default function ExhibitClient({ exhibit, allExhibits }: { exhibit: any; allExhibits: { catalog_id: string; title: string }[] }) {
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const router = useRouter();
+
+  const currentIndex = allExhibits.findIndex(e => e.catalog_id === exhibit.catalog_id);
+  const prevExhibit = currentIndex > 0 ? allExhibits[currentIndex - 1] : allExhibits[allExhibits.length - 1];
+  const nextExhibit = currentIndex < allExhibits.length - 1 ? allExhibits[currentIndex + 1] : allExhibits[0];
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') router.push(`/archive/${prevExhibit.catalog_id.toLowerCase()}`);
+      if (e.key === 'ArrowRight') router.push(`/archive/${nextExhibit.catalog_id.toLowerCase()}`);
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [prevExhibit, nextExhibit, router]);
 
   const shareUrl = `https://archiveofalmost.co/archive/${exhibit.catalog_id.toLowerCase()}`;
 
@@ -183,6 +198,20 @@ export default function ExhibitClient({ exhibit }: { exhibit: any }) {
           onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
         >← Archive</Link>
         <span className="cg" style={{ fontSize: '10px', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', fontStyle: 'italic' }}>Permanent Collection</span>
+        {allExhibits.length > 1 && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Link href={`/archive/${prevExhibit.catalog_id.toLowerCase()}`}
+              style={{ fontSize: '9px', letterSpacing: '0.35em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.45)', textDecoration: 'none', padding: '4px 10px', border: '1px solid rgba(255,255,255,0.15)', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color='white'; (e.currentTarget as HTMLElement).style.borderColor='rgba(255,255,255,0.4)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color='rgba(255,255,255,0.45)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(255,255,255,0.15)'; }}
+            >←</Link>
+            <Link href={`/archive/${nextExhibit.catalog_id.toLowerCase()}`}
+              style={{ fontSize: '9px', letterSpacing: '0.35em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,0.45)', textDecoration: 'none', padding: '4px 10px', border: '1px solid rgba(255,255,255,0.15)', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color='white'; (e.currentTarget as HTMLElement).style.borderColor='rgba(255,255,255,0.4)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color='rgba(255,255,255,0.45)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(255,255,255,0.15)'; }}
+            >→</Link>
+          </div>
+        )}
       </div>
 
       {/* CONTENT */}
