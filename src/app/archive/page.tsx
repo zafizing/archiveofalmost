@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
@@ -16,6 +17,7 @@ export default function ArchivePage() {
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
+  const router = useRouter();
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const storyRef = useRef<HTMLDivElement>(null);
@@ -54,14 +56,8 @@ export default function ArchivePage() {
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
-      if (selectedExhibit) {
-        if (e.key === 'Escape') { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }
-        if (e.key === 'ArrowRight') { const n = (activeIndex + 1) % exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }
-        if (e.key === 'ArrowLeft') { const n = ((activeIndex - 1) + exhibits.length) % exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }
-      } else {
-        if (e.key === 'ArrowRight') next();
-        if (e.key === 'ArrowLeft') prev();
-      }
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
@@ -277,7 +273,7 @@ export default function ArchivePage() {
 
           {/* CENTER */}
           <div className="relative z-10 flex flex-col items-center" style={{ width:'min(480px, 90vw)', flexShrink:0 }}>
-            <div onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+            <div onClick={() => router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`)}
               style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.45s ease' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}>
@@ -294,11 +290,11 @@ export default function ArchivePage() {
                 <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
                 <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'white', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].year}</span>
               </div>
-              <p className="cg" onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+              <p className="cg" onClick={() => router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`)}
                 style={{ fontSize:'clamp(16px, 2.2vw, 22px)', fontStyle:'italic', fontWeight:300, color:'white', lineHeight:1.3, marginBottom:'8px', cursor:'pointer' }}>
                 "{exhibits[activeIndex].title}"
               </p>
-              <span onClick={() => setSelectedExhibit(exhibits[activeIndex])}
+              <span onClick={() => router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`)}
                 style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.5)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.9)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.5)')}
