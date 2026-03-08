@@ -34,6 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ExhibitPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
   const { data } = await supabase
     .from('exhibits')
     .select('*')
@@ -43,5 +44,11 @@ export default async function ExhibitPage({ params }: { params: Promise<{ id: st
 
   if (!data) notFound();
 
-  return <ExhibitClient exhibit={data} />;
+  const { data: allExhibits } = await supabase
+    .from('exhibits')
+    .select('catalog_id, title')
+    .eq('is_approved', true)
+    .order('created_at', { ascending: false });
+
+  return <ExhibitClient exhibit={data} allExhibits={allExhibits ?? []} />;
 }
