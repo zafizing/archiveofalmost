@@ -56,8 +56,14 @@ export default function ArchivePage() {
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') next();
-      if (e.key === 'ArrowLeft') prev();
+      if (selectedExhibit) {
+        if (e.key === 'Escape') { setSelectedExhibit(null); setShowShareMenu(false); setShowFullImage(false); }
+        if (e.key === 'ArrowRight') { const n = (activeIndex + 1) % exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }
+        if (e.key === 'ArrowLeft') { const n = ((activeIndex - 1) + exhibits.length) % exhibits.length; setActiveIndex(n); setSelectedExhibit(exhibits[n]); }
+      } else {
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
+      }
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
@@ -111,8 +117,8 @@ export default function ArchivePage() {
     img.crossOrigin = 'anonymous';
     await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); img.src = item.image_url; });
 
-    // Photo — top portion
-    const photoX = 60, photoY = 100, photoW = 960, photoH = 760;
+    // Photo — top 40% only
+    const photoX = 0, photoY = 0, photoW = 1080, photoH = 680;
     if (img.width > 0) {
       ctx.save();
       ctx.rect(photoX, photoY, photoW, photoH);
@@ -121,28 +127,28 @@ export default function ArchivePage() {
       const dw = img.width * sc, dh = img.height * sc;
       ctx.drawImage(img, photoX + (photoW - dw) / 2, photoY + (photoH - dh) / 2, dw, dh);
       ctx.restore();
-      // Photo bottom fade
-      const fadeGrad = ctx.createLinearGradient(0, photoY + photoH * 0.55, 0, photoY + photoH);
+      // Strong bottom fade on photo
+      const fadeGrad = ctx.createLinearGradient(0, photoY + photoH * 0.45, 0, photoY + photoH);
       fadeGrad.addColorStop(0, 'rgba(12,10,9,0)');
-      fadeGrad.addColorStop(1, 'rgba(12,10,9,0.9)');
+      fadeGrad.addColorStop(1, 'rgba(12,10,9,1)');
       ctx.fillStyle = fadeGrad;
       ctx.fillRect(photoX, photoY, photoW, photoH);
     }
 
-    // Divider
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    // Divider line
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(60, 900); ctx.lineTo(1020, 900); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(60, 720); ctx.lineTo(1020, 720); ctx.stroke();
 
     // Catalog + year
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = '700 24px Georgia';
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.font = '700 22px Georgia';
     ctx.textAlign = 'left';
-    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 60, 960);
+    ctx.fillText(`${item.catalog_id}  —  ${item.year}`, 60, 775);
 
     // Title
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.font = 'italic 300 56px Georgia';
+    ctx.fillStyle = 'rgba(255,255,255,0.97)';
+    ctx.font = 'italic 300 52px Georgia';
     const titleWords = `"${item.title}"`.split(' ');
     let tLine = '', tLines: string[] = [];
     for (const w of titleWords) {
@@ -151,48 +157,73 @@ export default function ArchivePage() {
       else tLine = t;
     }
     if (tLine) tLines.push(tLine.trim());
-    tLines.forEach((l, i) => ctx.fillText(l, 60, 1045 + i * 70));
+    tLines.forEach((l, i) => ctx.fillText(l, 60, 850 + i * 66));
 
-    // Description — up to 4 lines
-    const descStartY = 1045 + tLines.length * 70 + 44;
-    ctx.fillStyle = 'rgba(255,255,255,0.62)';
-    ctx.font = 'italic 300 30px Georgia';
-    const descWords = item.description.split(' ');
-    let dLine = '', dLines: string[] = [];
-    for (const w of descWords) {
-      const t = dLine + w + ' ';
-      if (ctx.measureText(t).width > 960 && dLine) {
-        dLines.push(dLine.trim());
-        dLine = w + ' ';
-        if (dLines.length >= 4) break;
-      } else dLine = t;
+    // Thin divider under title
+    const afterTitle = 850 + tLines.length * 66 + 20;
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(60, afterTitle); ctx.lineTo(120, afterTitle); ctx.stroke();
+
+    // Description — dynamic font size to fit available space
+    const descStartY = afterTitle + 44;
+    const submitterHeight = item.submitter_name ? 80 : 0;
+    const bottomReserve = 120; // space for submitter + bottom URL
+    const availableHeight = 1920 - descStartY - submitterHeight - bottomReserve;
+
+    // Try font sizes from 28 down to 18 until it fits
+    let descFontSize = 28;
+    let descLineHeight = 46;
+    let dLines: string[] = [];
+
+    for (let fontSize = 28; fontSize >= 18; fontSize -= 2) {
+      descLineHeight = Math.round(fontSize * 1.65);
+      ctx.font = `italic 300 ${fontSize}px Georgia`;
+      const descWords = item.description.split(' ');
+      let dLine = '', lines: string[] = [];
+      for (const w of descWords) {
+        const t = dLine + w + ' ';
+        if (ctx.measureText(t).width > 960 && dLine) { lines.push(dLine.trim()); dLine = w + ' '; }
+        else dLine = t;
+      }
+      if (dLine) lines.push(dLine.trim());
+      const totalHeight = lines.length * descLineHeight;
+      dLines = lines;
+      descFontSize = fontSize;
+      if (totalHeight <= availableHeight) break;
     }
-    if (dLine && dLines.length < 4) {
-      const isEnd = dLine.trim() === item.description.split(' ').slice(-dLine.trim().split(' ').length).join(' ').trim();
-      dLines.push(dLine.trim() + (isEnd ? '' : '…'));
+
+    // If still doesn't fit at 18px, truncate with ellipsis
+    const maxLines = Math.floor(availableHeight / descLineHeight);
+    if (dLines.length > maxLines) {
+      dLines = dLines.slice(0, maxLines);
+      dLines[dLines.length - 1] = dLines[dLines.length - 1].replace(/\s+\S+$/, '') + '…';
     }
-    dLines.forEach((l, i) => ctx.fillText(l, 60, descStartY + i * 48));
+
+    ctx.fillStyle = 'rgba(255,255,255,0.72)';
+    ctx.font = `italic 300 ${descFontSize}px Georgia`;
+    dLines.forEach((l, i) => ctx.fillText(l, 60, descStartY + i * descLineHeight));
 
     // Submitter
     if (item.submitter_name) {
-      const subY = descStartY + dLines.length * 48 + 48;
-      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      const subY = descStartY + dLines.length * descLineHeight + 52;
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(60, subY - 8); ctx.lineTo(88, subY - 8); ctx.stroke();
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
-      ctx.font = 'italic 300 26px Georgia';
+      ctx.beginPath(); ctx.moveTo(60, subY - 10); ctx.lineTo(90, subY - 10); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = 'italic 300 24px Georgia';
       ctx.textAlign = 'left';
-      ctx.fillText(item.submitter_name, 98, subY);
+      ctx.fillText(item.submitter_name, 102, subY);
     }
 
     // Bottom
     ctx.strokeStyle = 'rgba(255,255,255,0.1)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(400, 1830); ctx.lineTo(680, 1830); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.28)';
-    ctx.font = '700 20px Georgia';
+    ctx.beginPath(); ctx.moveTo(390, 1840); ctx.lineTo(690, 1840); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '700 19px Georgia';
     ctx.textAlign = 'center';
-    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1875);
+    ctx.fillText('ARCHIVEOFALMOST.CO', 540, 1882);
 
     const link = document.createElement('a');
     link.download = `archive-of-almost-${item.catalog_id?.toLowerCase() || 'object'}.jpg`;
@@ -273,7 +304,7 @@ export default function ArchivePage() {
 
           {/* CENTER */}
           <div className="relative z-10 flex flex-col items-center" style={{ width:'min(480px, 90vw)', flexShrink:0 }}>
-            <div onClick={() => router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`)}
+            <div onClick={() => { setSelectedExhibit(exhibits[activeIndex]); router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`, { scroll: false }); }}
               style={{ width:'100%', position:'relative', cursor:'pointer', transition:'transform 0.45s ease' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(-4px)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform='translateY(0)'; }}>
@@ -290,11 +321,11 @@ export default function ArchivePage() {
                 <div style={{ width:'14px', height:'1px', background:'rgba(255,255,255,0.3)' }} />
                 <span style={{ fontSize:'9px', letterSpacing:'0.45em', color:'white', textTransform:'uppercase', fontWeight:700 }}>{exhibits[activeIndex].year}</span>
               </div>
-              <p className="cg" onClick={() => router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`)}
+              <p className="cg" onClick={() => { setSelectedExhibit(exhibits[activeIndex]); router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`, { scroll: false }); }}
                 style={{ fontSize:'clamp(16px, 2.2vw, 22px)', fontStyle:'italic', fontWeight:300, color:'white', lineHeight:1.3, marginBottom:'8px', cursor:'pointer' }}>
                 "{exhibits[activeIndex].title}"
               </p>
-              <span onClick={() => router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`)}
+              <span onClick={() => { setSelectedExhibit(exhibits[activeIndex]); router.push(`/archive/${exhibits[activeIndex].catalog_id.toLowerCase()}`, { scroll: false }); }}
                 style={{ fontSize:'9px', letterSpacing:'0.45em', color:'rgba(255,255,255,0.5)', textTransform:'uppercase', cursor:'pointer', transition:'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.9)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color='rgba(255,255,255,0.5)')}
