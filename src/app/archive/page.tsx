@@ -30,7 +30,7 @@ export default function ArchivePage() {
   useEffect(() => { fetchTotalCount(); }, [fetchTotalCount]);
 
   const fetchExhibits = useCallback(async () => {
-    const { data, error } = await supabase.from('exhibits').select('*').eq('is_approved', true).order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('exhibits').select('*').eq('is_approved', true).order('catalog_id', { ascending: true });
     if (!error && data) setExhibits(data);
   }, []);
   useEffect(() => { fetchExhibits(); }, [fetchExhibits]);
