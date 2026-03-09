@@ -114,12 +114,12 @@ export default function ArchivePage() {
     ctx.fillStyle = '#0c0a09';
     ctx.fillRect(0, 0, 1080, 1920);
 
-    // Vignette
-    const vignette = ctx.createRadialGradient(540, 960, 200, 540, 960, 960);
+    // Vignette — sadece fotoğrafın altından itibaren uygula
+    const vignette = ctx.createRadialGradient(540, 1200, 200, 540, 1200, 900);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
-    vignette.addColorStop(1, 'rgba(0,0,0,0.75)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
     ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, 1080, 1920);
+    ctx.fillRect(0, 420, 1080, 1500);
 
     // Load image
     const img = document.createElement('img') as HTMLImageElement;
