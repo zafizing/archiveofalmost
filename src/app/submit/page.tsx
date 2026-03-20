@@ -111,7 +111,7 @@ export default function SubmitPage() {
               We will contact you at the email you provided.
             </p>
             <p className="text-[11px] tracking-[0.4em] text-neutral-700 uppercase">
-              Archival fee: $1,000 — collected only upon acceptance.
+              Founding collection: free — collected only upon acceptance if slots remain. $500 thereafter.
             </p>
           </div>
 
@@ -142,7 +142,8 @@ export default function SubmitPage() {
           <div className="w-10 h-[1px] bg-neutral-800"></div>
           <p className="text-sm text-neutral-500 font-light leading-relaxed max-w-md italic">
             We accept a limited number of objects. Each submission is reviewed personally. 
-            If accepted, you will be contacted to complete your archival for <span className="text-white/60">$1,000</span>.
+            The first 50 objects are archived free of charge — permanently, no fee. 
+            After the founding collection is complete, archival is <span className="text-white/60">$500</span> per object.
           </p>
           <p className="text-[11px] tracking-[0.3em] text-neutral-700 uppercase">
             {remaining !== null ? `${remaining} of ${total} slots remaining` : "Loading..."} — No payment required to apply
