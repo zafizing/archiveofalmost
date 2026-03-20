@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
-const TOTAL_SLOTS = 150;
+const TOTAL_SLOTS = 250;
 
 export function useSlotCount() {
   const [archived, setArchived] = useState<number | null>(null);
