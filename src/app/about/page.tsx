@@ -36,7 +36,7 @@ export default function AboutPage() {
             preserved — exactly as they are, exactly as unfinished as they are.
           </p>
           <p className="text-base md:text-lg text-white/50 font-light leading-relaxed italic">
-            We accept 150 objects. No more. Each one is reviewed personally before being 
+            We accept 250 objects. No more. Each one is reviewed personally before being 
             admitted to the collection. Because not every memory belongs here. But some do. 
             You'll know if yours does.
           </p>
@@ -52,7 +52,7 @@ export default function AboutPage() {
         <div className="space-y-4">
           <div className="text-[11px] tracking-[0.5em] text-neutral-600 uppercase font-bold">The Collection</div>
           <p className="text-sm text-white/55 font-light leading-relaxed italic">
-            150 objects, permanently archived. Each with a photograph, a story, a year, and a name — 
+            250 objects, permanently archived. Each with a photograph, a story, a year, and a name — 
             or the absence of one. The collection never changes. Once archived, always archived.
           </p>
         </div>
@@ -63,6 +63,10 @@ export default function AboutPage() {
             Submit your object and story. We review every application personally. 
             If accepted, you'll receive an invitation to complete your archival. 
             Not all submissions are accepted.
+          </p>
+          <p className="text-sm text-white/40 font-light leading-relaxed italic">
+            The first 50 objects are accepted free of charge — permanently archived, no fee. 
+            After the founding collection is complete, archival is $500 per object.
           </p>
         </div>
 
