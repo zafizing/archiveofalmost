@@ -20,7 +20,7 @@ export default function TermsPage() {
 
           <section className="space-y-4">
             <h2 className="text-sm tracking-[0.3em] uppercase font-bold text-white/90">2. Description of Service</h2>
-            <p className="text-base font-light">Archive of Almost is a digital museum that permanently archives photographs and accompanying stories submitted by users. The Archive accepts a limited number of objects — no more than 150 — each reviewed and admitted at the sole discretion of the Archive's curators. Submission does not guarantee acceptance.</p>
+            <p className="text-base font-light">Archive of Almost is a digital museum that permanently archives photographs and accompanying stories submitted by users. The Archive accepts a limited number of objects — no more than 250 — each reviewed and admitted at the sole discretion of the Archive's curators. Submission does not guarantee acceptance.</p>
           </section>
 
           <section className="space-y-4">
