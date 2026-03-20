@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
-const TOTAL_SLOTS = 150;
+const TOTAL_SLOTS = 250;
 const AUTO_INTERVAL = 7000;
 
 export default function ArchivePage() {
